@@ -1,0 +1,1453 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Box, Button } from '@mui/material';
+import { Input } from '@mui/material';
+import PropTypes from 'prop-types';
+import clsx from 'clsx';
+import { styled, useTheme } from '@mui/material/styles';
+import { lighten } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import Pagination from '@mui/material/Pagination';
+import TableRow from '@mui/material/TableRow';
+import TableSortLabel from '@mui/material/TableSortLabel';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Paper from '@mui/material/Paper';
+import IconButton from '@mui/material/IconButton';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+// import Tooltip from '@mui/material/Tooltip';
+import MuiTooltip from '@mui/material/Tooltip';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
+import Switch from '@mui/material/Switch';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ExcelIcon from '@mui/icons-material/FileCopy'; 
+import Checkbox from '@mui/material/Checkbox';
+import MenuItem from '@mui/material/MenuItem';
+import { ToggleButtonGroup, ToggleButton } from '@mui/material';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+import { onGetHcaPagos } from '../../../@crema/redux/features/consultaProxPagos/consultaProxPagosSlice';
+import {onGetColeccionLigera as onGetInversionistas} from '../../../@crema/redux/features/inversionista/inversionistasSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import Autocomplete from '@mui/material/Autocomplete';
+import MyAutocomplete from '../../../shared/components/MyAutoComplete';
+import IntlMessages from '../../../@crema/helpers/IntlMessages';
+import Popover from '@mui/material/Popover';
+import TuneIcon from '@mui/icons-material/Tune';
+import ClearAllIcon from '@mui/icons-material/ClearAll';
+import TextField from '@mui/material/TextField';
+import Swal from 'sweetalert2';
+import {
+  UPDATE_TYPE,
+  CREATE_TYPE,
+  DELETE_TYPE,
+} from '../../../shared/constants/Constantes';
+import { Form, Formik } from 'formik';
+import AppMessageView from '@crema/components/AppMessageView';
+import { useDebounce } from '../../../@crema/hooks/useDebounce';
+import MyCell from '../../../shared/components/MyCell';
+import moment from 'moment';
+import HelpButton from '../../../shared/components/HelpButton';
+import parse from 'html-react-parser';
+import { useNavigate } from 'react-router-dom';
+import { TIPO_DOCUMENTO, TIPO_CUENTA, ESTADOS_INVERSIONES, DATO_BOOLEAN, TIPOS_VALOR, DATO_CONSULTA_RADIO } from '../../../shared/constants/ListaValores';
+import { formatCurrency } from '../../../shared/hooks/formatCurrency';
+import defaultConfig from '@crema/constants/defaultConfig';
+import { ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line } from 'recharts';
+
+
+const cells = [
+  {
+    id: 'inversionista_gestor',
+    typeHead: 'string',
+    label: 'Inversionista/Gestor',
+    value: (value) => value,
+    align: 'left',
+    mostrarInicio: true,
+  },
+  {
+    id: 'proyecto',
+    typeHead: 'string',
+    label: 'Proyecto',
+    value: (value) => value,
+    align: 'left',
+    mostrarInicio: true,
+  },
+  {
+    id: 'fecha',
+    typeHead: 'string',
+    label: 'Fecha',
+    value: (value) => value,
+    align: 'left',
+    mostrarInicio: true,
+  },
+  {
+    id: 'tipo',
+    typeHead: 'string',
+    label: 'Tipo',
+    value: (value) => value,
+    align: 'left',
+    mostrarInicio: true,
+  },
+  {
+    id: 'valor',
+    typeHead: 'numeric',
+    label: 'Valor',
+    value: (value) => formatCurrency(value),
+    align: 'right',
+    mostrarInicio: true,
+  },
+  {
+    id: 'ret_fuente',
+    typeHead: 'numeric',
+    label: 'Ret fuente',
+    value: (value) => formatCurrency(value),
+    align: 'right',
+    mostrarInicio: true,
+  },
+  {
+    id: 'valor_a_pagar',
+    typeHead: 'numeric',
+    label: 'Valor a pagar',
+    value: (value) => formatCurrency(value),
+    align: 'right',
+    mostrarInicio: true,
+  },
+];
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    color: theme.palette.primary,  
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 11,
+    textAlign: 'center',
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  textAlign: 'start',
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+    fontSize: 14,
+  },
+}));
+
+function EnhancedTableHead(props) {
+  const { classes, order, orderBy, onRequestSort, columnasMostradas } = props;
+
+  return (
+    <TableHead>
+      <StyledTableRow className={classes.head}>
+        {/* <StyledTableCell
+          align='center'
+          style={{ fontWeight: 'bold' }}
+          className={classes.headCell}
+        >
+          <Box 
+            sx={{
+              display: 'grid',
+               gridTemplateColumns: 'repeat(1,1fr)',
+            }}
+          >
+            <Box>Acción</Box>
+          </Box>
+        </StyledTableCell> */}
+        {columnasMostradas.map((cell) => {
+          if (cell.mostrar) {
+            return (
+              <StyledTableCell
+                key={cell.id}
+                style={{ fontWeight: 'bold' }}
+                align={
+                  // eslint-disable-next-line prettier/prettier
+                  cell.typeHead === 'string'
+                    ? 'left'
+                    : cell.typeHead === 'numeric' // eslint-disable-next-line prettier/prettier
+                    ? 'right'// eslint-disable-next-line prettier/prettier
+                    : 'center'
+                }
+                // eslint-disable-next-line prettier/prettier
+                className={classes.cell}
+                sortDirection={orderBy === cell.id ? order : false}
+              >
+                <TableSortLabel
+                  active={orderBy === cell.id}
+                  direction={orderBy === cell.id ? order : 'asc'}
+                  onClick={() => {
+                    onRequestSort(cell.id);
+                  }}
+                >
+                  {cell.label}
+                  {orderBy === cell.id ? (
+                    <span className={classes.visuallyHidden}>
+                      {order === 'desc'
+                        ? 'sorted descending'
+                        : 'sorted ascending'}
+                    </span>
+                  ) : null}
+                </TableSortLabel>
+              </StyledTableCell>
+            );
+          } else {
+            return <th key={cell.id}></th>;
+          }
+        })}
+      </StyledTableRow>
+    </TableHead>
+  );
+}
+
+EnhancedTableHead.propTypes = {
+  classes: PropTypes.object.isRequired,
+  numSelected: PropTypes.number.isRequired,
+  onRequestSort: PropTypes.func.isRequired,
+  onSelectAllClick: PropTypes.func.isRequired,
+  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
+  orderBy: PropTypes.string.isRequired,
+  rowCount: PropTypes.number.isRequired,
+  columnasMostradas: PropTypes.array.isRequired,
+};
+
+const useToolbarStyles = makeStyles((theme) => ({
+  root: {
+    padding: '15px',
+    boxShadow: '0px 0px 5px 5px rgb(0 0 0 / 10%)',
+    borderRadius: '4px',
+    display: 'grid',
+    // gap: '20px',
+  },
+  title: {
+    flex: '1 1 100%',
+    fontWeight: 'bold',
+  },
+  horizontalBottoms: {
+    width: 'min-content',
+    display: 'flex',
+    gap: '5px',
+  },
+  titleTop: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  contenedorFiltros: {
+    width: '90%',
+    display: 'grid',
+    gridTemplateColumns: '4fr 4fr 3fr',
+    gap: '30px',
+    '@media (max-width: 600px)': { // Cambia a una columna en pantallas móviles
+      gridTemplateColumns: '1fr',
+    },
+  },
+  pairFilters: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    gap: '20px',
+    minWidth: '100px',
+  },
+}));
+
+const EnhancedTableToolbar = (props) => {
+  const classes = useToolbarStyles();
+  const {
+    numSelected,
+    titulo,
+    handleOpenPopoverColumns,
+    queryFilter,
+    fechaDesdeFiltro,
+    fechaHastaFiltro,
+    tipoConceptoFiltro,
+    inversionistaFiltro,
+    modoVisualizacion,
+    inversionistas,
+    setIdInversionista,
+    limpiarFiltros,
+    permisos,
+    url,
+    theme,
+    fechaError,
+    mensajeFechaError,
+    fechaDesdeError,
+    mensajeFechaDesdeError,
+  } = props;
+  return (
+    <Toolbar
+      sx={{
+        padding: '15px',
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: '0px 0px 5px 5px rgb(0 0 0 / 10%)',
+        borderRadius: '4px',
+        display: 'grid',
+      }}
+    >
+      {numSelected > 0 ? (
+        <Typography
+          className={classes.title}
+          color='inherit'
+          variant='subtitle1'
+          component='div'
+        >
+          {numSelected} selected
+        </Typography>
+      ) : (
+        <>
+          <Box className={classes.titleTop}>
+            <Typography
+              className={classes.title}
+              variant='h2'
+              id='tableTitle'
+              component='div'
+            >
+              {titulo}
+            </Typography>
+            <Box className={classes.horizontalBottoms}>
+              { 
+                fechaDesdeFiltro !== '' && (
+                  <Formik>
+                    <Form>                
+                      {permisos?.indexOf('Exportar') >= 0 && (
+                        <MuiTooltip
+                          title='Exportar'
+                          component='a'
+                          className={classes.linkDocumento}
+                          href={
+                            defaultConfig.API_URL +
+                            '/exportar-programacion?fecha='+fechaDesdeFiltro
+                          }>
+                        <IconButton
+                            sx={{
+                              backgroundColor: theme.palette.colorFiltro,
+                              color: 'white',
+                              boxShadow:
+                                '0px 3px 5px -1px rgb(0 0 0 / 30%), 0px 6px 10px 0px rgb(0 0 0 / 20%), 0px 1px 18px 0px rgb(0 0 0 / 16%)',
+                              '&:hover': {
+                                backgroundColor: theme.palette.colorHovers,
+                                cursor: 'pointer',
+                              },
+                              padding: '13px',}}
+                            aria-label='filter list'>
+                            <Box component='span' 
+                            sx={{
+                              position: 'absolute',
+                              color: theme.palette.colorFiltro,
+                              '&:hover': {
+                                color: theme.palette.colorHovers,
+                                cursor: 'pointer',
+                              },
+                              fontSize: '14px',
+                              top: '19px',
+                              fontWeight: 'bold',
+                            }}>
+                              X
+                            </Box>
+                            <ExcelIcon />
+                          </IconButton>
+                        </MuiTooltip>
+                      )}
+                    </Form>
+                  </Formik>
+                )
+              }
+              
+              <HelpButton url={url} />
+              <MuiTooltip
+                title='Mostrar/Ocultar Columnas'
+                onClick={handleOpenPopoverColumns}
+                sx={{backgroundColor: theme.palette.colorFiltro,
+                  color: 'white',
+                  boxShadow:
+                    '0px 3px 5px -1px rgb(0 0 0 / 30%), 0px 6px 10px 0px rgb(0 0 0 / 20%), 0px 1px 18px 0px rgb(0 0 0 / 16%)',
+                  '&:hover': {
+                    backgroundColor: theme.palette.colorHovers,
+                    cursor: 'pointer',
+                  },
+                  padding: '13px',}}
+              >
+                <IconButton
+                  sx={{backgroundColor: theme.palette.colorFiltro,
+                    color: 'white',
+                    boxShadow:
+                      '0px 3px 5px -1px rgb(0 0 0 / 30%), 0px 6px 10px 0px rgb(0 0 0 / 20%), 0px 1px 18px 0px rgb(0 0 0 / 16%)',
+                    '&:hover': {
+                      backgroundColor: theme.palette.colorHovers,
+                      cursor: 'pointer',
+                    },
+                    padding: '13px',}}
+                  aria-label='filter list'
+                >
+                  <TuneIcon />
+                </IconButton>
+              </MuiTooltip>
+            </Box>
+          </Box>
+          <Box className={classes.contenedorFiltros}>
+            <TextField
+              label='Fecha Desde'
+              name='fechaDesdeFiltro'
+              id='fechaDesdeFiltro'
+              onChange={queryFilter}
+              type='date'
+              InputLabelProps={{
+                shrink: true,
+              }}
+              error={fechaDesdeError}
+              helperText={fechaDesdeError ? mensajeFechaDesdeError : ''}
+              value={fechaDesdeFiltro}
+              className={classes.inputFiltros}
+              variant='standard'
+              InputProps={{
+                inputComponent: Input,
+                disableUnderline: false,
+              }}
+              sx={{                
+                '& .MuiInput-underline:before': {
+                  borderBottomColor: '#ccc',
+                  marginBottom: -0.5,
+                },
+                '& .MuiInput-underline:hover:before': {
+                  borderBottomColor: theme.palette.text.primary,
+                },
+                '& .MuiInput-underline:after': {
+                  borderBottomColor: theme.palette.text.primary,
+                },
+              }}
+            />
+            <TextField
+              label='Fecha Hasta'
+              name='fechaHastaFiltro'
+              id='fechaHastaFiltro'
+              onChange={queryFilter}
+              type='date'
+              InputLabelProps={{
+                shrink: true,
+              }}
+              error={fechaError}
+              helperText={fechaError ? mensajeFechaError : ''}
+              value={fechaHastaFiltro}
+              className={classes.inputFiltros}
+              variant='standard'
+              InputProps={{
+                inputComponent: Input,
+                disableUnderline: false,
+              }}
+              sx={{                
+                '& .MuiInput-underline:before': {
+                  borderBottomColor: '#ccc',
+                  marginBottom: -0.5,
+                },
+                '& .MuiInput-underline:hover:before': {
+                  borderBottomColor: theme.palette.text.primary,
+                },
+                '& .MuiInput-underline:after': {
+                  borderBottomColor: theme.palette.text.primary,
+                },
+              }}
+            />
+            <Box display='grid'>
+              <Box display='flex' mb={2}>
+                <MuiTooltip title='Limpiar Filtros' onClick={limpiarFiltros}>
+                  <IconButton
+                    sx={{
+                      backgroundColor: theme.palette.primary.main,
+                      color: 'white',
+                      boxShadow:
+                        '0px 3px 5px -1px rgb(0 0 0 / 30%), 0px 6px 10px 0px rgb(0 0 0 / 20%), 0px 1px 18px 0px rgb(0 0 0 / 16%)',
+                      '&:hover': {
+                        backgroundColor: theme.palette.colorHovers,
+                        cursor: 'pointer',
+                      },
+                      padding: '13px', }}
+                    aria-label='filter list'
+                  >
+                    <ClearAllIcon />
+                  </IconButton>
+                </MuiTooltip>
+              </Box>
+            </Box>
+          </Box>
+          <Box className={classes.contenedorFiltros}>
+            <TextField
+              label='Inversionista'
+              name='inversionistaFiltro'
+              id='inversionistaFiltro'
+              select
+              fullWidth
+              variant='standard'
+              onChange={queryFilter}
+              value={inversionistaFiltro}
+              SelectProps={{
+                IconComponent: ArrowDropDownIcon,
+                native: false,
+                MenuProps: {
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 250,
+                    },
+                  },
+                },
+              }}
+              InputProps={{
+                inputComponent: Input,
+                disableUnderline: false,
+              }}
+              sx={{                
+                '& .MuiInput-underline:before': {
+                  borderBottomColor: '#ccc',
+                  marginBottom: -0.5,
+                },
+                '& .MuiInput-underline:hover:before': {
+                  borderBottomColor: theme.palette.text.primary,
+                },
+                '& .MuiInput-underline:after': {
+                  borderBottomColor: theme.palette.text.primary,
+                },
+                '& .MuiSelect-icon': {
+                    color: theme.palette.text.primary,
+                  },
+              }}
+            >
+              {inversionistas.map((inversionista) => (
+                <MenuItem key={inversionista.id} value={inversionista.id}>
+                  {inversionista.nombre}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              label='Tipo Concepto'
+              name='tipoConceptoFiltro'
+              id='tipoConceptoFiltro'
+              select
+              fullWidth
+              variant='standard'
+              onChange={queryFilter}
+              value={tipoConceptoFiltro}
+              SelectProps={{
+                IconComponent: ArrowDropDownIcon,
+                native: false,
+                MenuProps: {
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 250,
+                    },
+                  },
+                },
+              }}
+              InputProps={{
+                inputComponent: Input,
+                disableUnderline: false,
+              }}
+              sx={{                
+                '& .MuiInput-underline:before': {
+                  borderBottomColor: '#ccc',
+                  marginBottom: -0.5,
+                },
+                '& .MuiInput-underline:hover:before': {
+                  borderBottomColor: theme.palette.text.primary,
+                },
+                '& .MuiInput-underline:after': {
+                  borderBottomColor: theme.palette.text.primary,
+                },
+                '& .MuiSelect-icon': {
+                    color: theme.palette.text.primary,
+                  },
+              }}
+            >
+              {TIPOS_VALOR.map((estado) => (
+                <MenuItem key={estado.id} value={estado.id}>
+                  {estado.nombre}
+                </MenuItem>
+              ))}
+            </TextField>
+            <Box>
+              <FormControl component="fieldset">
+                <FormLabel id="demo-controlled-radio-buttons-group" sx={{fontSize:'10px'}}>Modo Visualización</FormLabel>
+                <RadioGroup
+                   aria-labelledby="demo-error-radios"
+                  name="modoVisualizacion"
+                  value={modoVisualizacion}
+                  onChange={queryFilter}
+                  variant="standard"
+                  row
+                >
+                  {DATO_CONSULTA_RADIO.map((tipo) => (
+                    <FormControlLabel
+                      key={tipo.value}
+                      value={tipo.value}
+                      control={<Radio />}
+                      label={tipo.label}
+                      sx={{ marginRight: 2 }}
+                    />
+                  ))}
+                </RadioGroup>
+              </FormControl>
+            </Box> 
+          </Box>
+        </>
+      )}
+
+      {numSelected > 0 ? (
+        <MuiTooltip title='Delete'>
+          <IconButton aria-label='delete'>
+            <DeleteIcon />
+          </IconButton>
+        </MuiTooltip>
+      ) : (
+        ''
+      )}
+    </Toolbar>
+  );
+};
+
+EnhancedTableToolbar.propTypes = {
+  numSelected: PropTypes.number.isRequired,
+  handleOpenPopoverColumns: PropTypes.func.isRequired,
+  queryFilter: PropTypes.func.isRequired,
+  limpiarFiltros: PropTypes.func.isRequired,
+  fechaDesdeFiltro: PropTypes.string.isRequired,
+  fechaHastaFiltro: PropTypes.string.isRequired,
+  tipoConceptoFiltro: PropTypes.string.isRequired,
+  inversionistaFiltro: PropTypes.string.isRequired,
+  modoVisualizacion: PropTypes.string.isRequired,
+  titulo: PropTypes.string.isRequired,
+  permisos: PropTypes.string.isRequired,
+  url: PropTypes.string.isRequired,
+};
+
+const useStyles = makeStyles((theme) => ({
+  marcoTabla: {
+    boxShadow: '0px 0px 5px 5px rgb(0 0 0 / 10%)',
+    borderRadius: '4px',
+    paddingLeft: '15px',
+    paddingRight: '15px',
+    marginTop: '5px',
+  },
+  root: {
+    width: '100%',
+    padding: '20px',
+  },
+  head: {
+    borderTop: '2px solid #dee2e6',
+    borderBottom: '2px solid #dee2e6',
+  },
+  headCell: {
+    padding: '0px 0px 0px 15px',
+    // textAlign: 'start',
+  },
+  row: {
+    padding: 'none',
+  },
+  cell: (props) => ({
+    padding: props.vp + ' 0px ' + props.vp + ' 15px',
+    whiteSpace: 'nowrap',
+  }),
+  cellWidth: (props) => ({
+    minWidth: props.width,
+  }),
+  cellColor: (props) => ({
+    backgroundColor: props.cellColor,
+    color: 'white',
+  }),
+  acciones: (props) => ({
+    padding: props.vp + ' 0px ' + props.vp + ' 15px',
+    minWidth: '160px',
+  }),
+  paper: {
+    width: '100%',    
+    boxShadow: 'none',
+    backgroundColor: 'transparent',
+  },
+  table: {
+    minWidth: '100%',
+  },
+  visuallyHidden: {
+    border: 0,
+    clip: 'rect(0 0 0 0)',
+    height: 1,
+    margin: -1,
+    overflow: 'hidden',
+    padding: 0,
+    position: 'absolute',
+    top: 20,
+    width: 1,
+  },
+  paginacion: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: '10px',
+    paddingBottom: '5px',
+  },
+  rowsPerPageOptions: {
+    marginRight: '10px',
+  },
+}));
+
+let hUrl = '';
+
+const Inversion = (props) => {
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const [order, setOrder] = React.useState('asc');
+  const [orderBy, setOrderBy] = React.useState('');
+  const [orderByToSend, setOrderByToSend] = React.useState(
+    'fecha_modificacion:desc',
+  );
+  const [selected, setSelected] = React.useState([]);
+  const [page, setPage] = React.useState(1);
+  // const [dense, setDense] = React.useState(false);
+  const dense = true; //Borrar cuando se use el change
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const rowsPerPageOptions = [5, 10, 15, 25, 50];
+  const [accion, setAccion] = useState('ver');
+  const { rows, desde, hasta, ultima_pagina, total } = useSelector((state) => state.consultaProxPagos);
+  const { message, error, messageType } = useSelector(({ common }) => common);
+  const { coleccionLigera: inversionistas } = useSelector((state) => state.inversionistas);    
+  const [erroresPorFila, setErroresPorFila] = useState({});
+  const [fechaDesdeFiltro, setFechaDesdeFiltro] = useState('');
+  const [fechaHastaFiltro, setFechaHastaFiltro] = useState('');
+  const [tipoConceptoFiltro, setTipoConceptoFiltro] = useState('');
+  const [inversionistaFiltro, setInversionistaFiltro] = useState('');
+  const [modoVisualizacion, setModoVisualizacion] = useState('');
+  const debouncedDateDesde = useDebounce(fechaDesdeFiltro, 800);
+  const debouncedDateHasta = useDebounce(fechaHastaFiltro, 800);
+  const debouncedTipoConcepto = useDebounce(tipoConceptoFiltro, 800);
+  const debouncedInversionista = useDebounce(inversionistaFiltro, 800);
+  const [openPopOver, setOpenPopOver] = useState(false);
+  const [popoverTarget, setPopoverTarget] = useState(null);
+  const [accionesSeleccionadas, setAccionesSeleccionadas] = useState({});
+  const [accionesSeleccionadasGlobal, setAccionesSeleccionadasGlobal] = useState({});
+  const [tipoGrafico, setTipoGrafico] = useState('barra');
+  const [mostrarAcumulado, setMostrarAcumulado] = useState(false);
+  const [todosLosRegistros, setTodosLosRegistros] = useState([]);
+  const [registrosPaginados, setRegistrosPaginados] = useState([]);
+  const [fechaError, setFechaError] = useState(false);
+  const [mensajeFechaError, setMensajeFechaError] = useState('');
+  const [fechaDesdeError, setFechaDesdeError] = useState(false);
+  const [mensajeFechaDesdeError, setMensajeFechaDesdeError] = useState('');
+  const modoAlternativo = modoVisualizacion === 'S' ? 'A' : 'S';
+  const tipoAlternativo = tipoGrafico === 'barra' ? 'linea' : 'barra';
+  let columnasMostradasInicial = [];
+
+  cells.forEach((cell) => {
+    columnasMostradasInicial.push({
+      id: cell.id,
+      mostrar: cell.mostrarInicio,
+      typeHead: cell.typeHead,
+      label: cell.label,
+      value: cell.value,
+      align: cell.align,
+      width: cell.width,
+      cellColor: cell.cellColor,
+    });
+  });
+
+  const [columnasMostradas, setColumnasMostradas] = useState(columnasMostradasInicial,);
+
+  let vp = '15px';
+  if (dense === true) {
+    vp = '0px';
+  }
+  const classes = useStyles({ vp: vp });
+  const dispatch = useDispatch();
+
+  const { user } = useSelector(({ auth }) => auth);
+  const [permisos, setPermisos] = useState('');
+  const [titulo, setTitulo] = useState('');
+
+  useEffect(() => {
+    user &&
+      user.usuario.permisos.forEach((modulo) => {
+        modulo.opciones.forEach((opcion) => {
+          if (opcion.url === props.route.path) {
+            setTitulo(opcion.nombre);
+            hUrl = opcion.url_ayuda;
+            const permisoAux = [];
+            opcion.permisos.forEach((permiso) => {
+              if (permiso.permitido) {
+                permisoAux.push(permiso.titulo);
+              }
+            });
+            setPermisos(permisoAux);
+          }
+        });
+      });
+  }, [user, props.route]);
+
+  useEffect(() => {
+      dispatch(onGetInversionistas());
+  }, [dispatch]);
+
+  useEffect(() => {
+    const hayFecha = fechaDesdeFiltro || fechaHastaFiltro;
+    const hayModo = modoVisualizacion !== '';
+
+    if (modoVisualizacion !== '') {
+      dispatch(onGetHcaPagos({
+        fechaDesdeFiltro,
+        fechaHastaFiltro,
+        tipoConceptoFiltro,
+        inversionistaFiltro,
+      }));
+    } else {
+      setTodosLosRegistros([]); 
+    }
+  }, [
+    dispatch,
+    page,
+    rowsPerPage,
+    fechaDesdeFiltro,
+    fechaHastaFiltro,
+    tipoConceptoFiltro,
+    inversionistaFiltro,
+    modoVisualizacion,
+    debouncedDateDesde,
+    debouncedDateHasta,
+    debouncedTipoConcepto,
+    debouncedInversionista,
+    orderByToSend,
+  ]);
+
+
+  useEffect(() => {
+    setPage(1);
+  }, [
+      fechaDesdeFiltro,
+      fechaHastaFiltro,
+      tipoConceptoFiltro,
+      inversionistaFiltro,
+      modoVisualizacion,
+      debouncedDateDesde,
+      debouncedDateHasta,
+      debouncedTipoConcepto,
+      debouncedInversionista,
+      orderByToSend,
+    ]);
+
+  const queryFilter = (e) => {
+    const { name, value } = e.target;
+    const hoy = moment().format('YYYY-MM-DD');
+
+    if (name === 'fechaDesdeFiltro') {
+      setFechaDesdeFiltro(value);
+
+      if (value > hoy) {
+        setFechaDesdeError(true);
+        setMensajeFechaDesdeError('La fecha de pago debe ser menor o igual a la fecha del día');
+        return;
+      }else{
+        setFechaDesdeError(false);
+        setMensajeFechaDesdeError('');
+      }
+
+      if (fechaHastaFiltro && value > fechaHastaFiltro) {
+        setFechaError(true);
+        setMensajeFechaError('Fecha Desde no puede ser mayor que Fecha Hasta');
+        return;
+      }
+
+      setFechaError(false);
+      setMensajeFechaError('');
+    }
+
+    if (name === 'fechaHastaFiltro') {
+      setFechaHastaFiltro(value);
+
+      if (value > hoy) {
+        setFechaError(true);
+        setMensajeFechaError('La fecha de pago debe ser menor o igual a la fecha del día');
+        return;
+      }
+
+      if (fechaDesdeFiltro && value < fechaDesdeFiltro) {
+        setFechaError(true);
+        setMensajeFechaError('La fecha de pago hasta debe ser mayor o igual a la fecha desde');
+        return;
+      }
+
+      setFechaError(false);
+      setMensajeFechaError('');
+    }
+
+    switch (name) {
+      case 'inversionistaFiltro':
+        setInversionistaFiltro(value);
+        break;
+      case 'tipoConceptoFiltro':
+        setTipoConceptoFiltro(value);
+        break;
+      case 'modoVisualizacion':
+        if (!fechaHastaFiltro) {
+          const hoy = moment().format('YYYY-MM-DD');
+          setFechaHastaFiltro(hoy);
+        }
+
+        setModoVisualizacion(value);
+        break;
+      default:
+        break;
+    }
+  };
+
+
+
+
+  const limpiarFiltros = () => {
+    setFechaDesdeFiltro('');
+    setFechaHastaFiltro('');
+    setInversionistaFiltro('');
+    setTipoConceptoFiltro('');
+    setModoVisualizacion('');
+    setFechaError(false);
+    setMensajeFechaError('');
+    setFechaDesdeError(false);
+    setMensajeFechaDesdeError('');
+  };
+
+
+  const changeOrderBy = (id) => {
+    if (orderBy === id) {
+      if (order === 'asc') {
+        setOrder('desc');
+        setOrderByToSend(id + ':desc');
+      } else {
+        setOrder('asc');
+        setOrderByToSend(id + ':asc');
+      }
+    } else {
+      setOrder('asc');
+      setOrderBy(id);
+      setOrderByToSend(id + ':asc');
+    }
+  };
+
+  const handleClosePopover = () => {
+    setOpenPopOver(false);
+    setPopoverTarget(null);
+  };
+
+  const handleOpenPopoverColumns = (e) => {
+    setPopoverTarget(e.currentTarget);
+    setOpenPopOver(true);
+  };
+
+  const handleOnchangeMostrarColumna = (e) => {
+    let aux = columnasMostradas;
+    setColumnasMostradas(
+      aux.map((column) => {
+        if (column.id === e.target.id) {
+          return { ...column, mostrar: !column.mostrar };
+        } else {
+          return column;
+        }
+      }),
+    );
+  };
+
+  const showAllColumns = () => {
+    let aux = columnasMostradas;
+    setColumnasMostradas(
+      aux.map((column) => {
+        return { ...column, mostrar: true };
+      }),
+    );
+  };
+
+  const reiniciarColumns = () => {
+    setColumnasMostradas(columnasMostradasInicial);
+  };
+
+  const handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      const newSelecteds = rows.map((n) => n.name);
+      setSelected(newSelecteds);
+      return;
+    }
+    setSelected([]);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(1);
+  };
+
+  const isSelected = (name) => selected.indexOf(name) !== -1;
+
+  const [showTable, setShowTable] = useState(true);
+
+  useEffect(() => {
+    if (rows?.length === 0) {
+      setShowTable(false);
+    } else {
+      setShowTable(true);
+      setTodosLosRegistros(rows)
+    }
+  }, [rows]);
+
+
+  const agruparPorSemana = (datos, mostrarAcumulado = false) => {
+    const agrupados = {};
+    let acumulado = 0;
+
+    const datosFiltrados = datos.filter((item) => {
+      const id = item.id_plan_detallado?.toString();
+      return accionesSeleccionadasGlobal[id]?.pagar === true;
+    });
+
+    datosFiltrados.forEach((item) => {
+      const semana = `${item.viernes_semana}`;
+      const valor = parseFloat(item.valor?.toString().replace(/[^0-9.-]+/g, '') || 0);
+
+      if (!agrupados[semana]) {
+        agrupados[semana] = { semana, valor: 0 };
+      }
+
+      agrupados[semana].valor += valor;
+    });
+
+    const resultado = Object.entries(agrupados)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([semana, datos]) => {
+        acumulado += datos.valor;
+        return {
+          ...datos,
+          acumulado: mostrarAcumulado ? acumulado : undefined,
+        };
+      });
+
+    return resultado;
+  };
+
+
+  useEffect(() => {
+      const startIndex = (page - 1) * rowsPerPage;
+      const endIndex = startIndex + rowsPerPage;
+      setRegistrosPaginados(todosLosRegistros.slice(startIndex, endIndex));
+    }, [todosLosRegistros, page, rowsPerPage]);
+
+    useEffect(() => {
+    if (todosLosRegistros.length > 0) {
+      const nuevasAcciones = {};
+      todosLosRegistros.forEach((item) => {
+        nuevasAcciones[item.id_plan_detallado?.toString()] = { pagar: true };
+      });
+      setAccionesSeleccionadasGlobal(nuevasAcciones);
+    }
+  }, [todosLosRegistros]);
+
+
+  const datosGraficoSemanal = useMemo(() => {
+    return agruparPorSemana(todosLosRegistros);
+  }, [todosLosRegistros, accionesSeleccionadasGlobal]);
+
+  const datosGraficoAcumulado = useMemo(() => {
+    return agruparPorSemana(todosLosRegistros, true);
+  }, [todosLosRegistros, accionesSeleccionadasGlobal]);
+
+  const cambiarModoYTipo = () => {
+    setModoVisualizacion(modoAlternativo);
+    setTipoGrafico(tipoAlternativo);
+  };
+
+  const totalPaginas = Math.ceil(todosLosRegistros.length / rowsPerPage);
+
+  const startIndex = (page - 1) * rowsPerPage + 1;
+  const endIndex = Math.min(startIndex + rowsPerPage - 1, todosLosRegistros.length);
+  const textoPaginacion = `Mostrando de ${startIndex} a ${endIndex} de ${todosLosRegistros.length} resultados - Página ${page} de ${totalPaginas}`;
+
+
+  return (
+    <div className={classes.root}>
+      <Paper sx={{marginBottom: theme.spacing(2),}} className={classes.paper}>
+        {permisos && (
+          <EnhancedTableToolbar
+            numSelected={selected.length}
+            handleOpenPopoverColumns={handleOpenPopoverColumns}
+            queryFilter={queryFilter}
+            limpiarFiltros={limpiarFiltros}
+            fechaDesdeFiltro={fechaDesdeFiltro}       
+            fechaHastaFiltro={fechaHastaFiltro}
+            tipoConceptoFiltro={tipoConceptoFiltro}
+            inversionistaFiltro={inversionistaFiltro}
+            modoVisualizacion={modoVisualizacion}
+            inversionistas={inversionistas}
+            permisos={permisos}
+            titulo={titulo}
+            url={hUrl}
+            theme={theme}
+            fechaError={fechaError}
+            mensajeFechaError={mensajeFechaError}
+            fechaDesdeError={fechaDesdeError}
+            mensajeFechaDesdeError={mensajeFechaDesdeError}
+          />
+        )}
+        {showTable && permisos && (fechaDesdeFiltro || fechaHastaFiltro) ? (
+          <Box 
+            sx={{
+              background: theme.palette.background.paper
+            }}
+            className={classes.marcoTabla}
+          >
+              <Box sx={{ display: 'flex', justifyContent: 'end', mb: 1 }}>
+                <ToggleButtonGroup
+                  value={tipoGrafico}
+                  exclusive
+                  onChange={(e, newTipo) => {
+                    if (newTipo) setTipoGrafico(newTipo);
+                  }}
+                  size="small"
+                  sx={{
+                    '& .MuiToggleButton-root': {
+                      color: 'text.secondary',
+                    },
+                    '& .Mui-selected': {
+                      color: 'primary.main',
+                      backgroundColor: 'transparent', // Opcional: evita fondo gris
+                    },
+                  }}
+                >
+                  <ToggleButton value="barra">
+                    <BarChartIcon sx={{ fontSize: 20 }} />
+                  </ToggleButton>
+                  <ToggleButton value="linea">
+                    <ShowChartIcon sx={{ fontSize: 20 }} />
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+
+              {todosLosRegistros.length > 0 && (
+                <Box sx={{ width: '100%', height: 500, position: 'relative' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    {tipoGrafico === 'barra' ? (
+                      <BarChart data={modoVisualizacion === 'S' ? datosGraficoSemanal : datosGraficoAcumulado}>
+                        <XAxis 
+                          dataKey="semana"
+                          tick={{ angle: -30, fontSize: 12, textAnchor: 'end' }}
+                          interval={0}
+                        />
+                        <YAxis
+                          width={100}
+                          tick={{ fontSize: 10 }}
+                          interval={0}
+                          tickFormatter={(value) => formatCurrency(value)}
+                        />
+                        <Tooltip formatter={(value) => formatCurrency(value)} />
+                        <Legend />
+                        <Bar dataKey={modoVisualizacion === 'S' ? 'valor' : 'acumulado'} fill="#8884d8" />
+                      </BarChart>
+                    ) : (
+                      <LineChart data={modoVisualizacion === 'S' ? datosGraficoSemanal : datosGraficoAcumulado}>
+                        <XAxis 
+                          dataKey="semana"
+                          tick={{ angle: -30, fontSize: 12, textAnchor: 'end' }}
+                          interval={0}
+                        />
+                        <YAxis
+                          width={100}
+                          tick={{ fontSize: 10 }}
+                          interval={0}
+                          tickFormatter={(value) => formatCurrency(value)}
+                        />
+                        <Tooltip formatter={(value) => formatCurrency(value)} />
+                        <Legend />
+                        <Line type="monotone" dataKey={modoVisualizacion === 'S' ? 'valor' : 'acumulado'} stroke="#82ca9d" />
+                      </LineChart>
+                    )}
+                  </ResponsiveContainer>
+                </Box>
+              )}
+
+              {todosLosRegistros.length > 0 && (
+                <Box
+                  sx={{
+                    position: 'fixed',
+                    bottom: 16,
+                    right: 16,
+                    width: 200,
+                    height: 120,
+                    border: '1px solid ' + theme.palette.divider,
+                    borderRadius: 2,
+                    backgroundColor: theme.palette.background.paper,
+                    boxShadow: 3,
+                    zIndex: 1300,
+                    cursor: 'pointer',
+                  }}
+                  onClick={cambiarModoYTipo}
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    {tipoAlternativo === 'barra' ? (
+                      <BarChart data={modoAlternativo === 'S' ? datosGraficoSemanal : datosGraficoAcumulado}>
+                        <XAxis hide dataKey="semana" />
+                        <YAxis hide tickFormatter={(value) => formatCurrency(value)} />
+                        <Tooltip formatter={(value) => formatCurrency(value)} />
+                        <Bar dataKey={modoAlternativo === 'S' ? 'valor' : 'acumulado'} fill="#8884d8" />
+                      </BarChart>
+                    ) : (
+                      <LineChart data={modoAlternativo === 'S' ? datosGraficoSemanal : datosGraficoAcumulado}>
+                        <XAxis hide dataKey="semana" />
+                        <YAxis hide tickFormatter={(value) => formatCurrency(value)} />
+                        <Tooltip formatter={(value) => formatCurrency(value)} />
+                        <Line type="monotone" dataKey={modoAlternativo === 'S' ? 'valor' : 'acumulado'} stroke="#82ca9d" />
+                      </LineChart>
+                    )}
+                  </ResponsiveContainer>
+                </Box>
+              )}
+
+
+
+            <Box className={classes.paginacion}
+              sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%', 
+                gap: { xs: 2, sm: 0 },
+              }}
+            >
+              <Box
+              sx={{
+                width: { xs: '100%', sm: 'auto' }, 
+                textAlign: { xs: 'center', sm: 'left' }, 
+              }}>
+                <p>{textoPaginacion}</p>
+              </Box>
+              <Box className={classes.paginacion}>
+                <select
+                  className={classes.rowsPerPageOptions}
+                  value={rowsPerPage}
+                  onChange={handleChangeRowsPerPage}
+                >
+                  {rowsPerPageOptions.map((option) => {
+                    return (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    );
+                  })}
+                </select>
+                <Pagination
+                  showFirstButton
+                  showLastButton
+                  onChange={handleChangePage}
+                  count={totalPaginas}
+                  page={page}
+                />
+              </Box>
+            </Box>
+
+            <TableContainer component={Paper}>
+              <Table
+                className={classes.table}
+                aria-labelledby='tableTitle'
+                size={dense ? 'small' : 'medium'}
+                aria-label='customized table'
+              >
+                <EnhancedTableHead
+                  classes={classes}
+                  numSelected={selected.length}
+                  order={order}
+                  orderBy={orderBy}
+                  onSelectAllClick={handleSelectAllClick}
+                  onRequestSort={changeOrderBy}
+                  rowCount={rows?.length}
+                  columnasMostradas={columnasMostradas}
+                />
+                {modoVisualizacion !== '' &&
+                (<TableBody>
+                  {registrosPaginados?.map((row) => {
+                    const stringId = row.id_plan_detallado?.toString();
+                    const estaSeleccionado = accionesSeleccionadas[stringId]?.pago ?? true; 
+                    return (
+                      <React.Fragment key={row.id_plan_detallado}>
+                        <StyledTableRow>
+                            {/* <StyledTableCell align='center' className={classes.acciones}>
+                              <MuiTooltip title="Seleccionar">
+                                <Checkbox
+                                  size='small'
+                                  sx={{ padding: '3px', margin: '3px' }}
+                                  checked={accionesSeleccionadasGlobal[row.id_plan_detallado?.toString()]?.pagar ?? false}
+                                  onChange={(event) => {
+                                    const id = row.id_plan_detallado?.toString();
+                                    setAccionesSeleccionadasGlobal((prev) => ({
+                                      ...prev,
+                                      [id]: { ...prev[id], pagar: event.target.checked },
+                                    }));
+                                  }}
+
+                                />
+                              </MuiTooltip>
+                            </StyledTableCell> */}
+
+                          {columnasMostradas.map((columna) =>
+                            columna.mostrar ? (
+                              <MyCell
+                                key={row.id + columna.id}
+                                useStyles={useStyles}
+                                align={columna.align}
+                                width={columna.width}
+                                claseBase={classes.cell}
+                                value={columna.value(row[columna.id])}
+                                cellColor={columna.cellColor ? columna.cellColor(row[columna.id]) : ''}
+                              />
+                            ) : (
+                              <th key={row.id + columna.id}></th>
+                            )
+                          )}
+                        </StyledTableRow>
+                      </React.Fragment>
+                    );
+                  })}
+                </TableBody>)
+                }
+              </Table>
+            </TableContainer>
+            <Box className={classes.paginacion}
+             sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%', // Asegura que ocupe todo el ancho
+              gap: { xs: 2, sm: 0 }, // Espacio entre elementos en móvil
+            }}>
+              <Box
+              sx={{
+                width: { xs: '100%', sm: 'auto' }, // Ancho completo en móvil
+                textAlign: { xs: 'center', sm: 'left' }, // Centrado en móvil
+              }}>
+                <p>{textoPaginacion}</p>
+              </Box>
+              <Box className={classes.paginacion}>
+                <select
+                  className={classes.rowsPerPageOptions}
+                  value={rowsPerPage}
+                  onChange={handleChangeRowsPerPage}
+                >
+                  {rowsPerPageOptions.map((option) => {
+                    return (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    );
+                  })}
+                </select>
+                <Pagination
+                  showFirstButton
+                  showLastButton
+                  onChange={handleChangePage}
+                  count={totalPaginas}
+                  page={page}
+                />
+              </Box>
+            </Box>
+          </Box>
+        ) : permisos ? (
+          <Box
+            component='h2'
+            padding={4}
+            fontSize={19}
+            className={classes.marcoTabla}
+            sx={{
+              background: theme.palette.background.paper
+            }}
+          >
+            <IntlMessages id='sinResultados' />
+          </Box>
+        ) : (
+          <Box
+            component='h2'
+            padding={4}
+            fontSize={19}
+            className={classes.marcoTabla}
+            sx={{
+              background: theme.palette.background.paper
+            }}
+          >
+            <IntlMessages id='noAutorizado' />
+          </Box>
+        )}
+      </Paper>
+
+      <Popover
+        id='popoverColumns'
+        open={openPopOver}
+        anchorEl={popoverTarget}
+        onClose={handleClosePopover}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+      >
+        <Box sx={{display: 'grid',
+            padding: '10px',
+            color: theme.palette.grayBottoms,}}>
+          {columnasMostradas.map((column) => {
+            return (
+              <FormControlLabel
+                key={column.id}
+                control={
+                  <Switch
+                    id={column.id}
+                    checked={column.mostrar}
+                    onChange={handleOnchangeMostrarColumna}
+                  />
+                }
+                label={column.label}
+              />
+            );
+          })}
+          <Box>
+            <Button onClick={showAllColumns}>Mostrar Todos</Button>
+            <Button onClick={reiniciarColumns}>Reiniciar Vista</Button>
+          </Box>
+        </Box>
+      </Popover>
+      <AppMessageView
+        variant={
+          messageType === UPDATE_TYPE || messageType === CREATE_TYPE
+            ? 'success'
+            : 'error'
+        }
+        message={
+          messageType === UPDATE_TYPE || messageType === CREATE_TYPE
+            ? message
+            : ''
+        }
+      />
+    </div>
+  );
+};
+
+Inversion.propTypes = {
+  route: PropTypes.shape({
+    path: PropTypes.string.isRequired,
+  }),
+  permisos: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string),
+  ]).isRequired,
+};
+
+export default Inversion;

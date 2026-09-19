@@ -1,0 +1,1479 @@
+import React, { useState, useEffect } from 'react';
+import { Box, Button } from '@mui/material';
+import { Input } from '@mui/material';
+import PropTypes from 'prop-types';
+import clsx from 'clsx';
+import { styled, useTheme } from '@mui/material/styles';
+import { lighten } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import Pagination from '@mui/material/Pagination';
+import TableRow from '@mui/material/TableRow';
+import TableSortLabel from '@mui/material/TableSortLabel';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Paper from '@mui/material/Paper';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ExcelIcon from '@mui/icons-material/FileCopy'; 
+import Checkbox from '@mui/material/Checkbox';
+import { onGetProgramacion, onGuardarProgramacion, clearPlanDetallado } from '../../../@crema/redux/features/planDetallado/planDetalladoSlice';
+import {onGetColeccionLigera as onGetInversionistas} from '../../../@crema/redux/features/inversionista/inversionistasSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import Autocomplete from '@mui/material/Autocomplete';
+import MyAutocomplete from '../../../shared/components/MyAutoComplete';
+import IntlMessages from '../../../@crema/helpers/IntlMessages';
+import Popover from '@mui/material/Popover';
+import TuneIcon from '@mui/icons-material/Tune';
+import ClearAllIcon from '@mui/icons-material/ClearAll';
+import TextField from '@mui/material/TextField';
+import Swal from 'sweetalert2';
+import {
+  UPDATE_TYPE,
+  CREATE_TYPE,
+  DELETE_TYPE,
+} from '../../../shared/constants/Constantes';
+import { Form, Formik } from 'formik';
+import AppMessageView from '@crema/components/AppMessageView';
+import { useDebounce } from '../../../@crema/hooks/useDebounce';
+import MyCell from '../../../shared/components/MyCell';
+import moment from 'moment';
+import HelpButton from '../../../shared/components/HelpButton';
+import parse from 'html-react-parser';
+import { useNavigate } from 'react-router-dom';
+import { TIPO_DOCUMENTO, TIPO_CUENTA, ESTADOS_INVERSIONES, DATO_BOOLEAN, TIPOS_VALOR } from '../../../shared/constants/ListaValores';
+import { formatCurrency } from '../../../shared/hooks/formatCurrency';
+import defaultConfig from '@crema/constants/defaultConfig';
+
+const cells = [
+  {
+    id: 'inversionista_gestor',
+    typeHead: 'string',
+    label: 'Inversionista/Gestor',
+    value: (value) => value,
+    align: 'left',
+    mostrarInicio: true,
+  },
+  {
+    id: 'proyecto',
+    typeHead: 'string',
+    label: 'Proyecto',
+    value: (value) => value,
+    align: 'left',
+    mostrarInicio: true,
+  },
+  {
+    id: 'fecha',
+    typeHead: 'string',
+    label: 'Fecha',
+    value: (value) => value,
+    align: 'left',
+    mostrarInicio: true,
+  },
+  {
+    id: 'tipo',
+    typeHead: 'string',
+    label: 'Tipo',
+    value: (value) => TIPOS_VALOR.map((estado) => estado.id === value ? estado.nombre : ''),
+    align: 'left',
+    mostrarInicio: true,
+  },
+  {
+    id: 'valor',
+    typeHead: 'numeric',
+    label: 'Valor',
+    value: (value) => formatCurrency(value),
+    align: 'right',
+    mostrarInicio: true,
+  },
+  {
+    id: 'ret_fuente',
+    typeHead: 'numeric',
+    label: 'Ret fuente',
+    value: (value) => formatCurrency(value),
+    align: 'right',
+    mostrarInicio: true,
+  },
+  {
+    id: 'valor_a_pagar',
+    typeHead: 'numeric',
+    label: 'Valor a pagar',
+    value: (value) => formatCurrency(value),
+    align: 'right',
+    mostrarInicio: true,
+  },
+];
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    color: theme.palette.primary,  
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 11,
+    textAlign: 'center',
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  textAlign: 'start',
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+    fontSize: 14,
+  },
+}));
+
+function EnhancedTableHead(props) {
+  const { classes, order, orderBy, onRequestSort, columnasMostradas } = props;
+
+  return (
+    <TableHead>
+      <StyledTableRow className={classes.head}>
+        <StyledTableCell
+          align='center'
+          style={{ fontWeight: 'bold' }}
+          className={classes.headCell}
+        >
+          <Box 
+            sx={{
+              display: 'grid',
+               gridTemplateColumns: 'repeat(3,1fr)',
+            }}
+          >
+            <Box>Pago</Box>
+            <Box>Reinv.</Box>
+            <Box>Cta C.</Box>
+          </Box>
+        </StyledTableCell>
+        {columnasMostradas.map((cell) => {
+          if (cell.mostrar) {
+            return (
+              <StyledTableCell
+                key={cell.id}
+                style={{ fontWeight: 'bold' }}
+                align={
+                  // eslint-disable-next-line prettier/prettier
+                  cell.typeHead === 'string'
+                    ? 'left'
+                    : cell.typeHead === 'numeric' // eslint-disable-next-line prettier/prettier
+                    ? 'right'// eslint-disable-next-line prettier/prettier
+                    : 'center'
+                }
+                // eslint-disable-next-line prettier/prettier
+                className={classes.cell}
+                sortDirection={orderBy === cell.id ? order : false}
+              >
+                <TableSortLabel
+                  active={orderBy === cell.id}
+                  direction={orderBy === cell.id ? order : 'asc'}
+                  onClick={() => {
+                    onRequestSort(cell.id);
+                  }}
+                >
+                  {cell.label}
+                  {orderBy === cell.id ? (
+                    <span className={classes.visuallyHidden}>
+                      {order === 'desc'
+                        ? 'sorted descending'
+                        : 'sorted ascending'}
+                    </span>
+                  ) : null}
+                </TableSortLabel>
+              </StyledTableCell>
+            );
+          } else {
+            return <th key={cell.id}></th>;
+          }
+        })}
+      </StyledTableRow>
+    </TableHead>
+  );
+}
+
+EnhancedTableHead.propTypes = {
+  classes: PropTypes.object.isRequired,
+  numSelected: PropTypes.number.isRequired,
+  onRequestSort: PropTypes.func.isRequired,
+  onSelectAllClick: PropTypes.func.isRequired,
+  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
+  orderBy: PropTypes.string.isRequired,
+  rowCount: PropTypes.number.isRequired,
+  columnasMostradas: PropTypes.array.isRequired,
+};
+
+const useToolbarStyles = makeStyles((theme) => ({
+  root: {
+    padding: '15px',
+    boxShadow: '0px 0px 5px 5px rgb(0 0 0 / 10%)',
+    borderRadius: '4px',
+    display: 'grid',
+    // gap: '20px',
+  },
+  title: {
+    flex: '1 1 100%',
+    fontWeight: 'bold',
+  },
+  horizontalBottoms: {
+    width: 'min-content',
+    display: 'flex',
+    gap: '5px',
+  },
+  titleTop: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  contenedorFiltros: {
+    width: '90%',
+    display: 'grid',
+    gridTemplateColumns: '4fr 4fr 1fr',
+    gap: '20px',
+    '@media (max-width: 600px)': { // Cambia a una columna en pantallas móviles
+      gridTemplateColumns: '1fr',
+    },
+  },
+  pairFilters: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    gap: '20px',
+    minWidth: '100px',
+  },
+}));
+
+const EnhancedTableToolbar = (props) => {
+  const classes = useToolbarStyles();
+  const {
+    numSelected,
+    titulo,
+    handleOpenPopoverColumns,
+    queryFilter,
+    fechaProgramacionFiltro,
+    nombreFiltro,
+    inversionistas,
+    setIdInversionista,
+    limpiarFiltros,
+    permisos,
+    url,
+    theme,
+  } = props;
+  return (
+    <Toolbar
+      sx={{
+        padding: '15px',
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: '0px 0px 5px 5px rgb(0 0 0 / 10%)',
+        borderRadius: '4px',
+        display: 'grid',
+      }}
+    >
+      {numSelected > 0 ? (
+        <Typography
+          className={classes.title}
+          color='inherit'
+          variant='subtitle1'
+          component='div'
+        >
+          {numSelected} selected
+        </Typography>
+      ) : (
+        <>
+          <Box className={classes.titleTop}>
+            <Typography
+              className={classes.title}
+              variant='h2'
+              id='tableTitle'
+              component='div'
+            >
+              {titulo}
+            </Typography>
+            <Box className={classes.horizontalBottoms}>
+              { 
+                fechaProgramacionFiltro !== '' && (
+                  <Formik>
+                    <Form>                
+                      {permisos?.indexOf('Exportar') >= 0 && (
+                        <Tooltip
+                          title='Exportar'
+                          component='a'
+                          className={classes.linkDocumento}
+                          href={
+                            defaultConfig.API_URL +
+                            '/exportar-programacion?fecha='+fechaProgramacionFiltro
+                          }>
+                        <IconButton
+                            sx={{
+                              backgroundColor: theme.palette.colorFiltro,
+                              color: 'white',
+                              boxShadow:
+                                '0px 3px 5px -1px rgb(0 0 0 / 30%), 0px 6px 10px 0px rgb(0 0 0 / 20%), 0px 1px 18px 0px rgb(0 0 0 / 16%)',
+                              '&:hover': {
+                                backgroundColor: theme.palette.colorHovers,
+                                cursor: 'pointer',
+                              },
+                              padding: '13px',}}
+                            aria-label='filter list'>
+                            <Box component='span' 
+                            sx={{
+                              position: 'absolute',
+                              color: theme.palette.colorFiltro,
+                              '&:hover': {
+                                color: theme.palette.colorHovers,
+                                cursor: 'pointer',
+                              },
+                              fontSize: '14px',
+                              top: '19px',
+                              fontWeight: 'bold',
+                            }}>
+                              X
+                            </Box>
+                            <ExcelIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Form>
+                  </Formik>
+                )
+              }
+              
+              <HelpButton url={url} />
+              <Tooltip
+                title='Mostrar/Ocultar Columnas'
+                onClick={handleOpenPopoverColumns}
+                sx={{backgroundColor: theme.palette.colorFiltro,
+                  color: 'white',
+                  boxShadow:
+                    '0px 3px 5px -1px rgb(0 0 0 / 30%), 0px 6px 10px 0px rgb(0 0 0 / 20%), 0px 1px 18px 0px rgb(0 0 0 / 16%)',
+                  '&:hover': {
+                    backgroundColor: theme.palette.colorHovers,
+                    cursor: 'pointer',
+                  },
+                  padding: '13px',}}
+              >
+                <IconButton
+                  sx={{backgroundColor: theme.palette.colorFiltro,
+                    color: 'white',
+                    boxShadow:
+                      '0px 3px 5px -1px rgb(0 0 0 / 30%), 0px 6px 10px 0px rgb(0 0 0 / 20%), 0px 1px 18px 0px rgb(0 0 0 / 16%)',
+                    '&:hover': {
+                      backgroundColor: theme.palette.colorHovers,
+                      cursor: 'pointer',
+                    },
+                    padding: '13px',}}
+                  aria-label='filter list'
+                >
+                  <TuneIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+          <Box className={classes.contenedorFiltros}>
+            <TextField
+              label='Fecha Programación'
+              name='fechaProgramacionFiltro'
+              id='fechaProgramacionFiltro'
+              onChange={queryFilter}
+              type='date'
+              InputLabelProps={{
+                shrink: true,
+              }}
+              value={fechaProgramacionFiltro}
+              className={classes.inputFiltros}
+              variant='standard'
+              InputProps={{
+                inputComponent: Input,
+                disableUnderline: false,
+              }}
+              sx={{                
+                '& .MuiInput-underline:before': {
+                  borderBottomColor: '#ccc',
+                  marginBottom: -0.5,
+                },
+                '& .MuiInput-underline:hover:before': {
+                  borderBottomColor: theme.palette.text.primary,
+                },
+                '& .MuiInput-underline:after': {
+                  borderBottomColor: theme.palette.text.primary,
+                },
+              }}
+            />
+            <TextField
+              label='Nombre'
+              name='nombreFiltro'
+              id='nombreFiltro'
+              onChange={queryFilter}
+              value={nombreFiltro}
+              className={classes.inputFiltros}
+              variant='standard'
+              fullWidth
+              InputProps={{
+                inputComponent: Input,
+                disableUnderline: false,
+              }}
+              sx={{                
+                '& .MuiInput-underline:before': {
+                  borderBottomColor: '#ccc',
+                  marginBottom: -0.5,
+                },
+                '& .MuiInput-underline:hover:before': {
+                  borderBottomColor: theme.palette.text.primary,
+                },
+                '& .MuiInput-underline:after': {
+                  borderBottomColor: theme.palette.text.primary,
+                },
+              }}
+            />
+
+            <Box display='grid'>
+              <Box display='flex' mb={2}>
+                <Tooltip title='Limpiar Filtros' onClick={limpiarFiltros}>
+                  <IconButton
+                    sx={{
+                      backgroundColor: theme.palette.primary.main,
+                      color: 'white',
+                      boxShadow:
+                        '0px 3px 5px -1px rgb(0 0 0 / 30%), 0px 6px 10px 0px rgb(0 0 0 / 20%), 0px 1px 18px 0px rgb(0 0 0 / 16%)',
+                      '&:hover': {
+                        backgroundColor: theme.palette.colorHovers,
+                        cursor: 'pointer',
+                      },
+                      padding: '13px', }}
+                    aria-label='filter list'
+                  >
+                    <ClearAllIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Box>
+          </Box>
+        </>
+      )}
+
+      {numSelected > 0 ? (
+        <Tooltip title='Delete'>
+          <IconButton aria-label='delete'>
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        ''
+      )}
+    </Toolbar>
+  );
+};
+
+EnhancedTableToolbar.propTypes = {
+  numSelected: PropTypes.number.isRequired,
+  handleOpenPopoverColumns: PropTypes.func.isRequired,
+  queryFilter: PropTypes.func.isRequired,
+  limpiarFiltros: PropTypes.func.isRequired,
+  fechaProgramacionFiltro: PropTypes.string.isRequired,
+  nombreFiltro: PropTypes.string.isRequired,
+  titulo: PropTypes.string.isRequired,
+  permisos: PropTypes.string.isRequired,
+  url: PropTypes.string.isRequired,
+};
+
+const useStyles = makeStyles((theme) => ({
+  marcoTabla: {
+    boxShadow: '0px 0px 5px 5px rgb(0 0 0 / 10%)',
+    borderRadius: '4px',
+    paddingLeft: '15px',
+    paddingRight: '15px',
+    marginTop: '5px',
+  },
+  root: {
+    width: '100%',
+    padding: '20px',
+  },
+  head: {
+    borderTop: '2px solid #dee2e6',
+    borderBottom: '2px solid #dee2e6',
+  },
+  headCell: {
+    padding: '0px 0px 0px 15px',
+    // textAlign: 'start',
+  },
+  row: {
+    padding: 'none',
+  },
+  cell: (props) => ({
+    padding: props.vp + ' 0px ' + props.vp + ' 15px',
+    whiteSpace: 'nowrap',
+  }),
+  cellWidth: (props) => ({
+    minWidth: props.width,
+  }),
+  cellColor: (props) => ({
+    backgroundColor: props.cellColor,
+    color: 'white',
+  }),
+  acciones: (props) => ({
+    padding: props.vp + ' 0px ' + props.vp + ' 15px',
+    minWidth: '160px',
+  }),
+  paper: {
+    width: '100%',    
+    boxShadow: 'none',
+    backgroundColor: 'transparent',
+  },
+  table: {
+    minWidth: '100%',
+  },
+  visuallyHidden: {
+    border: 0,
+    clip: 'rect(0 0 0 0)',
+    height: 1,
+    margin: -1,
+    overflow: 'hidden',
+    padding: 0,
+    position: 'absolute',
+    top: 20,
+    width: 1,
+  },
+  paginacion: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: '10px',
+    paddingBottom: '5px',
+  },
+  rowsPerPageOptions: {
+    marginRight: '10px',
+  },
+}));
+
+let hUrl = '';
+
+const Inversion = (props) => {
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const [order, setOrder] = React.useState('asc');
+  const [orderBy, setOrderBy] = React.useState('');
+  const [orderByToSend, setOrderByToSend] = React.useState(
+    'fecha_modificacion:desc',
+  );
+  const [selected, setSelected] = React.useState([]);
+  const [page, setPage] = React.useState(1);
+  // const [dense, setDense] = React.useState(false);
+  const dense = true; //Borrar cuando se use el change
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const rowsPerPageOptions = [5, 10, 15, 25, 50];
+  const [accionesSeleccionadas, setAccionesSeleccionadas] = useState({});
+  const [accion, setAccion] = useState('ver');
+  const { rows, desde, hasta, ultima_pagina, total, totalGeneral, totalNeto } = useSelector((state) => state.planDetallado);
+  const [accionesSeleccionadasGlobal, setAccionesSeleccionadasGlobal] = useState({});
+  const { message, error, messageType } = useSelector(({ common }) => common);
+  const { coleccionLigera: inversionistas } = useSelector((state) => state.inversionistas);    
+  const [erroresPorFila, setErroresPorFila] = useState({});
+  const textoPaginacion = `Mostrando de ${desde} a ${hasta} de ${total} resultados - Página ${page} de ${ultima_pagina}`;
+  const [nombreFiltro, setNombreFiltro] = useState('');
+  const [fechaProgramacionFiltro, setfechaProgramacionFiltro] = useState('');
+  const debouncedDate = useDebounce(fechaProgramacionFiltro, 800);
+  const debouncedName = useDebounce(nombreFiltro, 800);
+  const [openPopOver, setOpenPopOver] = useState(false);
+  const [popoverTarget, setPopoverTarget] = useState(null);
+  const [totales, setTotales] = useState({
+    valor: 0,
+    ret_fuente: 0,
+    valor_a_pagar: 0,
+  });
+  const [hayErrores, setHayErrores] = useState(false);
+  let columnasMostradasInicial = [];
+
+  cells.forEach((cell) => {
+    columnasMostradasInicial.push({
+      id: cell.id,
+      mostrar: cell.mostrarInicio,
+      typeHead: cell.typeHead,
+      label: cell.label,
+      value: cell.value,
+      align: cell.align,
+      width: cell.width,
+      cellColor: cell.cellColor,
+    });
+  });
+
+  const [columnasMostradas, setColumnasMostradas] = useState(
+    columnasMostradasInicial,
+  );
+
+  let vp = '15px';
+  if (dense === true) {
+    vp = '0px';
+  }
+  const classes = useStyles({ vp: vp });
+  const dispatch = useDispatch();
+
+  const { user } = useSelector(({ auth }) => auth);
+  const [permisos, setPermisos] = useState('');
+  const [titulo, setTitulo] = useState('');
+
+  useEffect(() => {
+    user &&
+      user.usuario.permisos.forEach((modulo) => {
+        modulo.opciones.forEach((opcion) => {
+          if (opcion.url === props.route.path) {
+            setTitulo(opcion.nombre);
+            hUrl = opcion.url_ayuda;
+            const permisoAux = [];
+            opcion.permisos.forEach((permiso) => {
+              if (permiso.permitido) {
+                permisoAux.push(permiso.titulo);
+              }
+            });
+            setPermisos(permisoAux);
+          }
+        });
+      });
+  }, [user, props.route]);
+
+  useEffect(() => {
+      dispatch(onGetInversionistas());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (fechaProgramacionFiltro !== '') {
+      const hoy = moment().startOf('day');
+      const fechaSeleccionada = moment(fechaProgramacionFiltro, 'YYYY-MM-DD').startOf('day');
+  
+      if (fechaSeleccionada.isBefore(hoy)) {
+        Swal.fire({
+          title: 'Error',
+          text: 'La fecha de programación debe ser mayor o igual a la fecha del día',
+          allowEscapeKey: false,
+          allowEnterKey: false,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'OK',
+          background: theme.palette.background.default,
+          color:theme.palette.text.primary,
+        });
+        setShowTable(false);
+        dispatch(clearPlanDetallado());
+        return;
+      }
+  
+      dispatch(onGetProgramacion({ page, rowsPerPage, fechaProgramacionFiltro,nombreFiltro, orderByToSend }));
+    } else {
+      setShowTable(false);
+      dispatch(clearPlanDetallado()); 
+    }
+  }, [dispatch, page, rowsPerPage, debouncedDate,nombreFiltro, orderByToSend]);
+  
+  
+
+  const updateColeccion = () => {
+    setPage(1);
+    dispatch(onGetProgramacion({page, rowsPerPage, fechaProgramacionFiltro, nombreFiltro, orderByToSend}));
+  };
+
+  const updateTotales = () => {
+    setTotales({
+      valor: 0,
+      ret_fuente: 0,
+      valor_a_pagar: 0,
+    });
+  };
+
+  useEffect(() => {
+    setPage(1);
+  }, [fechaProgramacionFiltro, debouncedDate, debouncedName,nombreFiltro, orderByToSend]);
+
+  const queryFilter = (e) => {
+    switch (e.target.name) {
+      case 'fechaProgramacionFiltro':
+        setfechaProgramacionFiltro(e.target.value);
+        break;
+      case 'nombreFiltro':
+        setNombreFiltro(e.target.value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const limpiarFiltros = () => {
+    setfechaProgramacionFiltro('');
+    setNombreFiltro('');
+  };
+
+  const changeOrderBy = (id) => {
+    if (orderBy === id) {
+      if (order === 'asc') {
+        setOrder('desc');
+        setOrderByToSend(id + ':desc');
+      } else {
+        setOrder('asc');
+        setOrderByToSend(id + ':asc');
+      }
+    } else {
+      setOrder('asc');
+      setOrderBy(id);
+      setOrderByToSend(id + ':asc');
+    }
+  };
+
+  const handleClosePopover = () => {
+    setOpenPopOver(false);
+    setPopoverTarget(null);
+  };
+
+  const handleOpenPopoverColumns = (e) => {
+    setPopoverTarget(e.currentTarget);
+    setOpenPopOver(true);
+  };
+
+  const handleOnchangeMostrarColumna = (e) => {
+    let aux = columnasMostradas;
+    setColumnasMostradas(
+      aux.map((column) => {
+        if (column.id === e.target.id) {
+          return { ...column, mostrar: !column.mostrar };
+        } else {
+          return column;
+        }
+      }),
+    );
+  };
+
+  const showAllColumns = () => {
+    let aux = columnasMostradas;
+    setColumnasMostradas(
+      aux.map((column) => {
+        return { ...column, mostrar: true };
+      }),
+    );
+  };
+
+  const reiniciarColumns = () => {
+    setColumnasMostradas(columnasMostradasInicial);
+  };
+
+  const handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      const newSelecteds = rows.map((n) => n.name);
+      setSelected(newSelecteds);
+      return;
+    }
+    setSelected([]);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(1);
+  };
+
+  const isSelected = (name) => selected.indexOf(name) !== -1;
+
+  const [showTable, setShowTable] = useState(true);
+
+  useEffect(() => {
+    if (rows?.length === 0) {
+      setShowTable(false);
+    } else {
+      setShowTable(true);
+    }
+  }, [rows]);
+
+const manejarCambioAccion = (id, tipoAccion, tipoConcepto) => {
+  const stringId = String(id);
+  const row = rows.find((r) => (r.id + '-' + r.id_cliente) === stringId);
+
+  setAccionesSeleccionadas((prev) => {
+    const accionesPrevias = prev[stringId] || { pago: false, rei: false, cta: false };
+
+    // Toggle del checkbox (true/false)
+    const nuevasAcciones = {
+      ...accionesPrevias,
+      [tipoAccion]: !accionesPrevias[tipoAccion],
+    };
+
+    // Nuevo estado local actualizado
+    const nuevoEstado = {
+      ...prev,
+      [stringId]: nuevasAcciones,
+    };
+
+    // Preparamos una copia de acciones globales con el cambio actual
+    const accionesGlobalActualizadas = {
+      ...accionesSeleccionadasGlobal,
+      [stringId]: {
+        ...nuevasAcciones,
+        ...row,
+        valor: row.valor,
+        ret_fuente: row.ret_fuente,
+        valor_a_pagar: row.valor_a_pagar,
+      },
+    };
+
+    // Validar si hay error con el nuevo estado
+    const mensajeError = validarAccion(id, nuevasAcciones, row, accionesGlobalActualizadas);
+
+    // Actualiza errores por fila
+    setErroresPorFila((prevErrores) => {
+      const nuevosErrores = { ...prevErrores };
+      if (mensajeError) {
+        nuevosErrores[stringId] = mensajeError;
+      } else {
+        delete nuevosErrores[stringId];
+      }
+      return nuevosErrores;
+    });
+
+    // Actualiza acciones seleccionadas globales
+    setAccionesSeleccionadasGlobal((prevGlobal) => {
+      const nuevasGlobales = { ...prevGlobal };
+
+      // Si ya no hay ninguna acción marcada, eliminar de acciones globales
+      if (!nuevasAcciones.pago && !nuevasAcciones.rei && !nuevasAcciones.cta) {
+        delete nuevasGlobales[stringId];
+      } else {
+        nuevasGlobales[stringId] = {
+          ...nuevasAcciones,
+          ...row,
+          valor: row.valor,
+          ret_fuente: row.ret_fuente,
+          valor_a_pagar: row.valor_a_pagar,
+        };
+      }
+
+      return nuevasGlobales;
+    });
+
+    return nuevoEstado;
+  });
+};
+
+
+
+  const validarAccion = (id, acciones, row, accionesGlobales) => {
+    const stringId = String(id);
+    const requiereCtaCobroPago = row.tipo === 'C' || row.tipo === 'I';
+    const requiereCtaCobroRei = row.tipo === 'I';
+
+    if (acciones.pago && acciones.rei) {
+      return 'No puede seleccionarse acción pagar y reinvertir al mismo tiempo.';
+    }
+
+    if (acciones.pago && requiereCtaCobroPago && !acciones.cta) {
+      return 'El tipo de concepto requiere confirmar cuenta de cobro.';
+    }
+
+    if (acciones.rei && requiereCtaCobroRei && !acciones.cta) {
+      return 'Los rendimientos requieren cuenta de cobro.';
+    }
+
+    if (acciones.rei && !(row.tipo === 'I' || row.tipo === 'K')) {
+      return 'Solo se permite reinvertir conceptos tipo Rendimientos o Reintegro.';
+    }
+
+    if (acciones.rei) {
+      const reinversionesActuales = Object.entries(accionesGlobales)
+        .filter(([_, acc]) => acc.rei)
+        .map(([_, acc]) => acc);
+
+      if (reinversionesActuales.length > 0) {
+        const mismaFecha = reinversionesActuales.every(item => item.fecha === row.fecha);
+        const mismoInversionista = reinversionesActuales.every(item => item.id_cliente === row.id_cliente);
+
+        if (!mismoInversionista) return 'Solo se permite reinvertir registros de un mismo inversionista.';
+        if (!mismaFecha) return 'Solo se permite reinvertir registros de una misma fecha.';
+      }
+    }
+
+    return ''; // No hay errores
+  };
+
+  
+  const calcularTotales = () => {
+    let totalValor = 0;
+    let totalRet = 0;
+    let totalPagar = 0;
+  
+    for (const key in accionesSeleccionadasGlobal) {
+      const acciones = accionesSeleccionadasGlobal[key];
+      if (acciones?.pago) {
+        totalValor += parseFloat(acciones.valor || 0);
+        totalRet += parseFloat(acciones.ret_fuente || 0);
+        totalPagar += parseFloat(acciones.valor_a_pagar || 0);
+      }
+    }
+  
+    setTotales({
+      valor: totalValor,
+      ret_fuente: totalRet,
+      valor_a_pagar: totalPagar,
+    });
+  };
+  
+    
+  useEffect(() => {
+    calcularTotales();
+  }, [accionesSeleccionadas, rows]);
+
+  useEffect(() => {
+    if (rows?.length === 0 || error) {
+      setShowTable(false);
+      setAccionesSeleccionadas({});
+      setTotales({
+        valor: 0,
+        ret_fuente: 0,
+        valor_a_pagar: 0,
+      });
+    } else {
+      setShowTable(true);
+    }
+  }, [rows, error]);
+  
+
+const guardarProgramacion = async () => {
+  const filasInvalidas = [];
+  let params = [];
+
+  const hayPagos = Object.values(accionesSeleccionadasGlobal).some((accion) => Boolean(accion.pago));
+  const hayReinversiones = Object.values(accionesSeleccionadasGlobal).some((accion) => Boolean(accion.rei));
+
+  // Validar errores de cuenta de cobro para los pagos
+  if (hayPagos) {
+    params = Object.entries(accionesSeleccionadasGlobal)
+      .filter(([_, accion]) => accion.pago)
+      .map(([_, accion]) => {
+        const esComisionORendimiento = accion.tipo === 'C' || accion.tipo === 'I';
+        const requiereCuentaCobro = esComisionORendimiento && !accion.cta;
+        if (requiereCuentaCobro) {
+          filasInvalidas.push(accion);
+        }
+
+        return {
+          id: accion.id,
+          estado_plan: 'PRG',
+          usuario_modificacion_id: user.usuario.id,
+          usuario_modificacion_nombre: user.usuario.nombre,
+          updated_at: new Date().toISOString(),
+        };
+      });
+  }
+
+  // Si hay errores en los pagos
+  if (filasInvalidas.length > 0) {
+    Swal.fire({
+      title: 'Validación requerida',
+      text: 'El tipo de concepto requiere confirmar cuenta de cobro.',
+      confirmButtonText: 'OK',
+      background: theme.palette.background.default,
+      color: theme.palette.text.primary,
+    });
+    return;
+  }
+
+  // Si no hay ninguna acción seleccionada
+  if (!hayPagos && !hayReinversiones) {
+    Swal.fire({
+      title: 'Sin registros',
+      text: 'Debe seleccionar al menos un registro con acción pagar o reinvertir.',
+      confirmButtonText: 'OK',
+      background: theme.palette.background.default,
+      color: theme.palette.text.primary,
+    });
+    return;
+  }
+
+
+  // Primero guardar los pagos
+  if (hayPagos) {
+    try {
+      // await dispatch(onGuardarProgramacion({ params }));
+      
+    } catch (error) {
+      console.error('Error al guardar pagos', error);
+      return; // si hay error, no seguir con reinversiones
+    }
+  }
+
+  // Luego de guardar pagos, validar reinversiones si existen
+  if (hayReinversiones) {
+    const reinversiones = Object.entries(accionesSeleccionadasGlobal)
+      .filter(([_, accion]) => accion.rei)
+      .map(([_, accion]) => accion);
+
+
+    const tiposInvalidos = reinversiones.filter((accion) => !(accion.tipo === 'I' || accion.tipo === 'K'));
+    if (tiposInvalidos.length > 0) {
+      Swal.fire({
+        title: 'Tipo inválido',
+        text: 'Solo se permite seleccionar conceptos tipo Rendimientos o Reintegro para reinvertir.',
+        confirmButtonText: 'OK',
+        background: theme.palette.background.default,
+        color: theme.palette.text.primary,
+      });
+      return;
+    }
+
+    const reinversionesInvalidas = reinversiones.filter((accion) => accion.tipo === 'I' && !accion.cta);
+    if (reinversionesInvalidas.length > 0) {
+      Swal.fire({
+        title: 'Validación requerida',
+        text: 'Los conceptos tipo Rendimientos requieren confirmar cuenta de cobro.',
+        confirmButtonText: 'OK',
+        background: theme.palette.background.default,
+        color: theme.palette.text.primary,
+      });
+      return;
+    }
+
+    const inversionistaRef = reinversiones[0]?.inversionista_gestor;
+    const idInversionistaRef = reinversiones[0]?.id_cliente;
+    const fechaRef = reinversiones[0]?.fecha;
+
+    const validacionInversionista = reinversiones.every((item) => item.inversionista_gestor === inversionistaRef);
+    const validacionFecha = reinversiones.every((item) => item.fecha === fechaRef);
+
+    if (!validacionInversionista) {
+      Swal.fire({
+        title: 'Validación requerida',
+        text: 'Solo se permite registrar reinversiones de un solo inversionista.',
+        confirmButtonText: 'OK',
+        background: theme.palette.background.default,
+        color: theme.palette.text.primary,
+      });
+      return;
+    }
+
+    if (!validacionFecha) {
+      Swal.fire({
+        title: 'Validación requerida',
+        text: 'Solo se permite registrar reinversiones en una sola fecha.',
+        confirmButtonText: 'OK',
+        background: theme.palette.background.default,
+        color: theme.palette.text.primary,
+      });
+      return;
+    }
+
+    // Si pasa todas las validaciones, procesar la reinversión
+    const totalValor = reinversiones.reduce((sum, item) => sum + Number(item.valor_a_pagar || 0), 0);
+    const idsSeleccionados = reinversiones.map((item) => item.id);
+
+    navigate('/inversiones/crear', {
+      state: {
+        id: idInversionistaRef,
+        id_inversionista: inversionistaRef,
+        valor: totalValor,
+        fecha: fechaRef,
+        indicador_reinversion: 'S',
+        ids_inversiones_originales: idsSeleccionados,
+      },
+    });
+
+    updateColeccion();
+    setAccionesSeleccionadas({});
+    setAccionesSeleccionadasGlobal({});
+    updateTotales();
+  }
+};
+
+  useEffect(() => {
+    setHayErrores(Object.keys(erroresPorFila).length > 0);
+  }, [erroresPorFila]);
+
+
+  return (
+    <div className={classes.root}>
+      <Paper sx={{marginBottom: theme.spacing(2),}} className={classes.paper}>
+        {permisos && (
+          <EnhancedTableToolbar
+            numSelected={selected.length}
+            handleOpenPopoverColumns={handleOpenPopoverColumns}
+            queryFilter={queryFilter}
+            limpiarFiltros={limpiarFiltros}
+            fechaProgramacionFiltro={fechaProgramacionFiltro}       
+            nombreFiltro={nombreFiltro}
+            inversionistas={inversionistas}
+            permisos={permisos}
+            titulo={titulo}
+            url={hUrl}
+            theme={theme}
+          />
+        )}
+        {showTable && permisos ? (
+          <Box 
+            sx={{
+              background: theme.palette.background.paper
+            }}
+            className={classes.marcoTabla}
+          >
+            <Box className={classes.paginacion}
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%', // Asegura que ocupe todo el ancho
+              gap: { xs: 2, sm: 0 }, // Espacio entre elementos en móvil
+            }}>
+              <Box
+              sx={{
+                width: { xs: '100%', sm: 'auto' }, // Ancho completo en móvil
+                textAlign: { xs: 'center', sm: 'left' }, // Centrado en móvil
+              }}>
+                <p>{textoPaginacion}</p>
+              </Box>
+              <Box className={classes.paginacion}>
+                <select
+                  className={classes.rowsPerPageOptions}
+                  value={rowsPerPage}
+                  onChange={handleChangeRowsPerPage}
+                >
+                  {rowsPerPageOptions.map((option) => {
+                    return (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    );
+                  })}
+                </select>
+                <Pagination
+                  showFirstButton
+                  showLastButton
+                  onChange={handleChangePage}
+                  count={ultima_pagina}
+                  page={page}
+                />
+              </Box>
+            </Box>
+
+            <TableContainer component={Paper}>
+              <Table
+                className={classes.table}
+                aria-labelledby='tableTitle'
+                size={dense ? 'small' : 'medium'}
+                aria-label='customized table'
+              >
+                <EnhancedTableHead
+                  classes={classes}
+                  numSelected={selected.length}
+                  order={order}
+                  orderBy={orderBy}
+                  onSelectAllClick={handleSelectAllClick}
+                  onRequestSort={changeOrderBy}
+                  rowCount={rows?.length}
+                  columnasMostradas={columnasMostradas}
+                />
+                <TableBody>
+                  {rows?.map((row) => {
+                    const isItemSelected = isSelected(row.name);
+
+                    return (
+                      <React.Fragment key={row.id}>
+                        <StyledTableRow
+                          hover
+                          tabIndex={-1}
+                          selected={isSelected(row.name)}
+                          className={classes.row}
+                        >
+                          <StyledTableCell align='center' className={classes.acciones}>
+                            <Box
+                              sx={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(3,1fr)',
+                              }}
+                            >
+                              <Tooltip title="Pagar">
+                                <Checkbox
+                                  size='small'
+                                  sx={{ padding: '3px', margin: '3px' }}
+                                  checked={accionesSeleccionadas[String(row.id + '-' + row.id_cliente)]?.pago || false}
+                                  onChange={() =>
+                                    manejarCambioAccion(row.id + '-' + row.id_cliente, 'pago', row.tipo)
+                                  }
+                                />
+                              </Tooltip>
+                              <Tooltip title="Reinvertir">
+                                <Checkbox
+                                  size='small'
+                                  sx={{ padding: '2px', margin: '2px' }}
+                                  checked={accionesSeleccionadas[String(row.id + '-' + row.id_cliente)]?.rei || false}
+                                  onChange={() =>
+                                    manejarCambioAccion(row.id + '-' + row.id_cliente, 'rei', row.tipo)
+                                  }
+                                  disabled={row.tipo === 'C'}
+                                />
+                              </Tooltip>
+                              <Tooltip title="Cuenta de cobro">
+                                <Checkbox
+                                  size='small'
+                                  sx={{
+                                    padding: '2px',
+                                    margin: '2px',
+                                    color: erroresPorFila[row.id + '-' + row.id_cliente]
+                                      ? theme.palette.error.main
+                                      : 'inherit',
+                                  }}
+                                  checked={accionesSeleccionadas[String(row.id + '-' + row.id_cliente)]?.cta || false}
+                                  onChange={() =>
+                                    manejarCambioAccion(row.id + '-' + row.id_cliente, 'cta', row.tipo)
+                                  }
+                                  disabled={row.tipo === 'K'}
+                                />
+                              </Tooltip>
+                            </Box>
+                          </StyledTableCell>
+
+                          {columnasMostradas.map((columna) =>
+                            columna.mostrar ? (
+                              <MyCell
+                                useStyles={useStyles}
+                                key={row.id + columna.id}
+                                align={columna.align}
+                                width={columna.width}
+                                claseBase={classes.cell}
+                                value={columna.value(row[columna.id])}
+                                cellColor={
+                                  columna.cellColor ? columna.cellColor(row[columna.id]) : ''
+                                }
+                              />
+                            ) : (
+                              <th key={row.id + columna.id}></th>
+                            )
+                          )}
+                        </StyledTableRow>
+
+                        {/* Fila adicional para el mensaje de error */}
+                        {erroresPorFila[row.id + '-' + row.id_cliente] && (
+                          <TableRow>
+                            <TableCell colSpan={columnasMostradas.filter((c) => c.mostrar).length + 1}>
+                              <Box
+                                sx={{
+                                  backgroundColor: theme.palette.action.hover,
+                                  color: theme.palette.error.main,
+                                  fontSize: 13,
+                                  paddingY: 1,
+                                  paddingX: 2,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 1,
+                                }}
+                              >
+                                {erroresPorFila[row.id + '-' + row.id_cliente]}
+                              </Box>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>                     
+                    );
+                  })}
+                 
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Box sx={{ mt: 2 }}>
+              {/* Fila de totales generales */}
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '4fr 1fr 1fr 1fr 1fr 4fr 3fr 3fr',
+                  alignItems: 'center',
+                  px: 2,
+                  py: 1,
+                  borderTop: `1px solid ${theme.palette.divider}`,
+                  backgroundColor: theme.palette.action.hover,
+                  fontWeight: 'bold',
+                  fontSize: 14,
+                  '@media (max-width: 600px)': {
+                    gridTemplateColumns: '1fr',
+                  },
+                }}
+              >
+                <Box sx={{ gridColumn: '1 / 6' }}></Box>
+                <Box sx={{ textAlign: 'right' }}>Totales:</Box>
+                <Box sx={{ textAlign: 'right' }}>{formatCurrency(totalGeneral)}</Box>
+                <Box sx={{ textAlign: 'right' }}>{formatCurrency(totalNeto)}</Box>
+              </Box>
+
+              {/* Fila de totales seleccionados */}
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '4fr 1fr 1fr 1fr 1fr 4fr 3fr 3fr',
+                  alignItems: 'center',
+                  px: 2,
+                  py: 1,
+                  backgroundColor: theme.palette.background.paper,
+                  fontWeight: 'bold',
+                  fontSize: 14,
+                  '@media (max-width: 600px)': {
+                    gridTemplateColumns: '1fr',
+                  },
+                }}
+              >
+                <Box sx={{ gridColumn: '1 / 6' }}></Box>
+                <Box sx={{ textAlign: 'right' }}>Total Seleccionado para pago:</Box>
+                <Box sx={{ textAlign: 'right' }}>{formatCurrency(totales.valor)}</Box>
+                <Box sx={{ textAlign: 'right' }}>{formatCurrency(totales.valor_a_pagar)}</Box>
+              </Box>
+            </Box>
+
+            <Button
+              onClick={guardarProgramacion}
+              disabled={hayErrores}
+              sx={{
+                float: 'right',
+                paddingLeft: 15,
+                paddingRight: 15,
+                color: 'white',
+                backgroundColor: theme.palette.primary.main,
+                '&:hover': {
+                  backgroundColor: theme.palette.colorHovers,
+                  cursor: 'pointer',
+                },
+              }}
+              variant="outlined"
+            >
+              <IntlMessages id='boton.submit' />
+            </Button>
+
+            <Box className={classes.paginacion}
+             sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%', // Asegura que ocupe todo el ancho
+              gap: { xs: 2, sm: 0 }, // Espacio entre elementos en móvil
+            }}>
+              <Box
+              sx={{
+                width: { xs: '100%', sm: 'auto' }, // Ancho completo en móvil
+                textAlign: { xs: 'center', sm: 'left' }, // Centrado en móvil
+              }}>
+                <p>{textoPaginacion}</p>
+              </Box>
+              <Box className={classes.paginacion}>
+                <select
+                  className={classes.rowsPerPageOptions}
+                  value={rowsPerPage}
+                  onChange={handleChangeRowsPerPage}
+                >
+                  {rowsPerPageOptions.map((option) => {
+                    return (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    );
+                  })}
+                </select>
+                <Pagination
+                  showFirstButton
+                  showLastButton
+                  onChange={handleChangePage}
+                  count={ultima_pagina}
+                  page={page}
+                />
+              </Box>
+            </Box>
+          </Box>
+        ) : permisos ? (
+          <Box
+            component='h2'
+            padding={4}
+            fontSize={19}
+            className={classes.marcoTabla}
+            sx={{
+              background: theme.palette.background.paper
+            }}
+          >
+            <IntlMessages id='sinResultados' />
+          </Box>
+        ) : (
+          <Box
+            component='h2'
+            padding={4}
+            fontSize={19}
+            className={classes.marcoTabla}
+            sx={{
+              background: theme.palette.background.paper
+            }}
+          >
+            <IntlMessages id='noAutorizado' />
+          </Box>
+        )}
+      </Paper>
+
+      <Popover
+        id='popoverColumns'
+        open={openPopOver}
+        anchorEl={popoverTarget}
+        onClose={handleClosePopover}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+      >
+        <Box sx={{display: 'grid',
+            padding: '10px',
+            color: theme.palette.grayBottoms,}}>
+          {columnasMostradas.map((column) => {
+            return (
+              <FormControlLabel
+                key={column.id}
+                control={
+                  <Switch
+                    id={column.id}
+                    checked={column.mostrar}
+                    onChange={handleOnchangeMostrarColumna}
+                  />
+                }
+                label={column.label}
+              />
+            );
+          })}
+          <Box>
+            <Button onClick={showAllColumns}>Mostrar Todos</Button>
+            <Button onClick={reiniciarColumns}>Reiniciar Vista</Button>
+          </Box>
+        </Box>
+      </Popover>
+      <AppMessageView
+        variant={
+          messageType === UPDATE_TYPE || messageType === CREATE_TYPE
+            ? 'success'
+            : 'error'
+        }
+        message={
+          messageType === UPDATE_TYPE || messageType === CREATE_TYPE
+            ? message
+            : ''
+        }
+      />
+    </div>
+  );
+};
+
+Inversion.propTypes = {
+  route: PropTypes.shape({
+    path: PropTypes.string.isRequired,
+  }),
+  permisos: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string),
+  ]).isRequired,
+};
+
+export default Inversion;
