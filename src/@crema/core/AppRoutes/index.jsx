@@ -10,6 +10,12 @@ import { parametrizacionConfigs } from './Parametrizacion';
 import { inversionConfigs } from './Inversion';
 import { consultaConfigs } from './Consulta';
 import { proyectoConfigs } from './Proyecto';
+import { turismoConfigs } from './Turismo';
+import { proveedoresConfigs } from './Proveedores';
+import { experienciasConfigs } from './Experiencias';
+import { reservasConfigs } from './Reservas';
+import { resenasConfigs } from './Resenas';
+import { promocionesConfigs } from './Promociones';
 
 export const authorizedStructure = (loginUrl) => {
   return {
@@ -22,6 +28,12 @@ export const authorizedStructure = (loginUrl) => {
       ...inversionConfigs,
       ...consultaConfigs,
       ...proyectoConfigs,
+      ...turismoConfigs,
+      ...proveedoresConfigs,
+      ...experienciasConfigs,
+      ...reservasConfigs,
+      ...resenasConfigs,
+      ...promocionesConfigs,
     ],
   };
 };
