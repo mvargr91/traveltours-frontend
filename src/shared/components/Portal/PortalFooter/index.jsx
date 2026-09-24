@@ -3,6 +3,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { Box, Container, Grid, Link, Stack, Typography } from '@mui/material';
 import { COLORES_MARCA, MARCA, gradienteArcoiris } from '../../../constants/Marca';
 import { ENLACES_PORTAL } from '../PortalHeader';
+import { RUTAS_PORTAL } from '../../../constants/RutasPortal';
 
 const Columna = ({ titulo, children }) => (
   <Grid item xs={6} md={3}>
@@ -33,12 +34,18 @@ const PortalFooter = () => (
           ))}
         </Columna>
         <Columna titulo='Proveedores'>
+          <Link component={RouterLink} to={`${RUTAS_PORTAL.registro}?tipo=proveedor`} underline='none' sx={enlaceSx}>
+            Registra tu negocio
+          </Link>
           <Link component={RouterLink} to='/signin' underline='none' sx={enlaceSx}>
             Portal de proveedores
           </Link>
-          <Typography variant='body2'>¿Quieres publicar tus experiencias? Escríbenos y verificamos tu negocio.</Typography>
+          <Typography variant='body2'>Verificamos cada negocio antes de publicar sus experiencias.</Typography>
         </Columna>
         <Columna titulo='Tu cuenta'>
+          <Link component={RouterLink} to={RUTAS_PORTAL.registro} underline='none' sx={enlaceSx}>
+            Crear cuenta
+          </Link>
           <Link component={RouterLink} to='/signin' underline='none' sx={enlaceSx}>
             Ingresar
           </Link>

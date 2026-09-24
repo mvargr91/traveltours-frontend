@@ -14,7 +14,7 @@ import {
 const severidadVerificacion = { aprobado: 'success', rechazado: 'error', pendiente: 'warning' };
 
 const ProveedorTuristicoForm = (props) => {
-  const { registro, accion, titulo, handleOnClose, saving, destinos } = props;
+  const { registro, accion, titulo, handleOnClose, saving, destinos, usuariosProveedor } = props;
   const disabled = accion === 'ver';
 
   return (
@@ -39,6 +39,17 @@ const ProveedorTuristicoForm = (props) => {
         textFieldProps={{ variant: 'standard' }}
       />
       <MyTextField fullWidth label='Dirección' name='direccion' disabled={disabled} />
+      <FormikAutocomplete
+        className='campo-completo'
+        name='usuario_id'
+        label='Cuenta de acceso al panel (usuario con rol Proveedor)'
+        options={usuariosProveedor}
+        disabled={disabled}
+        textFieldProps={{
+          variant: 'standard',
+          helperText: 'Con esta cuenta el proveedor gestiona sus experiencias y reservas. Crea el usuario en Seguridad > Usuarios con el rol Proveedor.',
+        }}
+      />
       <MyTextField fullWidth label='Sitio Web' name='sitio_web' disabled={disabled} />
       <MyTextField fullWidth label='Instagram' name='instagram' disabled={disabled} />
       <MyTextField fullWidth label='Facebook' name='facebook' disabled={disabled} />
@@ -55,6 +66,7 @@ ProveedorTuristicoForm.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   saving: PropTypes.bool,
   destinos: PropTypes.array.isRequired,
+  usuariosProveedor: PropTypes.array.isRequired,
 };
 
 export default ProveedorTuristicoForm;

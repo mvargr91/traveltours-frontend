@@ -29,6 +29,16 @@ const cells = [
   { id: 'correo', typeHead: 'string', label: 'Correo', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
   { id: 'rnt', typeHead: 'string', label: 'RNT', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
   {
+    id: 'usuario_id',
+    typeHead: 'string',
+    label: 'Acceso al Panel',
+    value: (v) => (v ? 'Vinculado' : 'Sin cuenta'),
+    cellColor: (v) => (v ? 'green' : '#FE8500'),
+    align: 'left',
+    mostrarInicio: true,
+    ordenable: false,
+  },
+  {
     id: 'estado_verificacion',
     typeHead: 'string',
     label: 'Verificación',

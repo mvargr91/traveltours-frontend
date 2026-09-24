@@ -79,6 +79,8 @@ import portalExperienciasReducer from './features/portalExperiencias/portalExper
 import portalDestinosReducer from './features/portalDestinos/portalDestinosSlice';
 import portalCategoriasReducer from './features/portalCategorias/portalCategoriasSlice';
 import portalPromocionesReducer from './features/portalPromociones/portalPromocionesSlice';
+import portalRegistroReducer from './features/portalRegistro/portalRegistroSlice';
+import usuariosProveedorReducer from './features/usuariosProveedor/usuariosProveedorSlice';
 
 export const store = configureStore({
   reducer: {
@@ -161,6 +163,8 @@ export const store = configureStore({
     portalDestinos: portalDestinosReducer,
     portalCategorias: portalCategoriasReducer,
     portalPromociones: portalPromocionesReducer,
+    portalRegistro: portalRegistroReducer,
+    usuariosProveedor: usuariosProveedorReducer,
   },
 });
 

@@ -159,6 +159,11 @@ const ReservaWidget = ({ experiencia }) => {
       <Typography variant='caption' color='text.secondary' component='p' sx={{ mt: 1, textAlign: 'center' }}>
         El proveedor confirmará tu reserva. Podrás verla en “Mis reservas”.
       </Typography>
+      {!isAuthenticated && (
+        <Button fullWidth size='small' sx={{ mt: 1 }} onClick={() => navigate(`${RUTAS_PORTAL.registro}?redirect=${RUTAS_PORTAL.tour(experiencia.slug)}`)}>
+          ¿No tienes cuenta? Regístrate
+        </Button>
+      )}
 
       <Dialog open={confirmando} onClose={() => setConfirmando(false)} maxWidth='xs' fullWidth>
         <Formik

@@ -10,6 +10,7 @@ import {
   resetActual,
 } from '../../../../@crema/redux/features/proveedoresTuristicos/proveedoresTuristicosSlice';
 import { onGetColeccionLigera as onGetDestinos } from '../../../../@crema/redux/features/destinos/destinosSlice';
+import { onGetColeccionLigera as onGetUsuariosProveedor } from '../../../../@crema/redux/features/usuariosProveedor/usuariosProveedorSlice';
 import { aRadio } from '../../../../shared/constants/Turismo';
 import ProveedorTuristicoForm from './ProveedorTuristicoForm';
 
@@ -24,6 +25,8 @@ const validationSchema = yup.object({
 
 const initialValues = (registro) => ({
   id: registro?.id ?? '',
+  // Cuenta (rol Proveedor) con la que el proveedor entra al panel y ve solo lo suyo.
+  usuario_id: registro?.usuario_id ?? '',
   nombre_comercial: registro?.nombre_comercial ?? '',
   razon_social: registro?.razon_social ?? '',
   nit: registro?.nit ?? '',
@@ -42,9 +45,11 @@ const initialValues = (registro) => ({
 const ProveedorTuristicoCreador = ({ proveedor, accion, handleOnClose, updateColeccion, titulo }) => {
   const dispatch = useDispatch();
   const { coleccionLigera: destinos } = useSelector((state) => state.destinos);
+  const { coleccionLigera: usuariosProveedor } = useSelector((state) => state.usuariosProveedor);
 
   useEffect(() => {
     dispatch(onGetDestinos());
+    dispatch(onGetUsuariosProveedor({ rol: 'Proveedor' }));
   }, [dispatch]);
 
   return (
@@ -70,6 +75,7 @@ const ProveedorTuristicoCreador = ({ proveedor, accion, handleOnClose, updateCol
           handleOnClose={handleOnClose}
           saving={saving}
           destinos={destinos}
+          usuariosProveedor={usuariosProveedor}
         />
       )}
     </AppCrudDialog>

@@ -55,9 +55,14 @@ const PortalHeader = () => {
       </IconButton>
     </>
   ) : (
-    <Button variant='contained' startIcon={<LoginIcon />} onClick={() => navigate('/signin')}>
-      Ingresar
-    </Button>
+    <>
+      <Button color='inherit' onClick={() => navigate(RUTAS_PORTAL.registro)}>
+        Crear cuenta
+      </Button>
+      <Button variant='contained' startIcon={<LoginIcon />} onClick={() => navigate('/signin')}>
+        Ingresar
+      </Button>
+    </>
   );
 
   return (
