@@ -74,6 +74,11 @@ import resenasReducer from './features/resenas/resenasSlice';
 import multimediaResenaReducer from './features/multimediaResena/multimediaResenaSlice';
 import promocionesReducer from './features/promociones/promocionesSlice';
 import promocionExperienciasReducer from './features/promocionExperiencias/promocionExperienciasSlice';
+// Portal público
+import portalExperienciasReducer from './features/portalExperiencias/portalExperienciasSlice';
+import portalDestinosReducer from './features/portalDestinos/portalDestinosSlice';
+import portalCategoriasReducer from './features/portalCategorias/portalCategoriasSlice';
+import portalPromocionesReducer from './features/portalPromociones/portalPromocionesSlice';
 
 export const store = configureStore({
   reducer: {
@@ -151,6 +156,11 @@ export const store = configureStore({
     multimediaResena: multimediaResenaReducer,
     promociones: promocionesReducer,
     promocionExperiencias: promocionExperienciasReducer,
+    // Portal público
+    portalExperiencias: portalExperienciasReducer,
+    portalDestinos: portalDestinosReducer,
+    portalCategorias: portalCategoriasReducer,
+    portalPromociones: portalPromocionesReducer,
   },
 });
 

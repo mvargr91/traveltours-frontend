@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { initialUrl } from '@crema/constants/AppConst';
 import { useAuthUser } from '../hooks/AuthHooks';
 import AppLoader from './AppLoader';
+import { esRutaPortal } from '../core/AppRoutes/Portal';
 
 const AuthRoutes = ({ children }) => {
   const { isLoading, user } = useAuthUser();
@@ -29,8 +30,13 @@ const AuthRoutes = ({ children }) => {
           ? route === pathname
           : route.test(pathname);
       });
+      // Las páginas del portal son visibles sin sesión (y no redirigen si hay sesión).
+      const isPortalRoute = esRutaPortal(pathname);
       setUrl(user?.usuario?.permisos[0]['opciones'][0]['url']);
 
+      if (isPortalRoute) {
+        return;
+      }
       if (!user && !isPublicRoute) {
         navigate('/signin', { replace: true });
       } else if (user && isPublicRoute) {

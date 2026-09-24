@@ -2,7 +2,7 @@ import React from 'react';
 import { Box } from '@mui/material';
 import { useThemeContext } from '@crema/context/AppContextProvider/ThemeContextProvider';
 import { alpha } from '@mui/material/styles';
-import  Logo  from '../../../../../assets/login/logo-login.png';
+import { MARCA } from '../../../../../shared/constants/Marca';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 
@@ -11,6 +11,8 @@ const AppLogo = () => {
   const location = useLocation(); // Obtiene la ubicación actual
   const { theme } = useThemeContext();
   const isSigninRoute = location.pathname === '/signin';
+  // Tema oscuro (panel) usa la variante con el "+" en blanco.
+  const Logo = theme?.palette?.mode === 'dark' ? MARCA.logos.oscuro : MARCA.logos.principal;
   return (
     <Box
       sx={{
@@ -29,7 +31,7 @@ const AppLogo = () => {
     >
       <img 
         src={Logo} 
-        alt={Logo} 
+        alt={MARCA.nombre} 
         onClick={() => {
           if(!isSigninRoute){
             // navigate('/inversiones');

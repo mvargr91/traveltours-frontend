@@ -16,6 +16,7 @@ import { experienciasConfigs } from './Experiencias';
 import { reservasConfigs } from './Reservas';
 import { resenasConfigs } from './Resenas';
 import { promocionesConfigs } from './Promociones';
+import { portalRoutes, cuentaConfigs } from './Portal';
 
 export const authorizedStructure = (loginUrl) => {
   return {
@@ -34,6 +35,7 @@ export const authorizedStructure = (loginUrl) => {
       ...reservasConfigs,
       ...resenasConfigs,
       ...promocionesConfigs,
+      ...cuentaConfigs,
     ],
   };
 };
@@ -47,11 +49,9 @@ export const publicStructure = (initialUrl) => {
 
 export const anonymousStructure = (initialUrl) => {
   return {
-    routes: errorPagesConfigs.concat([
-      {
-        path: '/',
-        element: <Navigate to={initialUrl} />,
-      },
+    // Con el portal habilitado, '/' y sus páginas son públicas; si no, '/' lleva al panel como antes.
+    routes: errorPagesConfigs.concat(portalRoutes, [
+      ...(portalRoutes.length ? [] : [{ path: '/', element: <Navigate to={initialUrl} /> }]),
       {
         path: '*',
         element: <Navigate to='/error-pages/error-404' />,
