@@ -22,6 +22,9 @@ const limpiarParams = (params = {}) =>
   );
 
 export const extraerMensajeError = (error) => {
+  if (error?.response?.status === 429) {
+    return 'Demasiados intentos. Espera un minuto e inténtalo de nuevo.';
+  }
   const mensajes = error?.response?.data?.mensajes;
   if (Array.isArray(mensajes) && mensajes.length > 0) {
     return mensajes[0];

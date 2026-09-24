@@ -29,6 +29,7 @@ import StorefrontIcon from '@mui/icons-material/Storefront';
 import { onCreate } from '@crema/redux/features/portalRegistro/portalRegistroSlice';
 import { onGetColeccion as onGetDestinos } from '@crema/redux/features/portalDestinos/portalDestinosSlice';
 import { login } from '@crema/redux/features/auth/authSlice';
+import { useAuthMethod } from '@crema/hooks/AuthHooks';
 import MyTextField from '../../../shared/components/MyTextField';
 import { urlPanelDe } from '../../../shared/components/Portal/PortalHeader';
 import { MARCA } from '../../../shared/constants/Marca';
@@ -80,6 +81,7 @@ const Registro = () => {
   const { saving } = useSelector((state) => state.portalRegistro);
   const destinos = useSelector((state) => state.portalDestinos.rows);
   const [ingresando, setIngresando] = useState(false);
+  const { signInUser } = useAuthMethod();
 
   useEffect(() => {
     if (destinos.length === 0) dispatch(onGetDestinos());
@@ -91,8 +93,11 @@ const Registro = () => {
     setSearchParams(params, { replace: true });
   };
 
-  const ingresar = ({ identificacion_usuario: username, clave: password }) => {
+  // Mismo par de llamadas que SigninJwtAuth: signInUser deja el token en jwtAxios
+  // (si no, las peticiones siguientes salen sin Authorization) y login actualiza Redux.
+  const ingresar = async ({ identificacion_usuario: username, clave: password }) => {
     setIngresando(true);
+    await signInUser({ username, password });
     dispatch(login({ username, password }))
       .unwrap()
       .then(({ user }) => navigate(redirect || urlPanelDe(user), { replace: true }))
