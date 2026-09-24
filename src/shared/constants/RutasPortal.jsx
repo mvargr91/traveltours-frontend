@@ -11,3 +11,6 @@ export const RUTAS_PORTAL = {
 
 // Interruptor para apagar el portal sin tocar código: VITE__PORTAL_PUBLICO=false en .env
 export const PORTAL_HABILITADO = import.meta.env.VITE__PORTAL_PUBLICO !== 'false';
+
+// Perfil del usuario autenticado (cualquier rol). Vive en el panel, no en el portal.
+export const RUTA_MI_CUENTA = '/mi-cuenta';

@@ -15,6 +15,7 @@ import { Business, Person } from '@mui/icons-material';
 import { useAuthMethod, useAuthUser } from "@crema/hooks/AuthHooks";
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, logoutUser } from "../../../../redux/features/auth/authSlice";
+import { PORTAL_HABILITADO, RUTAS_PORTAL, RUTA_MI_CUENTA } from "../../../../../shared/constants/RutasPortal";
 
 const useStyles = makeStyles((theme) => ({
   userRoot: {
@@ -72,6 +73,11 @@ const UserInfo = ({ color }) => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const irA = (ruta) => {
+    handleClose();
+    navigate(ruta);
   };
 
   const handleLogout = () => {
@@ -183,6 +189,14 @@ const UserInfo = ({ color }) => {
           >
             {user.usuario.correo_electronico}
           </MenuItem>
+          <MenuItem onClick={() => irA(RUTA_MI_CUENTA)}>
+            Mi cuenta
+          </MenuItem>
+          {PORTAL_HABILITADO && (
+            <MenuItem onClick={() => irA(RUTAS_PORTAL.inicio)}>
+              Ir al portal
+            </MenuItem>
+          )}
           <Box className={classes.btnContainer}>
             <Button
               onClick={handleLogout} className={classes.logoutBtn}

@@ -81,6 +81,7 @@ import portalCategoriasReducer from './features/portalCategorias/portalCategoria
 import portalPromocionesReducer from './features/portalPromociones/portalPromocionesSlice';
 import portalRegistroReducer from './features/portalRegistro/portalRegistroSlice';
 import usuariosProveedorReducer from './features/usuariosProveedor/usuariosProveedorSlice';
+import cuentaReducer from './features/cuenta/cuentaSlice';
 
 export const store = configureStore({
   reducer: {
@@ -165,6 +166,7 @@ export const store = configureStore({
     portalPromociones: portalPromocionesReducer,
     portalRegistro: portalRegistroReducer,
     usuariosProveedor: usuariosProveedorReducer,
+    cuenta: cuentaReducer,
   },
 });
 

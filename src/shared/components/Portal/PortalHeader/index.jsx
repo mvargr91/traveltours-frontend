@@ -18,10 +18,11 @@ import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import { useAuthMethod } from '@crema/hooks/AuthHooks';
 import { logoutUser } from '@crema/redux/features/auth/authSlice';
 import { MARCA, gradienteArcoiris } from '../../../constants/Marca';
-import { RUTAS_PORTAL } from '../../../constants/RutasPortal';
+import { RUTAS_PORTAL, RUTA_MI_CUENTA } from '../../../constants/RutasPortal';
 
 export const ENLACES_PORTAL = [
   { label: 'Inicio', to: RUTAS_PORTAL.inicio },
@@ -50,6 +51,9 @@ const PortalHeader = () => {
       <Button variant='outlined' startIcon={<DashboardIcon />} onClick={() => navigate(urlPanelDe(user))}>
         Mi panel
       </Button>
+      <IconButton onClick={() => navigate(RUTA_MI_CUENTA)} title='Mi cuenta' aria-label='Mi cuenta'>
+        <ManageAccountsIcon />
+      </IconButton>
       <IconButton onClick={salir} title='Cerrar sesión'>
         <LogoutIcon />
       </IconButton>
