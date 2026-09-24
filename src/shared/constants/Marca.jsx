@@ -27,3 +27,6 @@ export const ARCOIRIS = ['#E40303', '#FF8C00', '#FFED00', '#008026', '#24408E', 
 
 // Franja decorativa reutilizable (encabezado/footer del portal).
 export const gradienteArcoiris = `linear-gradient(90deg, ${ARCOIRIS.join(', ')})`;
+
+// Interruptor del tema del panel: con VITE__TEMA_MARCA=false en .env el panel vuelve a los colores anteriores.
+export const TEMA_MARCA_PANEL = import.meta.env.VITE__TEMA_MARCA !== 'false';

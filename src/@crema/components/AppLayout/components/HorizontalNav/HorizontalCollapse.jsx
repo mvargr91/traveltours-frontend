@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { coloresPanel } from '@crema/constants/defaultConfig';
 import {
   Grow,
   Icon,
@@ -162,19 +163,19 @@ function HorizontalCollapse(props) {
                       overflowY: 'auto',
                       scrollbarGutter: 'stable both-edges',
                       scrollbarWidth: 'thin',
-                      scrollbarColor: '#0588b0 transparent',
+                      scrollbarColor: `${coloresPanel.acento} transparent`,
                       '&::-webkit-scrollbar': { width: 1, height: 1 },
                       '&::-webkit-scrollbar-track': {
                         backgroundColor: 'transparent', 
                       },
                       '&::-webkit-scrollbar-thumb': {
                         borderRadius: 8,
-                        backgroundColor: '#0588b0', 
+                        backgroundColor: coloresPanel.acento, 
                         border: '2px solid transparent',
                         backgroundClip: 'padding-box',
                       },
                       '&::-webkit-scrollbar-thumb:hover': {
-                        backgroundColor: '#0588b0', 
+                        backgroundColor: coloresPanel.acento, 
                       },
                      }}
                   >
