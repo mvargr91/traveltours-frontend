@@ -39,6 +39,7 @@ import { onCreate as onCrearFavorito } from '@crema/redux/features/favoritos/fav
 import { DIAS_SEMANA, TIPOS_PRECIO, aHoraCorta, formatoMoneda, nombreDe, textoCantidad } from '../../../shared/constants/Turismo';
 import { ImagenExperiencia } from '../../../shared/components/Portal/ExperienceCard';
 import ReservaWidget from './ReservaWidget';
+import { urlArchivo } from '../../../shared/functions/Archivos';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
 
 // Lista "incluye / no incluye": texto libre (una línea por ítem) + características marcadas.
@@ -133,7 +134,7 @@ const ExperienciaDetalle = () => {
                 <Box
                   key={foto.id}
                   component='img'
-                  src={foto.ruta_archivo}
+                  src={urlArchivo(foto.ruta_archivo)}
                   alt={foto.texto_alternativo || foto.titulo || ''}
                   onClick={() => setFotoActiva(i)}
                   sx={{ width: '100%', height: 132, objectFit: 'cover', borderRadius: 2, cursor: 'pointer', outline: i === fotoActiva ? '3px solid' : 'none', outlineColor: 'primary.main' }}
@@ -238,7 +239,7 @@ const ExperienciaDetalle = () => {
             <Box sx={{ mb: 3 }}>
               <Typography variant='h4' sx={{ mb: 1 }}>Videos</Typography>
               {videos.map((v) => (
-                <Button key={v.id} startIcon={<PlayCircleIcon />} href={v.ruta_archivo} target='_blank' rel='noopener noreferrer'>{v.titulo || 'Ver video'}</Button>
+                <Button key={v.id} startIcon={<PlayCircleIcon />} href={urlArchivo(v.ruta_archivo)} target='_blank' rel='noopener noreferrer'>{v.titulo || 'Ver video'}</Button>
               ))}
             </Box>
           )}

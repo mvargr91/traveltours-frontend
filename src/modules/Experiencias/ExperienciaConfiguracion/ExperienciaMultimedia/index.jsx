@@ -15,11 +15,12 @@ import {
 } from '../../../../shared/constants/Turismo';
 import { pestanaPropTypes } from '../propTypes';
 import ExperienciaMultimediaCreador from './ExperienciaMultimediaCreador';
+import { urlArchivo } from '../../../../shared/functions/Archivos';
 
 const vistaPrevia = (ruta, row) =>
   row.tipo === 'foto' ? (
     <img
-      src={ruta}
+      src={urlArchivo(ruta)}
       alt={row.texto_alternativo || row.titulo || ''}
       style={{ height: 40, width: 64, objectFit: 'cover', borderRadius: 4, verticalAlign: 'middle' }}
     />
@@ -40,7 +41,7 @@ const accionesExtra = [
     titulo: 'Abrir Archivo',
     icono: OpenInNewIcon,
     permiso: 'Listar',
-    onClick: (row) => window.open(row.ruta_archivo, '_blank', 'noopener,noreferrer'),
+    onClick: (row) => window.open(urlArchivo(row.ruta_archivo), '_blank', 'noopener,noreferrer'),
   },
 ];
 

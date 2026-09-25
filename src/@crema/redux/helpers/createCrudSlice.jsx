@@ -7,12 +7,16 @@
 //   PUT    /recurso/{id}       -> { datos, mensajes: [texto, tipo] }
 //   DELETE /recurso/{id}       -> { mensajes: [texto, tipo] }
 //   PUT    /recurso/{id}/{accion} (acciones extra: estado, verificar, leida...)
+// Si los params traen un archivo (File/Blob) se envían como multipart; al modificar se usa
+// POST con _method=PUT porque PHP no lee multipart en PUT.
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import jwtAxios from '../../services/auth/jwt-auth';
 import { showMessage } from '../features/cammon/commonSlice';
 import { ERROR_TYPE } from '../../../shared/constants/Constantes';
+import { aFormData, tieneArchivo } from '../../../shared/functions/Archivos';
 
 const MENSAJE_ERROR = 'Ocurrió un error';
+const MULTIPART = { headers: { 'Content-Type': 'multipart/form-data' } };
 
 const limpiarParams = (params = {}) =>
   Object.fromEntries(
@@ -107,7 +111,9 @@ export const createCrudSlice = ({ name, endpoint, acciones = {} }) => {
     `${name}/onCreate`,
     async ({ params, handleOnClose, updateColeccion }, thunkAPI) => {
       try {
-        const response = await jwtAxios.post(endpoint, params);
+        const response = tieneArchivo(params)
+          ? await jwtAxios.post(endpoint, aFormData(params), MULTIPART)
+          : await jwtAxios.post(endpoint, params);
         ejecutarCallbacks(handleOnClose, updateColeccion);
         thunkAPI.dispatch(showMessage(response.data.mensajes));
         return response.data.datos;
@@ -123,7 +129,9 @@ export const createCrudSlice = ({ name, endpoint, acciones = {} }) => {
     `${name}/onUpdate`,
     async ({ params, handleOnClose, updateColeccion }, thunkAPI) => {
       try {
-        const response = await jwtAxios.put(`${endpoint}/${params.id}`, params);
+        const response = tieneArchivo(params)
+          ? await jwtAxios.post(`${endpoint}/${params.id}`, aFormData({ ...params, _method: 'PUT' }), MULTIPART)
+          : await jwtAxios.put(`${endpoint}/${params.id}`, params);
         ejecutarCallbacks(handleOnClose, updateColeccion);
         thunkAPI.dispatch(showMessage(response.data.mensajes));
         return response.data.datos;

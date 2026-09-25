@@ -1,12 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as yup from 'yup';
-import { Box } from '@mui/material';
 import AppCrudDialog from '../../../../../shared/components/AppCrudDialog';
 import AppCrudForm from '../../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../../shared/components/MyTextField';
 import MyRadioField from '../../../../../shared/components/MyRadioField';
 import MySelectField from '../../../../../shared/components/MySelectField';
+import MyFileField, { validarArchivo } from '../../../../../shared/components/MyFileField';
+import { esUrlExterna } from '../../../../../shared/functions/Archivos';
 import {
   onShow,
   onCreate,
@@ -19,10 +20,20 @@ import { creadorPropTypes } from '../../propTypes';
 
 const validationSchema = yup.object({
   tipo: yup.string().required('Requerido'),
-  ruta_archivo: yup.string().required('Requerido').url('Debe ser una URL válida').max(255, 'Máximo 255 caracteres'),
+  // Se sube un archivo o, para videos, se pega un enlace (YouTube, Vimeo...).
+  ruta_archivo: yup.string().max(255, 'Máximo 255 caracteres').nullable(),
+  enlace: yup.string().url('Debe ser una URL válida (https://...)').nullable(),
+  archivo: yup.mixed().when('tipo', ([tipo], esquema) =>
+    validarArchivo(tipo === 'video' ? 'video' : 'imagen', (valores) => !valores.ruta_archivo && !valores.enlace)),
   titulo: yup.string().max(150, 'Máximo 150 caracteres').nullable(),
   texto_alternativo: yup.string().max(255, 'Máximo 255 caracteres').nullable(),
   orden: enteroOpcional(),
+});
+
+// El enlace externo reemplaza la ruta; si se sube un archivo, el backend lo guarda y reemplaza la ruta.
+const transformarAntesDeEnviar = ({ enlace, ...valores }) => ({
+  ...valores,
+  ruta_archivo: valores.archivo ? valores.ruta_archivo : enlace || valores.ruta_archivo,
 });
 
 const ExperienciaMultimediaCreador = (props) => {
@@ -33,7 +44,10 @@ const ExperienciaMultimediaCreador = (props) => {
     id: registro?.id ?? '',
     experiencia_id: registro?.experiencia_id ?? Number(experienciaId),
     tipo: registro?.tipo ?? 'foto',
-    ruta_archivo: registro?.ruta_archivo ?? '',
+    // Lo guardado puede ser un archivo en storage o una URL externa.
+    ruta_archivo: esUrlExterna(registro?.ruta_archivo) ? '' : registro?.ruta_archivo ?? '',
+    enlace: esUrlExterna(registro?.ruta_archivo) ? registro.ruta_archivo : '',
+    archivo: null,
     titulo: registro?.titulo ?? '',
     texto_alternativo: registro?.texto_alternativo ?? '',
     orden: registro?.orden ?? 0,
@@ -53,16 +67,21 @@ const ExperienciaMultimediaCreador = (props) => {
       resetActual={resetActual}
       initialValues={initialValues}
       validationSchema={validationSchema}
+      transformarAntesDeEnviar={transformarAntesDeEnviar}
     >
       {({ values, saving }) => (
         <AppCrudForm titulo={titulo} accion={accion} handleOnClose={handleOnClose} saving={saving}>
           <MySelectField fullWidth variant='standard' label='Tipo' name='tipo' options={TIPOS_MULTIMEDIA} disabled={disabled} required />
           <MyTextField fullWidth label='Orden' name='orden' type='number' disabled={disabled} />
-          <MyTextField className='campo-completo' fullWidth label='URL del Archivo' name='ruta_archivo' disabled={disabled} required />
-          {values.tipo === 'foto' && values.ruta_archivo && (
-            <Box className='campo-completo' textAlign='center'>
-              <img src={values.ruta_archivo} alt={values.texto_alternativo} style={{ maxHeight: 180, maxWidth: '100%', borderRadius: 4 }} />
-            </Box>
+          <MyFileField
+            className='campo-completo'
+            label={values.tipo === 'video' ? 'Archivo de video' : 'Foto'}
+            tipo={values.tipo === 'video' ? 'video' : 'imagen'}
+            rutaActual={values.ruta_archivo}
+            disabled={disabled}
+          />
+          {values.tipo === 'video' && (
+            <MyTextField className='campo-completo' fullWidth label='O pega el enlace del video (YouTube, Vimeo...)' name='enlace' placeholder='https://' disabled={disabled} />
           )}
           <MyTextField fullWidth label='Título' name='titulo' disabled={disabled} />
           <MyTextField fullWidth label='Texto Alternativo (accesibilidad/SEO)' name='texto_alternativo' disabled={disabled} />
