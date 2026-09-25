@@ -23,10 +23,16 @@ import UserInfo from "../../components/UserInfo";
 import HeaderNavWrapper from "./HeaderNavWrapper";
 import HorizontalNav from "../../components/HorizontalNav";
 import { allowMultiLanguage } from "../../../../constants/AppConst";
+import Button from "@mui/material/Button";
+import { useNavigate } from "react-router-dom";
+import TravelExploreIcon from "@mui/icons-material/TravelExplore";
+import { TEMA_MARCA_PANEL, gradienteArcoiris } from "../../../../../shared/constants/Marca";
+import { PORTAL_HABILITADO, RUTAS_PORTAL } from "../../../../../shared/constants/RutasPortal";
 
 const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const theme = useTheme();
+  const navigate = useNavigate();
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -49,6 +55,7 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
       }}
       className="app-bar"
     >
+      {TEMA_MARCA_PANEL && <Box sx={{ height: 4, background: gradienteArcoiris }} />}
       <Toolbar
         sx={{
           boxSizing: "border-box",
@@ -101,6 +108,7 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
             <AppLogo />
           </Box>
           <Hidden smDown>
+            {!TEMA_MARCA_PANEL && (
             <Box
               sx={{
                 position: "absolute",
@@ -114,6 +122,7 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
             >
               Sistema de Inversiones
             </Box>
+            )}
           </Hidden>
 
           <Box
@@ -127,7 +136,19 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
               display: "flex",
               alignItems: "center",
             }}
-          >                     
+          >
+            {TEMA_MARCA_PANEL && PORTAL_HABILITADO && (
+              <Hidden mdDown>
+                <Button
+                  variant="outlined"
+                  startIcon={<TravelExploreIcon />}
+                  onClick={() => navigate(RUTAS_PORTAL.inicio)}
+                  sx={{ textTransform: "none", fontWeight: 600 }}
+                >
+                  Ver portal
+                </Button>
+              </Hidden>
+            )}
             <Box
               sx={{
                 ml: { sm: 4 },

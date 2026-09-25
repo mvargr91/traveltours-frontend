@@ -177,6 +177,12 @@ const authSlice = createSlice({
     clearMessage: (state) => {
       state.message = null;
     },
+    // "Mi cuenta" cambió nombre/correo: refleja el cambio en el encabezado sin volver a iniciar sesión.
+    actualizarUsuarioSesion: (state, action) => {
+      if (!state.user?.usuario) return;
+      state.user.usuario = { ...state.user.usuario, ...action.payload };
+      localStorage.setItem('user', JSON.stringify(state.user));
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -255,5 +261,5 @@ const authSlice = createSlice({
 });
 
 // Exportar acciones y reducer
-export const { logout, fetchStart, fetchSuccess, fetchError, showMessage, clearMessage } = authSlice.actions;
+export const { logout, fetchStart, fetchSuccess, fetchError, showMessage, clearMessage, actualizarUsuarioSesion } = authSlice.actions;
 export default authSlice.reducer;

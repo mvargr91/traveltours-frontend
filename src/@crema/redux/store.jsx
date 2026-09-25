@@ -52,6 +52,37 @@ import nivelConsumoReducer from './features/nivelConsumo/nivelConsumoSlice';
 import proyectoPlanInversionReducer from './features/proyectoPlanInversion/proyectoPlanInversionSlice';
 import descuentoTarifaReducer from './features/descuentoTarifa/descuentoTarifaSlice';
 
+// Travel Tours
+import destinosReducer from './features/destinos/destinosSlice';
+import categoriasReducer from './features/categorias/categoriasSlice';
+import caracteristicasReducer from './features/caracteristicas/caracteristicasSlice';
+import cuponesReducer from './features/cupones/cuponesSlice';
+import favoritosReducer from './features/favoritos/favoritosSlice';
+import notificacionesReducer from './features/notificaciones/notificacionesSlice';
+import proveedoresTuristicosReducer from './features/proveedoresTuristicos/proveedoresTuristicosSlice';
+import documentosProveedorTuristicoReducer from './features/documentosProveedorTuristico/documentosProveedorTuristicoSlice';
+import experienciasReducer from './features/experiencias/experienciasSlice';
+import experienciaCategoriasReducer from './features/experienciaCategorias/experienciaCategoriasSlice';
+import experienciaCaracteristicasReducer from './features/experienciaCaracteristicas/experienciaCaracteristicasSlice';
+import experienciaPreciosReducer from './features/experienciaPrecios/experienciaPreciosSlice';
+import experienciaMultimediaReducer from './features/experienciaMultimedia/experienciaMultimediaSlice';
+import experienciaHorariosReducer from './features/experienciaHorarios/experienciaHorariosSlice';
+import experienciaDisponibilidadReducer from './features/experienciaDisponibilidad/experienciaDisponibilidadSlice';
+import reservasReducer from './features/reservas/reservasSlice';
+import acompanantesReservaReducer from './features/acompanantesReserva/acompanantesReservaSlice';
+import resenasReducer from './features/resenas/resenasSlice';
+import multimediaResenaReducer from './features/multimediaResena/multimediaResenaSlice';
+import promocionesReducer from './features/promociones/promocionesSlice';
+import promocionExperienciasReducer from './features/promocionExperiencias/promocionExperienciasSlice';
+// Portal público
+import portalExperienciasReducer from './features/portalExperiencias/portalExperienciasSlice';
+import portalDestinosReducer from './features/portalDestinos/portalDestinosSlice';
+import portalCategoriasReducer from './features/portalCategorias/portalCategoriasSlice';
+import portalPromocionesReducer from './features/portalPromociones/portalPromocionesSlice';
+import portalRegistroReducer from './features/portalRegistro/portalRegistroSlice';
+import usuariosProveedorReducer from './features/usuariosProveedor/usuariosProveedorSlice';
+import cuentaReducer from './features/cuenta/cuentaSlice';
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -106,6 +137,36 @@ export const store = configureStore({
     nivelConsumo: nivelConsumoReducer,
     proyectoDesembolso: proyectoDesembolsoReducer, 
     descuentoTarifa: descuentoTarifaReducer,
+    // Travel Tours
+    destinos: destinosReducer,
+    categorias: categoriasReducer,
+    caracteristicas: caracteristicasReducer,
+    cupones: cuponesReducer,
+    favoritos: favoritosReducer,
+    notificaciones: notificacionesReducer,
+    proveedoresTuristicos: proveedoresTuristicosReducer,
+    documentosProveedorTuristico: documentosProveedorTuristicoReducer,
+    experiencias: experienciasReducer,
+    experienciaCategorias: experienciaCategoriasReducer,
+    experienciaCaracteristicas: experienciaCaracteristicasReducer,
+    experienciaPrecios: experienciaPreciosReducer,
+    experienciaMultimedia: experienciaMultimediaReducer,
+    experienciaHorarios: experienciaHorariosReducer,
+    experienciaDisponibilidad: experienciaDisponibilidadReducer,
+    reservas: reservasReducer,
+    acompanantesReserva: acompanantesReservaReducer,
+    resenas: resenasReducer,
+    multimediaResena: multimediaResenaReducer,
+    promociones: promocionesReducer,
+    promocionExperiencias: promocionExperienciasReducer,
+    // Portal público
+    portalExperiencias: portalExperienciasReducer,
+    portalDestinos: portalDestinosReducer,
+    portalCategorias: portalCategoriasReducer,
+    portalPromociones: portalPromocionesReducer,
+    portalRegistro: portalRegistroReducer,
+    usuariosProveedor: usuariosProveedorReducer,
+    cuenta: cuentaReducer,
   },
 });
 

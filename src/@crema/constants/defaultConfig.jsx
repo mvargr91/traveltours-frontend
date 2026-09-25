@@ -11,6 +11,24 @@ import {
   LayoutType,
 } from './AppEnums';
 import environment from './../../env';
+import { COLORES_MARCA, TEMA_MARCA_PANEL } from '../../shared/constants/Marca';
+
+// Colores del panel. "anterior" es el tema original; "marca" alinea el panel con el portal (Travel City).
+const COLORES_PANEL = {
+  anterior: {
+    principal: '#5d9802',
+    acento: '#0588b0',
+    textoEncabezado: '#0588b0',
+    barraMenu: '#0588b0',
+  },
+  marca: {
+    principal: COLORES_MARCA.azul,
+    acento: COLORES_MARCA.azul,
+    textoEncabezado: COLORES_MARCA.azulOscuro,
+    barraMenu: COLORES_MARCA.azulOscuro,
+  },
+};
+export const coloresPanel = TEMA_MARCA_PANEL ? COLORES_PANEL.marca : COLORES_PANEL.anterior;
 
 export const textLight = {
   primary: 'rgb(45, 47, 51)',
@@ -45,33 +63,33 @@ export const defaultTheme = {
       mode: ThemeMode.LIGHT,
       background: backgroundLight, 
       text: textLight, 
-      grayBottoms: '#5d9802', 
+      grayBottoms: coloresPanel.principal,
       redBottoms: '#be1e2d',
       enviaEmailBottoms: '#D22E1C',
       menu: {
         menuOpacity: '#0588b010',
       },
       primary: {
-        main: '#5d9802',
+        main: coloresPanel.principal,
         contrastText: '#fff',
       },
       secondary: {
-        main: '#5d9802',
-        light: '#0588b0',
+        main: coloresPanel.principal,
+        light: coloresPanel.acento,
         dark: '#9E3F1C',
       },
       tertiary:{
-        main: '#5d9802', 
+        main: coloresPanel.principal,
         light: '#1A1449',
         dark: '#222165',
       },
       cuarternario: {
-        main: '#0588b0',
+        main: coloresPanel.textoEncabezado,
         light: '#006430',
         dark: '#009136',
       },
       success: {
-        main: '#0588b0',
+        main: coloresPanel.acento,
         light: '#D9F5E5',
       },
       warning: {
@@ -99,7 +117,7 @@ export const defaultTheme = {
       },
       colorHover: '#5f1860',
       colorHovers: '#5f1860',
-      colorFiltro: '#0588b0',
+      colorFiltro: coloresPanel.acento,
     },
     status: {
       danger: 'orange',
@@ -226,10 +244,10 @@ export const DarkSidebar = {
   mode: ThemeMode.LIGHT,
 };
 export const LightSidebar = {
-  sidebarBgColor: '#0588b0',
+  sidebarBgColor: coloresPanel.barraMenu,
   sidebarTextColor: '#fff',
-  sidebarHeaderColor: '#0588b0',
-  sidebarMenuSelectedBgColor: '#0588b0',
+  sidebarHeaderColor: coloresPanel.barraMenu,
+  sidebarMenuSelectedBgColor: coloresPanel.acento,
   sidebarMenuSelectedTextColor: '#ffff',
   mode: ThemeMode.LIGHT,
 };

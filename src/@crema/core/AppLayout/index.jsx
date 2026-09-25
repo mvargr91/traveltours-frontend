@@ -14,7 +14,9 @@ import {
   authorizedStructure,
   publicStructure,
 } from '../AppRoutes';
-import { useRoutes } from 'react-router-dom';
+import { esRutaPortal } from '../AppRoutes/Portal';
+import PublicLayout from '../../../shared/components/Portal/PublicLayout';
+import { useLocation, useRoutes } from 'react-router-dom';
 import { initialUrl } from '@crema/constants/AppConst';
 import { useSelector, useDispatch } from 'react-redux';
 import { getAuthUser } from '../../redux/features/auth/authSlice';
@@ -49,6 +51,7 @@ const AppLayout = () => {
   
   // Aquí debes asegurarte de que `useRoutes` recibe un array con objetos correctos
   const routes = useRoutes(generatedRoutes);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     if (isAuthenticated && !loading) {
@@ -80,6 +83,11 @@ const AppLayout = () => {
     updateThemeMode,
     updateTheme,
   ]);
+
+  // Páginas del portal público: layout propio con o sin sesión.
+  if (esRutaPortal(pathname)) {
+    return <PublicLayout>{routes}</PublicLayout>;
+  }
 
   return (
     <>
