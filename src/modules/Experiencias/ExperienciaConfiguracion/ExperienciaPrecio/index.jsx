@@ -8,8 +8,8 @@ import {
 import {
   TIPOS_PRECIO,
   colorActivo,
-  formatoMoneda,
   nombreDe,
+  resumenCantidades,
   valorActivo,
 } from '../../../../shared/constants/Turismo';
 import { pestanaPropTypes } from '../propTypes';
@@ -18,8 +18,7 @@ import ExperienciaPrecioCreador from './ExperienciaPrecioCreador';
 const cells = [
   { id: 'descripcion', typeHead: 'string', label: 'Descripción', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'tipo', typeHead: 'string', label: 'Tipo', value: (v) => nombreDe(TIPOS_PRECIO, v), align: 'left', mostrarInicio: true },
-  { id: 'cantidad', typeHead: 'numeric', label: 'Cantidad Personas', value: (v) => v, align: 'right', mostrarInicio: true },
-  { id: 'precio', typeHead: 'numeric', label: 'Precio', value: formatoMoneda, align: 'right', mostrarInicio: true },
+  { id: 'cantidades', typeHead: 'string', label: 'Valor por persona', value: resumenCantidades, align: 'left', mostrarInicio: true, ordenable: false },
   { id: 'estado', typeHead: 'string', label: 'Estado', value: valorActivo, cellColor: colorActivo, align: 'left', mostrarInicio: true },
 ];
 

@@ -36,7 +36,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import { onShow, resetActual } from '@crema/redux/features/portalExperiencias/portalExperienciasSlice';
 import { onCreate as onCrearFavorito } from '@crema/redux/features/favoritos/favoritosSlice';
-import { DIAS_SEMANA, aHoraCorta, formatoMoneda, nombreDe } from '../../../shared/constants/Turismo';
+import { DIAS_SEMANA, TIPOS_PRECIO, aHoraCorta, formatoMoneda, nombreDe, textoCantidad } from '../../../shared/constants/Turismo';
 import { ImagenExperiencia } from '../../../shared/components/Portal/ExperienceCard';
 import ReservaWidget from './ReservaWidget';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
@@ -194,13 +194,22 @@ const ExperienciaDetalle = () => {
               <Typography variant='h4' sx={{ mb: 1 }}>Tarifas</Typography>
               <Table size='small'>
                 <TableBody>
-                  {exp.precios.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell>{p.descripcion}</TableCell>
-                      <TableCell>{p.cantidad > 1 ? `${p.cantidad} personas` : ''}</TableCell>
-                      <TableCell align='right'><strong>{formatoMoneda(p.precio)}</strong></TableCell>
-                    </TableRow>
-                  ))}
+                  {exp.precios.flatMap((p) =>
+                    p.cantidades.map((c, i) => (
+                      <TableRow key={`${p.id}-${c.cantidad}`}>
+                        <TableCell>
+                          {i === 0 && (
+                            <>
+                              {p.descripcion}{' '}
+                              <Chip size='small' variant='outlined' label={nombreDe(TIPOS_PRECIO, p.tipo)} sx={{ ml: 1 }} />
+                            </>
+                          )}
+                        </TableCell>
+                        <TableCell>{textoCantidad(c.cantidad)}</TableCell>
+                        <TableCell align='right'><strong>{formatoMoneda(c.valor)}</strong> <Typography component='span' variant='body2' color='text.secondary'>c/u</Typography></TableCell>
+                      </TableRow>
+                    )),
+                  )}
                 </TableBody>
               </Table>
             </Box>

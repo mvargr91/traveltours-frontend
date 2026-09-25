@@ -15,13 +15,18 @@ import {
   slugRequerido,
 } from '../../../../shared/functions/ValidacionesYup';
 import ExperienciaForm from './ExperienciaForm';
+import {
+  esquemaPrecios,
+  precioAParams,
+  preciosIniciales,
+} from '../../../../shared/components/PreciosExperiencia';
 
 const validationSchema = yup.object({
   proveedor_id: yup.string().required('Requerido'),
   destino_id: yup.string().required('Requerido'),
   nombre: yup.string().required('Requerido').max(180, 'Máximo 180 caracteres'),
   slug: slugRequerido(200),
-  precio_desde: numeroOpcional().min(0, 'No puede ser negativo'),
+  precios: esquemaPrecios,
   capacidad_maxima: enteroOpcional().min(1, 'Mínimo 1'),
   latitud: numeroOpcional().min(-90, 'Mínimo -90').max(90, 'Máximo 90'),
   longitud: numeroOpcional().min(-180, 'Mínimo -180').max(180, 'Máximo 180'),
@@ -35,7 +40,7 @@ const initialValues = (registro) => ({
   slug: registro?.slug ?? '',
   idioma: registro?.idioma ?? 'Español',
   duracion: registro?.duracion ?? '',
-  precio_desde: registro?.precio_desde ?? '',
+  precios: preciosIniciales(registro?.precios),
   capacidad_maxima: registro?.capacidad_maxima ?? '',
   punto_encuentro: registro?.punto_encuentro ?? '',
   direccion: registro?.direccion ?? '',
@@ -48,6 +53,12 @@ const initialValues = (registro) => ({
   verificada: aRadio(registro?.verificada, '0'),
   // El estado solo cambia por el flujo "Cambiar Estado"; toda experiencia nace en borrador.
   estado: registro?.estado ?? 'borrador',
+});
+
+// El "precio desde" lo calcula el backend a partir de los precios.
+const transformarAntesDeEnviar = ({ precios, ...valores }) => ({
+  ...valores,
+  precios: precios.map(precioAParams),
 });
 
 const ExperienciaCreador = (props) => {
@@ -66,6 +77,7 @@ const ExperienciaCreador = (props) => {
       resetActual={resetActual}
       initialValues={initialValues}
       validationSchema={validationSchema}
+      transformarAntesDeEnviar={transformarAntesDeEnviar}
       maxWidth='md'
     >
       {({ values, setFieldValue, registro, saving }) => (

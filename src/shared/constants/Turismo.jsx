@@ -66,12 +66,10 @@ export const TIPOS_MULTIMEDIA = [
   { id: 'video', nombre: 'Video' },
 ];
 
+// Un precio es de adulto o de niño; una experiencia puede tener varios de cada tipo.
 export const TIPOS_PRECIO = [
   { id: 'adulto', nombre: 'Adulto' },
   { id: 'nino', nombre: 'Niño' },
-  { id: 'adulto_mayor', nombre: 'Adulto mayor' },
-  { id: 'grupo', nombre: 'Grupo' },
-  { id: 'extranjero', nombre: 'Extranjero' },
 ];
 
 export const TIPOS_DOCUMENTO_PROVEEDOR = [
@@ -141,3 +139,10 @@ export const slugify = (texto = '') =>
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
+
+// Cada cantidad de un precio es el valor por persona que aplica desde ese número de personas.
+export const textoCantidad = (cantidad) =>
+  Number(cantidad) > 1 ? `Desde ${cantidad} personas` : '1 persona';
+
+export const resumenCantidades = (cantidades = []) =>
+  cantidades.map((c) => `${textoCantidad(c.cantidad)}: ${formatoMoneda(c.valor)}`).join(' · ');
