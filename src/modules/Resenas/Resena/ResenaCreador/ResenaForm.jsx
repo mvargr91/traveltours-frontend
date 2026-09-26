@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { urlArchivo } from '../../../../shared/functions/Archivos';
 import { Box, FormLabel, ImageList, ImageListItem, Rating, Typography } from '@mui/material';
 import AppCrudForm from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
@@ -36,9 +37,9 @@ const ResenaForm = (props) => {
           <ImageList cols={4} rowHeight={100} sx={{ mt: 1 }}>
             {multimedia.map((archivo) => (
               <ImageListItem key={archivo.id}>
-                <a href={archivo.ruta_archivo} target='_blank' rel='noopener noreferrer'>
+                <a href={urlArchivo(archivo.ruta_archivo)} target='_blank' rel='noopener noreferrer'>
                   <img
-                    src={archivo.ruta_archivo}
+                    src={urlArchivo(archivo.ruta_archivo)}
                     alt='Adjunto de la reseña'
                     loading='lazy'
                     style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 4 }}

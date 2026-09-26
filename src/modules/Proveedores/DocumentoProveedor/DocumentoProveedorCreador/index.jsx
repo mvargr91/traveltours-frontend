@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as yup from 'yup';
+import { validarArchivo } from '../../../../shared/components/MyFileField';
 import AppCrudDialog from '../../../../shared/components/AppCrudDialog';
 import {
   onShow,
@@ -12,8 +13,9 @@ import DocumentoProveedorForm from './DocumentoProveedorForm';
 
 const validationSchema = yup.object({
   tipo_documento: yup.string().required('Requerido').max(100, 'Máximo 100 caracteres'),
-  nombre_archivo: yup.string().required('Requerido').max(255, 'Máximo 255 caracteres'),
-  ruta_archivo: yup.string().required('Requerido').url('Debe ser una URL válida').max(255, 'Máximo 255 caracteres'),
+  ruta_archivo: yup.string().nullable(),
+  // Obligatorio al crear; al modificar solo si se quiere reemplazar el archivo.
+  archivo: validarArchivo('documento', (valores) => !valores.ruta_archivo),
   estado: yup.string().required('Requerido'),
   motivo_rechazo: yup.string().when('estado', {
     is: 'rechazado',
@@ -31,6 +33,7 @@ const DocumentoProveedorCreador = (props) => {
     tipo_documento: registro?.tipo_documento ?? '',
     nombre_archivo: registro?.nombre_archivo ?? '',
     ruta_archivo: registro?.ruta_archivo ?? '',
+    archivo: null,
     fecha_vencimiento: registro?.fecha_vencimiento ?? '',
     estado: registro?.estado ?? 'pendiente',
     motivo_rechazo: registro?.motivo_rechazo ?? '',

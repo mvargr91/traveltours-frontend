@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { urlArchivo } from '../../../functions/Archivos';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Card, CardActionArea, CardContent, Chip, Rating, Stack, Typography } from '@mui/material';
 import PlaceIcon from '@mui/icons-material/Place';
@@ -11,7 +12,7 @@ import { RUTAS_PORTAL } from '../../../constants/RutasPortal';
 
 export const ImagenExperiencia = ({ src, alt, altura }) =>
   src ? (
-    <Box component='img' src={src} alt={alt} loading='lazy' sx={{ width: '100%', height: altura, objectFit: 'cover', display: 'block' }} />
+    <Box component='img' src={urlArchivo(src)} alt={alt} loading='lazy' sx={{ width: '100%', height: altura, objectFit: 'cover', display: 'block' }} />
   ) : (
     // Sin foto: isotipo de la marca como marcador de posición
     <Box sx={{ height: altura, display: 'grid', placeItems: 'center', bgcolor: 'rgba(0,161,204,0.08)' }}>

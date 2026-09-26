@@ -13,12 +13,14 @@ import {
 import { aRadio } from '../../../../shared/constants/Turismo';
 import { enteroOpcional, slugRequerido } from '../../../../shared/functions/ValidacionesYup';
 import CategoriaForm from './CategoriaForm';
+import { validarArchivo } from '../../../../shared/components/MyFileField';
 
 const validationSchema = yup.object({
   nombre: yup.string().required('Requerido').max(128, 'Máximo 128 caracteres'),
   slug: slugRequerido(150),
   orden: enteroOpcional(),
-  imagen: yup.string().url('Debe ser una URL válida').nullable(),
+  imagen: yup.string().nullable(),
+  archivo: validarArchivo('imagen'),
 });
 
 const initialValues = (registro) => ({
@@ -28,6 +30,7 @@ const initialValues = (registro) => ({
   slug: registro?.slug ?? '',
   descripcion: registro?.descripcion ?? '',
   imagen: registro?.imagen ?? '',
+  archivo: null,
   orden: registro?.orden ?? 0,
   estado: aRadio(registro?.estado),
 });

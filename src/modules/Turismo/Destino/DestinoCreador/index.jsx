@@ -11,13 +11,15 @@ import {
 import { aRadio } from '../../../../shared/constants/Turismo';
 import { numeroOpcional, slugRequerido } from '../../../../shared/functions/ValidacionesYup';
 import DestinoForm from './DestinoForm';
+import { validarArchivo } from '../../../../shared/components/MyFileField';
 
 const validationSchema = yup.object({
   nombre: yup.string().required('Requerido').max(128, 'Máximo 128 caracteres'),
   slug: slugRequerido(150),
   latitud: numeroOpcional().min(-90, 'Mínimo -90').max(90, 'Máximo 90'),
   longitud: numeroOpcional().min(-180, 'Mínimo -180').max(180, 'Máximo 180'),
-  imagen: yup.string().url('Debe ser una URL válida').nullable(),
+  imagen: yup.string().nullable(),
+  archivo: validarArchivo('imagen'),
 });
 
 const initialValues = (registro) => ({
@@ -29,6 +31,7 @@ const initialValues = (registro) => ({
   ciudad: registro?.ciudad ?? '',
   descripcion: registro?.descripcion ?? '',
   imagen: registro?.imagen ?? '',
+  archivo: null,
   latitud: registro?.latitud ?? '',
   longitud: registro?.longitud ?? '',
   destacado: aRadio(registro?.destacado, '0'),

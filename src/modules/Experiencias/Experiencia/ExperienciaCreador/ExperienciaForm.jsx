@@ -5,12 +5,13 @@ import AppCrudForm from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
 import MyRadioField from '../../../../shared/components/MyRadioField';
 import MySelectField from '../../../../shared/components/MySelectField';
-import MyCurrencyField from '../../../../shared/components/MyCurrencyField';
+import PreciosExperiencia from '../../../../shared/components/PreciosExperiencia';
 import FormikAutocomplete from '../../../../shared/components/FormikAutocomplete';
 import {
   ESTADOS_EXPERIENCIA,
   IDIOMAS,
   OPCIONES_SI_NO,
+  formatoMoneda,
   nombreDe,
 } from '../../../../shared/constants/Turismo';
 import { useSlugAutomatico } from '../../../../shared/functions/ValidacionesYup';
@@ -37,8 +38,15 @@ const ExperienciaForm = (props) => {
       <MyTextField fullWidth label='Slug' name='slug' disabled={disabled} required />
       <MySelectField fullWidth variant='standard' label='Idioma' name='idioma' options={IDIOMAS} disabled={disabled} ninguno />
       <MyTextField fullWidth label='Duración' name='duracion' placeholder='Ej: 4 horas, 2 días' disabled={disabled} />
-      <MyCurrencyField fullWidth label='Precio Desde' name='precio_desde' disabled={disabled} />
       <MyTextField fullWidth label='Capacidad Máxima' name='capacidad_maxima' type='number' disabled={disabled} />
+
+      <Divider className='campo-completo'>Precios</Divider>
+      {registro?.precio_desde && (
+        <Alert className='campo-completo' severity='success' sx={{ bgcolor: 'rgba(0,161,204,0.08)', color: 'text.primary' }}>
+          Precio desde actual (el menor valor de adulto activo): <strong>{formatoMoneda(registro.precio_desde)}</strong>
+        </Alert>
+      )}
+      <PreciosExperiencia disabled={disabled} />
 
       <Divider className='campo-completo'>Ubicación</Divider>
       <MyTextField fullWidth label='Punto de Encuentro' name='punto_encuentro' disabled={disabled} />

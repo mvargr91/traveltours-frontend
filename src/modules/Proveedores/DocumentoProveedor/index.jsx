@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { descargarArchivo } from '../../../shared/functions/Archivos';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -52,11 +53,11 @@ const DocumentoProveedor = ({ route }) => {
 
   const accionesExtra = [
     {
-      titulo: 'Abrir Archivo',
+      titulo: 'Descargar Archivo',
       icono: OpenInNewIcon,
       permiso: 'Listar',
       visible: (row) => Boolean(row.ruta_archivo),
-      onClick: (row) => window.open(row.ruta_archivo, '_blank', 'noopener,noreferrer'),
+      onClick: (row) => descargarArchivo(`documentos-proveedor/${row.id}/archivo`, row.nombre_archivo),
     },
   ];
 
