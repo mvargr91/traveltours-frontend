@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
-import { Alert, Divider } from '@mui/material';
-import AppCrudForm from '../../../../shared/components/AppCrudForm';
+import { Alert } from '@mui/material';
+import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
 import MySelectField from '../../../../shared/components/MySelectField';
 import MyCurrencyField from '../../../../shared/components/MyCurrencyField';
@@ -107,7 +107,7 @@ const ReservaForm = (props) => {
         </Alert>
       )}
 
-      <Divider className='campo-completo'>Experiencia</Divider>
+      <SeccionForm titulo='Experiencia' />
       <FormikAutocomplete name='experiencia_id' label='Experiencia *' options={opcionesExperiencia} disabled={!esCreacion} textFieldProps={{ variant: 'standard' }} />
       <FormikAutocomplete name='usuario_id' label='Usuario *' options={usuarios} disabled={!esCreacion} textFieldProps={{ variant: 'standard' }} />
       {esCreacion && (
@@ -121,30 +121,30 @@ const ReservaForm = (props) => {
           ninguno
         />
       )}
-      <MyDatePicker label='Fecha *' name='fecha' disabled={disabled} />
-      <MyTextField fullWidth label='Hora' name='hora_inicio' type='time' InputLabelProps={{ shrink: true }} disabled={disabled} />
+      <MyDatePicker className='campo-tercio' label='Fecha *' name='fecha' disabled={disabled} />
+      <MyTextField className='campo-tercio' fullWidth label='Hora' name='hora_inicio' type='time' InputLabelProps={{ shrink: true }} disabled={disabled} />
+      <MySelectField className='campo-tercio' fullWidth variant='standard' label='Idioma' name='idioma' options={IDIOMAS} disabled={!esCreacion} ninguno />
 
-      <Divider className='campo-completo'>Cliente</Divider>
+      <SeccionForm titulo='Cliente' />
       <MyTextField fullWidth label='Nombre' name='nombre' disabled={disabled} required />
       <MyTextField fullWidth label='Correo' name='correo' type='email' disabled={disabled} required />
       <MyTextField fullWidth label='Teléfono' name='telefono' disabled={disabled} required />
       <MySelectField fullWidth variant='standard' label='Residencia' name='residencia' options={RESIDENCIAS} disabled={!esCreacion} ninguno />
       <MyTextField fullWidth label='Cantidad de Personas' name='cantidad_personas' type='number' disabled={disabled} required />
       <MyTextField fullWidth label='De los cuales niños' name='cantidad_chicos' type='number' disabled={disabled} />
-      <MySelectField fullWidth variant='standard' label='Idioma' name='idioma' options={IDIOMAS} disabled={!esCreacion} ninguno />
-      <MySelectField fullWidth variant='standard' label='Cupón' name='cupon_id' options={cupones} disabled={!esCreacion} ninguno />
 
-      <Divider className='campo-completo'>Valor</Divider>
+      <SeccionForm titulo='Valor' />
+      <MySelectField fullWidth variant='standard' label='Cupón' name='cupon_id' options={cupones} disabled={!esCreacion} ninguno />
       <MyCurrencyField fullWidth label='Valor Total' name='valor_total' disabled={disabled} required />
-      {esCreacion && precioBase ? (
-        <Alert severity='success' sx={{ py: 0 }}>
-          Sugerido: {formatoMoneda(precioBase)} × {values.cantidad_personas || 0}
+      {esCreacion && precioBase && (
+        <Alert className='campo-completo' severity='success' sx={{ py: 0 }}>
+          Valor sugerido: {formatoMoneda(precioBase)} × {values.cantidad_personas || 0} persona(s)
         </Alert>
-      ) : (
-        <span />
       )}
-      <MyTextField className='campo-completo' fullWidth multiline minRows={2} label='Observaciones del Cliente' name='observaciones' disabled={disabled} />
-      <MyTextField className='campo-completo' fullWidth multiline minRows={2} label='Notas Internas' name='notas' disabled={disabled} />
+
+      <SeccionForm titulo='Observaciones' />
+      <MyTextField fullWidth multiline minRows={3} label='Observaciones del Cliente' name='observaciones' disabled={disabled} />
+      <MyTextField fullWidth multiline minRows={3} label='Notas Internas' name='notas' disabled={disabled} />
     </AppCrudForm>
   );
 };

@@ -58,7 +58,7 @@ const ExperienciaConfiguracion = ({ route }) => {
       >
         <Box display='flex' alignItems='center' gap={2} flexWrap='wrap'>
           <Tooltip title='Volver a Experiencias'>
-            <IconButton onClick={() => navigate('/experiencias')}>
+            <IconButton onClick={() => navigate('/experiencias')} sx={{ color: '#000' }}>
               <ArrowBackIosIcon />
             </IconButton>
           </Tooltip>

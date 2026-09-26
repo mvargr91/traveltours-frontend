@@ -53,7 +53,7 @@ const CAMPOS_EDITABLES = [
   'notas',
 ];
 
-const ReservaCreador = ({ reserva, accion, handleOnClose, updateColeccion, titulo }) => {
+const ReservaCreador = ({ reserva, accion, handleOnClose, updateColeccion, titulo, enPagina }) => {
   const dispatch = useDispatch();
   const usuarioActual = useSelector(({ auth }) => auth.user?.usuario);
   const experiencias = useSelector((state) => state.experiencias.coleccionLigera);
@@ -107,6 +107,7 @@ const ReservaCreador = ({ reserva, accion, handleOnClose, updateColeccion, titul
       validationSchema={validationSchema}
       transformarAntesDeEnviar={transformarAntesDeEnviar}
       maxWidth='md'
+      enPagina={enPagina}
     >
       {({ values, setFieldValue, registro, saving }) => (
         <ReservaForm
@@ -132,6 +133,7 @@ ReservaCreador.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   updateColeccion: PropTypes.func.isRequired,
   titulo: PropTypes.string,
+  enPagina: PropTypes.bool,
 };
 
 export default ReservaCreador;

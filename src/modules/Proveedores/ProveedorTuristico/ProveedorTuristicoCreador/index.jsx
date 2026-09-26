@@ -42,7 +42,7 @@ const initialValues = (registro) => ({
   estado: aRadio(registro?.estado),
 });
 
-const ProveedorTuristicoCreador = ({ proveedor, accion, handleOnClose, updateColeccion, titulo }) => {
+const ProveedorTuristicoCreador = ({ proveedor, accion, handleOnClose, updateColeccion, titulo, enPagina }) => {
   const dispatch = useDispatch();
   const { coleccionLigera: destinos } = useSelector((state) => state.destinos);
   const { coleccionLigera: usuariosProveedor } = useSelector((state) => state.usuariosProveedor);
@@ -66,6 +66,7 @@ const ProveedorTuristicoCreador = ({ proveedor, accion, handleOnClose, updateCol
       initialValues={initialValues}
       validationSchema={validationSchema}
       maxWidth='md'
+      enPagina={enPagina}
     >
       {({ registro, saving }) => (
         <ProveedorTuristicoForm
@@ -88,6 +89,7 @@ ProveedorTuristicoCreador.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   updateColeccion: PropTypes.func.isRequired,
   titulo: PropTypes.string,
+  enPagina: PropTypes.bool,
 };
 
 export default ProveedorTuristicoCreador;

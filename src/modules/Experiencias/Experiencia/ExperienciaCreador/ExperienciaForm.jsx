@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Alert, Chip, Divider } from '@mui/material';
-import AppCrudForm from '../../../../shared/components/AppCrudForm';
+import { Alert, Chip } from '@mui/material';
+import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
 import MyRadioField from '../../../../shared/components/MyRadioField';
 import MySelectField from '../../../../shared/components/MySelectField';
@@ -32,15 +32,16 @@ const ExperienciaForm = (props) => {
         </Alert>
       )}
 
+      <SeccionForm titulo='Información general' />
       <FormikAutocomplete name='proveedor_id' label='Proveedor *' options={proveedores} disabled={disabled} textFieldProps={{ variant: 'standard' }} />
       <FormikAutocomplete name='destino_id' label='Destino *' options={destinos} disabled={disabled} textFieldProps={{ variant: 'standard' }} />
       <MyTextField autoFocus fullWidth label='Nombre' name='nombre' disabled={disabled} required />
       <MyTextField fullWidth label='Slug' name='slug' disabled={disabled} required />
-      <MySelectField fullWidth variant='standard' label='Idioma' name='idioma' options={IDIOMAS} disabled={disabled} ninguno />
-      <MyTextField fullWidth label='Duración' name='duracion' placeholder='Ej: 4 horas, 2 días' disabled={disabled} />
-      <MyTextField fullWidth label='Capacidad Máxima' name='capacidad_maxima' type='number' disabled={disabled} />
+      <MySelectField className='campo-tercio' fullWidth variant='standard' label='Idioma' name='idioma' options={IDIOMAS} disabled={disabled} ninguno />
+      <MyTextField className='campo-tercio' fullWidth label='Duración' name='duracion' placeholder='Ej: 4 horas, 2 días' disabled={disabled} />
+      <MyTextField className='campo-tercio' fullWidth label='Capacidad Máxima' name='capacidad_maxima' type='number' disabled={disabled} />
 
-      <Divider className='campo-completo'>Precios</Divider>
+      <SeccionForm titulo='Precios' />
       {registro?.precio_desde && (
         <Alert className='campo-completo' severity='success' sx={{ bgcolor: 'rgba(0,161,204,0.08)', color: 'text.primary' }}>
           Precio desde actual (el menor valor de adulto activo): <strong>{formatoMoneda(registro.precio_desde)}</strong>
@@ -48,17 +49,18 @@ const ExperienciaForm = (props) => {
       )}
       <PreciosExperiencia disabled={disabled} />
 
-      <Divider className='campo-completo'>Ubicación</Divider>
+      <SeccionForm titulo='Ubicación' />
       <MyTextField fullWidth label='Punto de Encuentro' name='punto_encuentro' disabled={disabled} />
       <MyTextField fullWidth label='Dirección' name='direccion' disabled={disabled} />
       <MyTextField fullWidth label='Latitud' name='latitud' type='number' disabled={disabled} />
       <MyTextField fullWidth label='Longitud' name='longitud' type='number' disabled={disabled} />
 
-      <Divider className='campo-completo'>Contenido</Divider>
+      <SeccionForm titulo='Contenido' />
       <MyTextField className='campo-completo' fullWidth multiline minRows={3} label='Descripción' name='descripcion' disabled={disabled} />
       <MyTextField fullWidth multiline minRows={3} label='Incluye' name='incluye' placeholder='Un ítem por línea' disabled={disabled} />
       <MyTextField fullWidth multiline minRows={3} label='No Incluye' name='no_incluye' placeholder='Un ítem por línea' disabled={disabled} />
 
+      <SeccionForm titulo='Publicación' />
       <MyRadioField label='Destacada' name='destacada' disabled={disabled} options={OPCIONES_SI_NO} />
       <MyRadioField label='Verificada' name='verificada' disabled={disabled} options={OPCIONES_SI_NO} />
     </AppCrudForm>
