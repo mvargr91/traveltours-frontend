@@ -22,7 +22,6 @@ import {
   nombreDe,
   valorSiNo,
 } from '../../../shared/constants/Turismo';
-import ExperienciaCreador from './ExperienciaCreador';
 
 const cells = [
   { id: 'nombre', typeHead: 'string', label: 'Nombre', value: (v) => v, align: 'left', mostrarInicio: true },
@@ -49,8 +48,8 @@ const Experiencia = ({ route }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
-  const { formulario, abrirCrear, abrirEditar, abrirVer, cerrar, refreshKey, updateColeccion } =
-    useCrudModulo();
+  // Crear/editar/ver abren el formulario en su propia ruta (ver ExperienciaPagina).
+  const { refreshKey, updateColeccion } = useCrudModulo();
   const [experienciaEstado, setExperienciaEstado] = useState(null);
   const destinos = useSelector((state) => state.destinos.coleccionLigera);
   const proveedores = useSelector((state) => state.proveedoresTuristicos.coleccionLigera);
@@ -97,22 +96,11 @@ const Experiencia = ({ route }) => {
         permisos={permisos}
         entidadNombre='Experiencia'
         refreshKey={refreshKey}
-        onCrear={abrirCrear}
-        onEditar={abrirEditar}
-        onVer={abrirVer}
+        onCrear={() => navigate('/experiencias/crear')}
+        onEditar={(row) => navigate(`/experiencias/${row.id}/editar`)}
+        onVer={(row) => navigate(`/experiencias/${row.id}/ver`)}
         accionesExtra={accionesExtra}
       />
-      {formulario && (
-        <ExperienciaCreador
-          experiencia={formulario.id}
-          accion={formulario.accion}
-          handleOnClose={cerrar}
-          updateColeccion={updateColeccion}
-          titulo={titulo}
-          destinos={destinos}
-          proveedores={proveedoresOpciones}
-        />
-      )}
       {experienciaEstado && (
         <AppEstadoDialog
           stateKey='experiencias'

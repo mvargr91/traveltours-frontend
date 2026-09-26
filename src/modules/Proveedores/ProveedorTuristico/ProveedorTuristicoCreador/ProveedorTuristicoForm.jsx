@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Alert } from '@mui/material';
-import AppCrudForm from '../../../../shared/components/AppCrudForm';
+import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
 import MyRadioField from '../../../../shared/components/MyRadioField';
 import FormikAutocomplete from '../../../../shared/components/FormikAutocomplete';
@@ -25,10 +25,15 @@ const ProveedorTuristicoForm = (props) => {
           {registro.observaciones_verificacion ? ` — ${registro.observaciones_verificacion}` : ''}
         </Alert>
       )}
+
+      <SeccionForm titulo='Datos del negocio' />
       <MyTextField autoFocus fullWidth label='Nombre Comercial' name='nombre_comercial' disabled={disabled} required />
       <MyTextField fullWidth label='Razón Social' name='razon_social' disabled={disabled} />
       <MyTextField fullWidth label='NIT' name='nit' disabled={disabled} />
       <MyTextField fullWidth label='Registro Nacional de Turismo (RNT)' name='rnt' disabled={disabled} />
+      <MyTextField className='campo-completo' fullWidth multiline minRows={3} label='Descripción' name='descripcion' disabled={disabled} />
+
+      <SeccionForm titulo='Contacto y ubicación' />
       <MyTextField fullWidth label='Teléfono' name='telefono' disabled={disabled} />
       <MyTextField fullWidth label='Correo' name='correo' type='email' disabled={disabled} />
       <FormikAutocomplete
@@ -39,6 +44,13 @@ const ProveedorTuristicoForm = (props) => {
         textFieldProps={{ variant: 'standard' }}
       />
       <MyTextField fullWidth label='Dirección' name='direccion' disabled={disabled} />
+
+      <SeccionForm titulo='Web y redes sociales' />
+      <MyTextField className='campo-tercio' fullWidth label='Sitio Web' name='sitio_web' disabled={disabled} />
+      <MyTextField className='campo-tercio' fullWidth label='Instagram' name='instagram' disabled={disabled} />
+      <MyTextField className='campo-tercio' fullWidth label='Facebook' name='facebook' disabled={disabled} />
+
+      <SeccionForm titulo='Acceso al panel y estado' />
       <FormikAutocomplete
         className='campo-completo'
         name='usuario_id'
@@ -50,11 +62,7 @@ const ProveedorTuristicoForm = (props) => {
           helperText: 'Con esta cuenta el proveedor gestiona sus experiencias y reservas. Crea el usuario en Seguridad > Usuarios con el rol Proveedor.',
         }}
       />
-      <MyTextField fullWidth label='Sitio Web' name='sitio_web' disabled={disabled} />
-      <MyTextField fullWidth label='Instagram' name='instagram' disabled={disabled} />
-      <MyTextField fullWidth label='Facebook' name='facebook' disabled={disabled} />
-      <MyTextField className='campo-completo' fullWidth multiline minRows={3} label='Descripción' name='descripcion' disabled={disabled} />
-      <MyRadioField label='Estado' name='estado' disabled={disabled} required options={OPCIONES_ESTADO} />
+      <MyRadioField className='campo-completo' label='Estado' name='estado' disabled={disabled} required options={OPCIONES_ESTADO} />
     </AppCrudForm>
   );
 };

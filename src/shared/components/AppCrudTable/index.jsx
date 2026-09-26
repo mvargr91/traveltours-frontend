@@ -417,7 +417,7 @@ const AppCrudTable = (props) => {
               <Box display='flex' alignItems='center' flex='1 1 100%'>
                 {onVolver && (
                   <Tooltip title='Volver'>
-                    <IconButton onClick={onVolver} sx={{ mr: 1 }}>
+                    <IconButton onClick={onVolver} sx={{ mr: 1, color: '#000' }}>
                       <ArrowBackIosIcon />
                     </IconButton>
                   </Tooltip>

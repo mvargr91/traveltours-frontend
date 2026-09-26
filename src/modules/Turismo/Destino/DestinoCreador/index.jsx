@@ -38,7 +38,7 @@ const initialValues = (registro) => ({
   estado: aRadio(registro?.estado),
 });
 
-const DestinoCreador = ({ destino, accion, handleOnClose, updateColeccion, titulo }) => (
+const DestinoCreador = ({ destino, accion, handleOnClose, updateColeccion, titulo, enPagina }) => (
   <AppCrudDialog
     stateKey='destinos'
     registroId={destino}
@@ -52,6 +52,7 @@ const DestinoCreador = ({ destino, accion, handleOnClose, updateColeccion, titul
     initialValues={initialValues}
     validationSchema={validationSchema}
     maxWidth='md'
+    enPagina={enPagina}
   >
     {({ values, setFieldValue, saving }) => (
       <DestinoForm
@@ -72,6 +73,7 @@ DestinoCreador.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   updateColeccion: PropTypes.func.isRequired,
   titulo: PropTypes.string,
+  enPagina: PropTypes.bool,
 };
 
 export default DestinoCreador;

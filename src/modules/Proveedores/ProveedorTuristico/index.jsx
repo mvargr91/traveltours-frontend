@@ -19,7 +19,6 @@ import {
   nombreDe,
   valorActivo,
 } from '../../../shared/constants/Turismo';
-import ProveedorTuristicoCreador from './ProveedorTuristicoCreador';
 
 const cells = [
   { id: 'nombre_comercial', typeHead: 'string', label: 'Nombre Comercial', value: (v) => v, align: 'left', mostrarInicio: true },
@@ -56,8 +55,8 @@ const filtrosConfig = [{ name: 'nombre', label: 'Nombre Comercial', type: 'text'
 const ProveedorTuristico = ({ route }) => {
   const navigate = useNavigate();
   const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
-  const { formulario, abrirCrear, abrirEditar, abrirVer, cerrar, refreshKey, updateColeccion } =
-    useCrudModulo();
+  // Crear/editar/ver abren el formulario en su propia ruta (ver ProveedorTuristicoPagina).
+  const { refreshKey, updateColeccion } = useCrudModulo();
   const [proveedorAVerificar, setProveedorAVerificar] = useState(null);
 
   const accionesExtra = [
@@ -88,20 +87,11 @@ const ProveedorTuristico = ({ route }) => {
         permisos={permisos}
         entidadNombre='Proveedor'
         refreshKey={refreshKey}
-        onCrear={abrirCrear}
-        onEditar={abrirEditar}
-        onVer={abrirVer}
+        onCrear={() => navigate('/proveedores-turisticos/crear')}
+        onEditar={(row) => navigate(`/proveedores-turisticos/${row.id}/editar`)}
+        onVer={(row) => navigate(`/proveedores-turisticos/${row.id}/ver`)}
         accionesExtra={accionesExtra}
       />
-      {formulario && (
-        <ProveedorTuristicoCreador
-          proveedor={formulario.id}
-          accion={formulario.accion}
-          handleOnClose={cerrar}
-          updateColeccion={updateColeccion}
-          titulo={titulo}
-        />
-      )}
       {proveedorAVerificar && (
         <AppEstadoDialog
           stateKey='proveedoresTuristicos'

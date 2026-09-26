@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import AppCrudTable, { auditCells } from '../../../shared/components/AppCrudTable';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
 import useCrudModulo from '../../../shared/hooks/useCrudModulo';
 import { onGetColeccion, onDelete } from '../../../@crema/redux/features/destinos/destinosSlice';
 import { colorActivo, valorActivo, valorSiNo } from '../../../shared/constants/Turismo';
-import DestinoCreador from './DestinoCreador';
 
 const cells = [
   { id: 'nombre', typeHead: 'string', label: 'Nombre', value: (v) => v, align: 'left', mostrarInicio: true },
@@ -20,8 +20,9 @@ const filtrosConfig = [{ name: 'nombre', label: 'Nombre', type: 'text' }];
 
 const Destino = ({ route }) => {
   const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
-  const { formulario, abrirCrear, abrirEditar, abrirVer, cerrar, refreshKey, updateColeccion } =
-    useCrudModulo();
+  const navigate = useNavigate();
+  // Crear/editar/ver abren el formulario en su propia ruta (ver DestinoPagina).
+  const { refreshKey } = useCrudModulo();
 
   return (
     <>
@@ -36,19 +37,10 @@ const Destino = ({ route }) => {
         permisos={permisos}
         entidadNombre='Destino'
         refreshKey={refreshKey}
-        onCrear={abrirCrear}
-        onEditar={abrirEditar}
-        onVer={abrirVer}
+        onCrear={() => navigate('/destinos/crear')}
+        onEditar={(row) => navigate(`/destinos/${row.id}/editar`)}
+        onVer={(row) => navigate(`/destinos/${row.id}/ver`)}
       />
-      {formulario && (
-        <DestinoCreador
-          destino={formulario.id}
-          accion={formulario.accion}
-          handleOnClose={cerrar}
-          updateColeccion={updateColeccion}
-          titulo={titulo}
-        />
-      )}
     </>
   );
 };

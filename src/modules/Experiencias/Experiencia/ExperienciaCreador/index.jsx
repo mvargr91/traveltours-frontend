@@ -62,7 +62,7 @@ const transformarAntesDeEnviar = ({ precios, ...valores }) => ({
 });
 
 const ExperienciaCreador = (props) => {
-  const { experiencia, accion, handleOnClose, updateColeccion, titulo, destinos, proveedores } = props;
+  const { experiencia, accion, handleOnClose, updateColeccion, titulo, destinos, proveedores, enPagina } = props;
 
   return (
     <AppCrudDialog
@@ -79,6 +79,7 @@ const ExperienciaCreador = (props) => {
       validationSchema={validationSchema}
       transformarAntesDeEnviar={transformarAntesDeEnviar}
       maxWidth='md'
+      enPagina={enPagina}
     >
       {({ values, setFieldValue, registro, saving }) => (
         <ExperienciaForm
@@ -105,6 +106,7 @@ ExperienciaCreador.propTypes = {
   titulo: PropTypes.string,
   destinos: PropTypes.array.isRequired,
   proveedores: PropTypes.array.isRequired,
+  enPagina: PropTypes.bool,
 };
 
 export default ExperienciaCreador;

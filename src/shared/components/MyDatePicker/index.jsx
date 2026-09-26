@@ -17,7 +17,7 @@ const adjustUTCDateToLocal = (date) => {
   return date instanceof Date && !isNaN(date) ? date : null;
 };
 
-const MyDatePicker = ({ label, name, disabled }) => {
+const MyDatePicker = ({ label, name, disabled, className }) => {
   const theme = useTheme();
   const [field, meta] = useField(name);
   const { setFieldValue, setTouched } = useFormikContext();
@@ -43,6 +43,7 @@ const MyDatePicker = ({ label, name, disabled }) => {
         slotProps={{
           textField: {
             name,
+            className,
             variant: 'standard',
             disabled,
             error: Boolean(meta.touched && meta.error),

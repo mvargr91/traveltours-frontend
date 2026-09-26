@@ -21,7 +21,6 @@ import {
   formatoMoneda,
   nombreDe,
 } from '../../../shared/constants/Turismo';
-import ReservaCreador from './ReservaCreador';
 
 const cells = [
   { id: 'codigo_reserva', typeHead: 'string', label: 'Código', value: (v) => v, align: 'left', mostrarInicio: true },
@@ -56,8 +55,8 @@ const Reserva = ({ route }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
-  const { formulario, abrirCrear, abrirEditar, abrirVer, cerrar, refreshKey, updateColeccion } =
-    useCrudModulo();
+  // Crear/editar/ver abren el formulario en su propia ruta (ver ReservaPagina).
+  const { refreshKey, updateColeccion } = useCrudModulo();
   const [reservaEstado, setReservaEstado] = useState(null);
   const proveedores = useSelector((state) => state.proveedoresTuristicos.coleccionLigera);
 
@@ -105,20 +104,11 @@ const Reserva = ({ route }) => {
         permisos={permisos}
         entidadNombre='Reserva'
         refreshKey={refreshKey}
-        onCrear={abrirCrear}
-        onEditar={abrirEditar}
-        onVer={abrirVer}
+        onCrear={() => navigate('/reservas/crear')}
+        onEditar={(row) => navigate(`/reservas/${row.id}/editar`)}
+        onVer={(row) => navigate(`/reservas/${row.id}/ver`)}
         accionesExtra={accionesExtra}
       />
-      {formulario && (
-        <ReservaCreador
-          reserva={formulario.id}
-          accion={formulario.accion}
-          handleOnClose={cerrar}
-          updateColeccion={updateColeccion}
-          titulo={titulo}
-        />
-      )}
       {reservaEstado && (
         <AppEstadoDialog
           stateKey='reservas'

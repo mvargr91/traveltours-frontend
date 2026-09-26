@@ -19,7 +19,7 @@ const MyRadioField = (props) => {
   };
 
   return (
-    <FormControl component="fieldset" error={!!errorText}>
+    <FormControl component="fieldset" className={props.className} error={!!errorText}>
       <FormLabel>{props.label}</FormLabel>
       <RadioGroup
         {...field}
@@ -62,6 +62,7 @@ MyRadioField.propTypes = {
     })
   ).isRequired,
   disabled: PropTypes.bool,
+  className: PropTypes.string,
 };
 
 export default MyRadioField;
