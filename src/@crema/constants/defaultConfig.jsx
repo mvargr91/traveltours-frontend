@@ -38,14 +38,14 @@ export const textLight = {
 };
 
 export const textDark = {
-  primary: 'rgb(255,255,255)',
-  secondary: 'rgb(229, 231, 235)',
-  disabled: 'rgb(156, 163, 175)',
+  primary: '#F3F4F6',
+  secondary: '#9CA3AF',
+  disabled: '#6B7280',
 };
 
 export const backgroundDark = {
-  paper: '#FFFFFF',
-  default: '#F4F7FE',
+  paper: '#1F2937',
+  default: '#111827',
 };
 
 export const backgroundLight = {
@@ -236,12 +236,12 @@ export const defaultTheme = {
 
 
 export const DarkSidebar = {
-  sidebarBgColor: '#FFFFFF',
-  sidebarTextColor: '#fff',
-  sidebarHeaderColor: '#FFFFFF',
-  sidebarMenuSelectedBgColor: '#F4F7FE',
-  sidebarMenuSelectedTextColor: 'rgba(255, 255, 255, 0.87)',
-  mode: ThemeMode.LIGHT,
+  sidebarBgColor: '#1F2937',
+  sidebarTextColor: '#FFFFFF',
+  sidebarHeaderColor: '#1F2937',
+  sidebarMenuSelectedBgColor: coloresPanel.acento,
+  sidebarMenuSelectedTextColor: '#FFFFFF',
+  mode: ThemeMode.DARK,
 };
 export const LightSidebar = {
   sidebarBgColor: coloresPanel.barraMenu,

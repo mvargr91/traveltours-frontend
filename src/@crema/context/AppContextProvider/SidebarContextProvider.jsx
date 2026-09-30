@@ -1,6 +1,8 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import defaultConfig from '@crema/constants/defaultConfig';
+import defaultConfig, { DarkSidebar, LightSidebar } from '@crema/constants/defaultConfig';
+import { useThemeContext } from './ThemeContextProvider';
+import { ThemeMode } from '@crema/constants/AppEnums';
 
 const SidebarContext = createContext();
 const SidebarActionsContext = createContext();
@@ -10,11 +12,12 @@ export const useSidebarContext = () => useContext(SidebarContext);
 export const useSidebarActionsContext = () => useContext(SidebarActionsContext);
 
 const SidebarContextProvider = ({ children }) => {
+  const { themeMode } = useThemeContext();
   const [menuStyle, updateMenuStyle] = useState(
     defaultConfig.sidebar.menuStyle,
   );
   const [sidebarColorSet, updateSidebarColorSet] = useState(
-    defaultConfig.sidebar.colorSet,
+    themeMode === ThemeMode.DARK ? DarkSidebar : defaultConfig.sidebar.colorSet,
   );
   const [allowSidebarBgImage, updateImage] = useState(
     defaultConfig.sidebar.allowSidebarBgImage,
@@ -22,6 +25,12 @@ const SidebarContextProvider = ({ children }) => {
   const [sidebarBgImageId, setSidebarImage] = useState(
     defaultConfig.sidebar.sidebarBgImageId,
   );
+
+  useEffect(() => {
+    updateSidebarColorSet(
+      themeMode === ThemeMode.DARK ? DarkSidebar : LightSidebar,
+    );
+  }, [themeMode]);
 
   const setSidebarBgImage = useCallback((allowSidebarBgImage) => {
     updateImage(allowSidebarBgImage);

@@ -63,7 +63,11 @@ const Home = () => {
           position: 'relative',
           overflow: 'hidden',
           color: '#fff',
-          background: `linear-gradient(120deg, ${COLORES_MARCA.azulOscuro} 0%, ${COLORES_MARCA.azul} 55%, ${ARCOIRIS[5]} 100%)`,
+          background: `url(brand/banner3.png)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          /*background: `linear-gradient(120deg, ${COLORES_MARCA.azulOscuro} 0%, ${COLORES_MARCA.azul} 55%, ${ARCOIRIS[5]} 100%)`,*/
           py: { xs: 8, md: 12 },
         }}
       >
@@ -102,11 +106,11 @@ const Home = () => {
                 </Button>
               </Paper>
             </Grid>
-            <Grid item md={5} sx={{ display: { xs: 'none', md: 'block' } }}>
+            {/*<Grid item md={5} sx={{ display: { xs: 'none', md: 'block' } }}>
               <Box sx={{ bgcolor: 'rgba(255,255,255,0.95)', borderRadius: 4, p: 3 }}>
                 <Box component='img' src={MARCA.logos.principal} alt={MARCA.nombre} sx={{ width: '100%' }} />
               </Box>
-            </Grid>
+            </Grid>*/}
           </Grid>
         </Container>
       </Box>
