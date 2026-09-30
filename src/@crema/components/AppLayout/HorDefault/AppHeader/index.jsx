@@ -28,6 +28,7 @@ import { useNavigate } from "react-router-dom";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import { TEMA_MARCA_PANEL, gradienteArcoiris } from "../../../../../shared/constants/Marca";
 import { PORTAL_HABILITADO, RUTAS_PORTAL } from "../../../../../shared/constants/RutasPortal";
+import AppThemeModeSwitcher from "../../../AppThemeModeSwitcher";
 
 const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -143,15 +144,16 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
                   variant="outlined"
                   startIcon={<TravelExploreIcon />}
                   onClick={() => navigate(RUTAS_PORTAL.inicio)}
-                  sx={{ textTransform: "none", fontWeight: 600 }}
+                  sx={{ textTransform: "none", fontWeight: 600, mr: 2 }}
                 >
                   Ver portal
                 </Button>
               </Hidden>
             )}
+            <AppThemeModeSwitcher />
             <Box
               sx={{
-                ml: { sm: 4 },
+                ml: { sm: 3 },
                 mr: { xs: 4, sm: 0 },
                 minWidth: { md: 220 },
                 "& .user-info-view": {

@@ -12,6 +12,12 @@ body {
     line-height: 1.35 !important;
     font-family: 'Be Vietnam', serif;
     height: 100%;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+body.dark-mode {
+    background-color: #111827;
+    color: #F3F4F6;
 }
 
 html {

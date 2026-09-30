@@ -1,14 +1,16 @@
 import React from "react";
 import orange from "@mui/material/colors/orange";
 import { Box, useMediaQuery, Button } from "@mui/material"; // <-- Importa useMediaQuery
-import { useThemeContext } from '@crema/context/AppContextProvider/ThemeContextProvider';
+import { useThemeContext, useThemeActionsContext } from '@crema/context/AppContextProvider/ThemeContextProvider';
 import Avatar from "@mui/material/Avatar";
 import { styled, useTheme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Fonts } from "@crema/constants/AppEnums";
+import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import { Fonts, ThemeMode } from "@crema/constants/AppEnums";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Business, Person } from '@mui/icons-material';
@@ -60,7 +62,8 @@ const UserInfo = ({ color }) => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const { themeMode } = useThemeContext();
+  const { updateThemeMode } = useThemeActionsContext();
   const theme = useTheme();
   const classes = useStyles({ theme });
 
@@ -177,14 +180,13 @@ const UserInfo = ({ color }) => {
         >
           <MenuItem
             className={classes.font}
-            style={{ fontWeight: 'bold', color: 'black' }}
+            style={{ fontWeight: 'bold' }}
             disabled={true}  
           >
             {user.usuario.nombre }
           </MenuItem>
           <MenuItem
             className={classes.font}
-            style={{ fontWeight: 'bold', color: 'black' }}
             disabled={true}
           >
             {user.usuario.correo_electronico}
@@ -197,6 +199,22 @@ const UserInfo = ({ color }) => {
               Ir al portal
             </MenuItem>
           )}
+          <MenuItem
+            onClick={() => {
+              updateThemeMode(themeMode === ThemeMode.DARK ? ThemeMode.LIGHT : ThemeMode.DARK);
+              handleClose();
+            }}
+          >
+            {themeMode === ThemeMode.DARK ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <LightModeOutlinedIcon sx={{ color: '#FBBF24', fontSize: 20 }} /> Modo claro
+              </Box>
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <DarkModeOutlinedIcon sx={{ color: 'text.secondary', fontSize: 20 }} /> Modo oscuro
+              </Box>
+            )}
+          </MenuItem>
           <Box className={classes.btnContainer}>
             <Button
               onClick={handleLogout} className={classes.logoutBtn}

@@ -53,3 +53,4 @@ export * from '../AppThemeSetting';
 export * from '../AppTooltip';
 export * from '../ChartTooltip';
 export * from '../AuthRoutes';
+export { default as AppThemeModeSwitcher } from '../AppThemeModeSwitcher';

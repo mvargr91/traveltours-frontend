@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Container, Grid, Link, Stack, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { COLORES_MARCA, MARCA, gradienteArcoiris } from '../../../constants/Marca';
 import { ENLACES_PORTAL } from '../PortalHeader';
 import { RUTAS_PORTAL } from '../../../constants/RutasPortal';
@@ -16,8 +17,20 @@ const Columna = ({ titulo, children }) => (
 
 const enlaceSx = { color: 'rgba(255,255,255,0.75)', '&:hover': { color: '#fff' } };
 
-const PortalFooter = () => (
-  <Box component='footer' sx={{ bgcolor: COLORES_MARCA.texto, color: 'rgba(255,255,255,0.75)', mt: 8 }}>
+const PortalFooter = () => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
+  return (
+    <Box
+      component='footer'
+      sx={{
+        bgcolor: isDark ? '#0b111a' : COLORES_MARCA.texto,
+        color: 'rgba(255,255,255,0.75)',
+        mt: 8,
+        transition: 'background-color 0.3s ease',
+      }}
+    >
     <Box sx={{ height: 4, background: gradienteArcoiris }} />
     <Container maxWidth='lg' sx={{ py: 6 }}>
       <Grid container spacing={4}>
@@ -62,6 +75,7 @@ const PortalFooter = () => (
       </Typography>
     </Container>
   </Box>
-);
+  );
+};
 
 export default PortalFooter;

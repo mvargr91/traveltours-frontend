@@ -56,33 +56,8 @@ const AppLayout = () => {
   useEffect(() => {
     if (isAuthenticated && !loading) {
       if (params.layout) updateNavStyle(params.layout);
-
-      // Establecer solo el modo DARK para el tema
-      updateThemeMode(ThemeMode.DARK);
-      updateTheme((prevTheme) => ({
-        ...prevTheme,
-        // palette: { //TODO:: cambio de color globalmente
-        //   ...prevTheme.palette,
-        //   mode: ThemeMode.DARK,
-        //   background: {
-        //     default: '#2B3137',
-        //     paper: '#313541',
-        //   },
-        //   text: {
-        //     primary: '#ffffff',
-        //     secondary: '#bbbbbb',
-        //   },
-        // },
-      }));
     }
-  }, [
-    isAuthenticated,
-    loading,
-    params.layout,
-    updateNavStyle,
-    updateThemeMode,
-    updateTheme,
-  ]);
+  }, [isAuthenticated, loading, params.layout, updateNavStyle]);
 
   // Páginas del portal público: layout propio con o sin sesión.
   if (esRutaPortal(pathname)) {

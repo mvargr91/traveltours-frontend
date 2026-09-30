@@ -7,64 +7,15 @@ import {
   useThemeActionsContext,
   useThemeContext,
 } from "@crema/context/AppContextProvider/ThemeContextProvider";
-import { useSidebarActionsContext } from "@crema/context/AppContextProvider/SidebarContextProvider";
-import {
-  backgroundDark,
-  backgroundLight,
-  DarkSidebar,
-  LightSidebar,
-  textDark,
-  textLight,
-} from "@crema/constants/defaultConfig";
 import IntlMessages from "@crema/helpers/IntlMessages";
-import { useEffect } from "react";
 
 const ThemeModes = () => {
-  const { updateTheme, updateThemeMode } = useThemeActionsContext();
-  const { updateSidebarColorSet } = useSidebarActionsContext();
-  const { theme } = useThemeContext();
+  const { updateThemeMode } = useThemeActionsContext();
+  const { themeMode } = useThemeContext();
 
-  // Forzar el modo DARK en la primera carga del componente
-  useEffect(() => {
-    // Establecer el modo oscuro por defecto
-    updateThemeMode(ThemeMode.DARK);
-    updateSidebarColorSet({
-      sidebarBgColor: DarkSidebar.sidebarBgColor,
-      sidebarTextColor: DarkSidebar.sidebarTextColor,
-      sidebarMenuSelectedBgColor: DarkSidebar.sidebarMenuSelectedBgColor,
-      sidebarMenuSelectedTextColor: DarkSidebar.sidebarMenuSelectedTextColor,
-      sidebarHeaderColor: DarkSidebar.sidebarHeaderColor,
-    });
-    updateTheme({
-      ...theme,
-      palette: {
-        ...theme.palette,
-        mode: ThemeMode.DARK,
-        background: backgroundDark,
-        text: textDark,
-      },
-    });
-  }, [updateThemeMode, updateSidebarColorSet, updateTheme, theme]);
-
-  const onModeChange = (event, themeMode) => {
-    // Ignorar cambios y forzar siempre el modo DARK
-    updateThemeMode(ThemeMode.DARK);
-    updateSidebarColorSet({
-      sidebarBgColor: DarkSidebar.sidebarBgColor,
-      sidebarTextColor: DarkSidebar.sidebarTextColor,
-      sidebarMenuSelectedBgColor: DarkSidebar.sidebarMenuSelectedBgColor,
-      sidebarMenuSelectedTextColor: DarkSidebar.sidebarMenuSelectedTextColor,
-      sidebarHeaderColor: DarkSidebar.sidebarHeaderColor,
-    });
-    updateTheme({
-      ...theme,
-      palette: {
-        ...theme.palette,
-        mode: ThemeMode.DARK,
-        background: backgroundDark,
-        text: textDark,
-      },
-    });
+  const onModeChange = (event, newMode) => {
+    if (!newMode) return;
+    updateThemeMode(newMode);
   };
 
   return (
@@ -73,18 +24,17 @@ const ThemeModes = () => {
         <IntlMessages id="customizer.themeMode" />
       </Box>
       <ToggleButtonGroup
-        value={ThemeMode.DARK} // Forzar siempre a "DARK"
+        value={themeMode}
         exclusive
         onChange={onModeChange}
-        aria-label="text alignment"
+        aria-label="theme mode toggle"
       >
         <StyledToggleButton
           value={ThemeMode.LIGHT}
           className={clsx({
-            active: ThemeMode.DARK === ThemeMode.LIGHT,
+            active: themeMode === ThemeMode.LIGHT,
           })}
-          aria-label="left aligned"
-          disabled // Deshabilitar el botón de modo "LIGHT"
+          aria-label="Light mode"
         >
           <IntlMessages id="customizer.light" />
         </StyledToggleButton>
@@ -92,9 +42,9 @@ const ThemeModes = () => {
         <StyledToggleButton
           value={ThemeMode.DARK}
           className={clsx({
-            active: true, // Siempre activo en "DARK"
+            active: themeMode === ThemeMode.DARK,
           })}
-          aria-label="centered"
+          aria-label="Dark mode"
         >
           <IntlMessages id="customizer.dark" />
         </StyledToggleButton>
