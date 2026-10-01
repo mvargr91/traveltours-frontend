@@ -80,6 +80,7 @@ import portalDestinosReducer from './features/portalDestinos/portalDestinosSlice
 import portalCategoriasReducer from './features/portalCategorias/portalCategoriasSlice';
 import portalPromocionesReducer from './features/portalPromociones/portalPromocionesSlice';
 import portalRegistroReducer from './features/portalRegistro/portalRegistroSlice';
+import portalReservasReducer from './features/portalReservas/portalReservasSlice';
 import usuariosProveedorReducer from './features/usuariosProveedor/usuariosProveedorSlice';
 import cuentaReducer from './features/cuenta/cuentaSlice';
 
@@ -165,6 +166,7 @@ export const store = configureStore({
     portalCategorias: portalCategoriasReducer,
     portalPromociones: portalPromocionesReducer,
     portalRegistro: portalRegistroReducer,
+    portalReservas: portalReservasReducer,
     usuariosProveedor: usuariosProveedorReducer,
     cuenta: cuentaReducer,
   },

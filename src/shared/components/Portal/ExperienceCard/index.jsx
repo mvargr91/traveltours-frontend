@@ -6,7 +6,8 @@ import { Box, Card, CardActionArea, CardContent, Chip, Rating, Stack, Typography
 import PlaceIcon from '@mui/icons-material/Place';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import VerifiedIcon from '@mui/icons-material/Verified';
-import { formatoMoneda } from '../../../constants/Turismo';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import { esPagoEnLinea, formatoMoneda } from '../../../constants/Turismo';
 import { MARCA } from '../../../constants/Marca';
 import { RUTAS_PORTAL } from '../../../constants/RutasPortal';
 
@@ -38,6 +39,9 @@ const ExperienceCard = ({ experiencia }) => {
           <Stack direction='row' spacing={0.5} sx={{ position: 'absolute', top: 10, left: 10 }}>
             {experiencia.promocion_id && <Chip size='small' label='Promo' color='secondary' />}
             {experiencia.destacada ? <Chip size='small' label='Destacada' sx={{ bgcolor: '#FFED00', color: '#1F2933' }} /> : null}
+            {esPagoEnLinea(experiencia) && (
+              <Chip size='small' icon={<CreditCardIcon />} label='Pago en línea' sx={{ bgcolor: '#7B1FA2', color: '#fff', '& .MuiChip-icon': { color: '#fff' } }} />
+            )}
           </Stack>
         </Box>
         <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>

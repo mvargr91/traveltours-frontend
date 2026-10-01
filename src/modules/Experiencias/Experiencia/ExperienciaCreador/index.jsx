@@ -28,6 +28,7 @@ const validationSchema = yup.object({
   slug: slugRequerido(200),
   precios: esquemaPrecios,
   capacidad_maxima: enteroOpcional().min(1, 'Mínimo 1'),
+  modalidad_pago: yup.string().required('Requerido').oneOf(['reserva', 'pago_en_linea']),
   latitud: numeroOpcional().min(-90, 'Mínimo -90').max(90, 'Máximo 90'),
   longitud: numeroOpcional().min(-180, 'Mínimo -180').max(180, 'Máximo 180'),
 });
@@ -42,6 +43,7 @@ const initialValues = (registro) => ({
   duracion: registro?.duracion ?? '',
   precios: preciosIniciales(registro?.precios),
   capacidad_maxima: registro?.capacidad_maxima ?? '',
+  modalidad_pago: registro?.modalidad_pago ?? 'reserva',
   punto_encuentro: registro?.punto_encuentro ?? '',
   direccion: registro?.direccion ?? '',
   latitud: registro?.latitud ?? '',

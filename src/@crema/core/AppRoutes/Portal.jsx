@@ -10,6 +10,8 @@ const ExperienciaDetalle = React.lazy(() => import('../../../modules/Portal/Expe
 const Destinos = React.lazy(() => import('../../../modules/Portal/Destinos'));
 const Promociones = React.lazy(() => import('../../../modules/Portal/Promociones'));
 const Registro = React.lazy(() => import('../../../modules/Portal/Registro'));
+const ConsultarReserva = React.lazy(() => import('../../../modules/Portal/ConsultarReserva'));
+const ResultadoPago = React.lazy(() => import('../../../modules/Portal/ResultadoPago'));
 const MisReservas = React.lazy(() => import('../../../modules/Cuenta/MisReservas'));
 const MisFavoritos = React.lazy(() => import('../../../modules/Cuenta/MisFavoritos'));
 const MiCuenta = React.lazy(() => import('../../../modules/Cuenta/MiCuenta'));
@@ -23,6 +25,8 @@ export const portalRoutes = PORTAL_HABILITADO
       { path: RUTAS_PORTAL.destinos, element: <Destinos /> },
       { path: RUTAS_PORTAL.promociones, element: <Promociones /> },
       { path: RUTAS_PORTAL.registro, element: <Registro /> },
+      { path: RUTAS_PORTAL.consultarReserva, element: <ConsultarReserva /> },
+      { path: RUTAS_PORTAL.resultadoPago, element: <ResultadoPago /> },
     ]
   : [];
 
