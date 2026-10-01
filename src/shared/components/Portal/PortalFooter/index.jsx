@@ -65,6 +65,9 @@ const PortalFooter = () => {
           <Link component={RouterLink} to='/mis-reservas' underline='none' sx={enlaceSx}>
             Mis reservas
           </Link>
+          <Link component={RouterLink} to={RUTAS_PORTAL.consultarReserva} underline='none' sx={enlaceSx}>
+            Consultar reserva
+          </Link>
           <Link component={RouterLink} to='/mis-favoritos' underline='none' sx={enlaceSx}>
             Mis favoritos
           </Link>

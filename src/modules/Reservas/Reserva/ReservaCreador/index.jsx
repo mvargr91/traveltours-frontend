@@ -21,7 +21,8 @@ import {
 import ReservaForm from './ReservaForm';
 
 const validationSchema = yup.object({
-  usuario_id: yup.string().required('Requerido'),
+  // Las reservas hechas sin cuenta desde el portal no tienen usuario: solo se exige al crear.
+  usuario_id: yup.string().when('id', { is: (id) => !id, then: (s) => s.required('Requerido') }),
   experiencia_id: yup.string().required('Requerido'),
   proveedor_id: yup.string().required('Seleccione una experiencia válida'),
   fecha: yup.string().required('Requerido').nullable(),

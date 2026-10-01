@@ -30,9 +30,9 @@ const validationSchema = yup.object({
     .string()
     .required('Requerido')
     .max('128', 'Debe tener máximo 128 Caracteres'),
+  // Puede quedar vacío (ej. CORREO_ADMIN_RESERVAS vacío = MAIL_FROM_ADDRESS).
   valor_parametro: yup
     .string()
-    .required('Requerido')
     .max('2000', 'Debe tener máximo 2000 Caracteres'),
 });
 

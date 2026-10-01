@@ -24,6 +24,7 @@ export const ESTADOS_EXPERIENCIA = [
 
 export const ESTADOS_RESERVA = [
   { id: 'pendiente', nombre: 'Pendiente', color: '#FE8500' },
+  { id: 'pendiente_pago', nombre: 'Pendiente de pago', color: '#7B1FA2' },
   { id: 'aceptada', nombre: 'Aceptada', color: 'green' },
   { id: 'rechazada', nombre: 'Rechazada', color: 'red' },
   { id: 'cancelada', nombre: 'Cancelada', color: '#B80001' },
@@ -67,6 +68,14 @@ export const TIPOS_MULTIMEDIA = [
 ];
 
 // Un precio es de adulto o de niño; una experiencia puede tener varios de cada tipo.
+// Cómo se reserva una experiencia (experiencias.modalidad_pago).
+export const MODALIDADES_PAGO = [
+  { id: 'reserva', nombre: 'Reserva', color: '#00A1CC', descripcion: 'El viajero solicita el cupo y paga directamente con el proveedor.' },
+  { id: 'pago_en_linea', nombre: 'Pago en línea', color: '#7B1FA2', descripcion: 'El viajero paga en el portal al reservar.' },
+];
+export const OPCIONES_MODALIDAD_PAGO = MODALIDADES_PAGO.map(({ id, nombre }) => ({ value: id, label: nombre }));
+export const esPagoEnLinea = (experiencia) => experiencia?.modalidad_pago === 'pago_en_linea';
+
 export const TIPOS_PRECIO = [
   { id: 'adulto', nombre: 'Adulto' },
   { id: 'nino', nombre: 'Niño' },

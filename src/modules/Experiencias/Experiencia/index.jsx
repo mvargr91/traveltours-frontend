@@ -17,6 +17,7 @@ import { onGetColeccionLigera as onGetDestinos } from '../../../@crema/redux/fea
 import { onGetColeccionLigera as onGetProveedores } from '../../../@crema/redux/features/proveedoresTuristicos/proveedoresTuristicosSlice';
 import {
   ESTADOS_EXPERIENCIA,
+  MODALIDADES_PAGO,
   colorDe,
   formatoMoneda,
   nombreDe,
@@ -38,6 +39,16 @@ const cells = [
     cellColor: (v) => colorDe(ESTADOS_EXPERIENCIA, v),
     align: 'left',
     mostrarInicio: true,
+  },
+  {
+    id: 'modalidad_pago',
+    typeHead: 'string',
+    label: 'Modalidad',
+    value: (v) => nombreDe(MODALIDADES_PAGO, v),
+    cellColor: (v) => colorDe(MODALIDADES_PAGO, v),
+    align: 'left',
+    mostrarInicio: true,
+    ordenable: false,
   },
   { id: 'destacada', typeHead: 'string', label: 'Destacada', value: valorSiNo, align: 'left', mostrarInicio: true },
   { id: 'verificada', typeHead: 'string', label: 'Verificada', value: valorSiNo, align: 'left', mostrarInicio: false, ordenable: false },

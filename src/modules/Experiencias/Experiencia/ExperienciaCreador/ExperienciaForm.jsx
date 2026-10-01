@@ -10,6 +10,8 @@ import FormikAutocomplete from '../../../../shared/components/FormikAutocomplete
 import {
   ESTADOS_EXPERIENCIA,
   IDIOMAS,
+  MODALIDADES_PAGO,
+  OPCIONES_MODALIDAD_PAGO,
   OPCIONES_SI_NO,
   formatoMoneda,
   nombreDe,
@@ -48,6 +50,13 @@ const ExperienciaForm = (props) => {
         </Alert>
       )}
       <PreciosExperiencia disabled={disabled} />
+
+      <SeccionForm titulo='Modalidad de pago' />
+      <MyRadioField label='¿Cómo se reserva?' name='modalidad_pago' disabled={disabled} required options={OPCIONES_MODALIDAD_PAGO} />
+      <Alert className='campo-completo' severity='info'>
+        <strong>{nombreDe(MODALIDADES_PAGO, values.modalidad_pago)}:</strong>{' '}
+        {MODALIDADES_PAGO.find((m) => m.id === values.modalidad_pago)?.descripcion}
+      </Alert>
 
       <SeccionForm titulo='Ubicación' />
       <MyTextField fullWidth label='Punto de Encuentro' name='punto_encuentro' disabled={disabled} />

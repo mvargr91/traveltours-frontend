@@ -7,6 +7,8 @@ export const RUTAS_PORTAL = {
   destinos: '/lugares',
   promociones: '/ofertas',
   registro: '/registro',
+  consultarReserva: '/reserva',
+  resultadoPago: '/pago/resultado',
 };
 
 // Interruptor para apagar el portal sin tocar código: VITE__PORTAL_PUBLICO=false en .env
