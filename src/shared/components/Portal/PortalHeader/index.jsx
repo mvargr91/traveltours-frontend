@@ -31,6 +31,7 @@ export const ENLACES_PORTAL = [
   { label: 'Tours', to: RUTAS_PORTAL.tours, color: '#f97316', bgcolor: 'rgba(249, 115, 22, 0.1)' },
   { label: 'Destinos', to: RUTAS_PORTAL.destinos, color: '#eab308', bgcolor: 'rgba(234, 179, 8, 0.1)' },
   { label: 'Promociones', to: RUTAS_PORTAL.promociones, color: '#22c55e', bgcolor: 'rgba(34, 197, 94, 0.1)' },
+  { label: 'Mapa', to: RUTAS_PORTAL.mapa, color: '#06b6d4', bgcolor: 'rgba(6, 182, 212, 0.1)' },
 ];
 
 // Primera opción del menú según los permisos del rol (misma regla que usa AppLayout tras el login).
