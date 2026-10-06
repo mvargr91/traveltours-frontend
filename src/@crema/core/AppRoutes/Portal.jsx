@@ -5,6 +5,7 @@ import { RoutePermittedRole } from '@crema/constants/AppEnums';
 import { PORTAL_HABILITADO, RUTAS_PORTAL, RUTA_MI_CUENTA } from '../../../shared/constants/RutasPortal';
 
 const Home = React.lazy(() => import('../../../modules/Portal/Home'));
+const Mapa = React.lazy(() => import('../../../modules/Portal/Mapa'));
 const Experiencias = React.lazy(() => import('../../../modules/Portal/Experiencias'));
 const ExperienciaDetalle = React.lazy(() => import('../../../modules/Portal/ExperienciaDetalle'));
 const Destinos = React.lazy(() => import('../../../modules/Portal/Destinos'));
@@ -18,6 +19,7 @@ const MiCuenta = React.lazy(() => import('../../../modules/Cuenta/MiCuenta'));
 export const portalRoutes = PORTAL_HABILITADO
   ? [
       { path: RUTAS_PORTAL.inicio, element: <Home /> },
+      { path: RUTAS_PORTAL.mapa, element: <Mapa /> },
       { path: RUTAS_PORTAL.tours, element: <Experiencias /> },
       { path: RUTAS_PORTAL.tour(':slug'), element: <ExperienciaDetalle /> },
       { path: RUTAS_PORTAL.destinos, element: <Destinos /> },

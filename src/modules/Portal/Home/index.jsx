@@ -20,6 +20,8 @@ import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import ExploreIcon from '@mui/icons-material/Explore';
+import Chip from '@mui/material/Chip';
 import { onGetColeccion as onGetExperiencias } from '@crema/redux/features/portalExperiencias/portalExperienciasSlice';
 import { onGetColeccion as onGetDestinos } from '@crema/redux/features/portalDestinos/portalDestinosSlice';
 import { onGetColeccion as onGetPromociones } from '@crema/redux/features/portalPromociones/portalPromocionesSlice';
@@ -175,6 +177,47 @@ const Home = () => {
             </Grid>
           ))}
         </Grid>
+      </Container>
+
+      {/* Banner / Acceso a Mapa de Experiencias */}
+      <Container maxWidth='lg' sx={{ pb: 7 }}>
+        <Paper
+          elevation={2}
+          sx={{
+            p: { xs: 3, md: 5 },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 3,
+            borderRadius: 4,
+            background: (theme) =>
+              theme.palette.mode === 'dark'
+                ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+                : 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+            border: (theme) => `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <Box sx={{ maxWidth: 640 }}>
+            <Chip label='Nuevo Mapa Interactivo' color='primary' size='small' sx={{ mb: 1.5, fontWeight: 700 }} />
+            <Typography variant='h2' sx={{ fontWeight: 800, mb: 1 }}>
+              Mapa de experiencias
+            </Typography>
+            <Typography variant='h4' sx={{ color: 'text.secondary', fontWeight: 400, fontSize: { xs: '1rem', md: '1.2rem' } }}>
+              Encuentra experiencias LGTBIQ+ friendly por toda Colombia en el mapa interactivo con Mapbox.
+            </Typography>
+          </Box>
+          <Button
+            component={RouterLink}
+            to={RUTAS_PORTAL.mapa}
+            variant='contained'
+            size='large'
+            startIcon={<ExploreIcon />}
+            sx={{ px: 4, py: 1.5, borderRadius: 3, fontWeight: 700 }}
+          >
+            Explorar en el mapa
+          </Button>
+        </Paper>
       </Container>
 
       {promociones.length > 0 && (
