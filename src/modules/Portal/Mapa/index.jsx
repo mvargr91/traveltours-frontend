@@ -36,12 +36,7 @@ import { ARCOIRIS, COLORES_MARCA } from '../../../shared/constants/Marca';
 const CENTRO_COLOMBIA = [-74.08175, 4.60971];
 
 // Token de Mapbox configurado en variables de entorno o token por defecto
-const ENV_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-const TIENE_TOKEN_VALIDO = Boolean(ENV_TOKEN && ENV_TOKEN.startsWith('pk.'));
-mapboxgl.accessToken = TIENE_TOKEN_VALIDO
-  ? ENV_TOKEN
-  : 'pk.eyJ1IjoidHJhdmVsdG91cnMiLCJhIjoiY211bmZxZ3Z5MGFtODJ5bzh2Ym9jaG5sOSJ9.6sftsmOpaiiAfuMn1xXWNw';
-
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 // Estilo de mapa base de alta resolución para Mapbox GL (sin restricción de cuota de pago, 100% visible)
 const ESTILO_MAPA_BASE = {
   version: 8,
