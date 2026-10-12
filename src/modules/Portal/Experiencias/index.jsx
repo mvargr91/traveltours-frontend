@@ -22,19 +22,22 @@ import { useDebounce } from '@crema/hooks/useDebounce';
 import CategoryBar from '../../../shared/components/Portal/CategoryBar';
 import ExperienceCard from '../../../shared/components/Portal/ExperienceCard';
 import { GrillaCargando } from '../../../shared/components/Portal/Secciones';
+import { useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 
+// id del orden -> clave de su nombre en los textos editables.
 const ORDENES = [
-  { id: 'relevancia', nombre: 'Recomendadas' },
-  { id: 'precio_asc', nombre: 'Precio: menor a mayor' },
-  { id: 'precio_desc', nombre: 'Precio: mayor a menor' },
-  { id: 'calificacion', nombre: 'Mejor calificadas' },
-  { id: 'recientes', nombre: 'Más recientes' },
+  { id: 'relevancia', texto: 'ordenRelevancia' },
+  { id: 'precio_asc', texto: 'ordenPrecioAsc' },
+  { id: 'precio_desc', texto: 'ordenPrecioDesc' },
+  { id: 'calificacion', texto: 'ordenCalificacion' },
+  { id: 'recientes', texto: 'ordenRecientes' },
 ];
 const FILTROS = ['texto', 'destino', 'categoria', 'precio_min', 'precio_max', 'orden'];
 const POR_PAGINA = 12;
 
 const Experiencias = () => {
   const dispatch = useDispatch();
+  const t = useTextos('tours');
   const [searchParams, setSearchParams] = useSearchParams();
   const { rows, total, ultima_pagina: ultimaPagina, loading } = useSelector((state) => state.portalExperiencias);
   const destinos = useSelector((state) => state.portalDestinos.rows);
@@ -75,40 +78,40 @@ const Experiencias = () => {
 
   const destinoActual = destinos.find((d) => d.slug === filtrosUrl.destino);
   const categoriaActual = categorias.find((c) => c.slug === filtrosUrl.categoria);
+  const titulo = categoriaActual?.nombre ?? t('titulo');
 
   return (
     <>
       <CategoryBar activa={filtrosUrl.categoria} />
       <Container maxWidth='lg' sx={{ py: 5 }}>
         <Typography variant='h2'>
-          {categoriaActual?.nombre ?? 'Experiencias'}
-          {destinoActual ? ` en ${destinoActual.nombre}` : ''}
+          {destinoActual ? t('tituloEnDestino', { titulo, destino: destinoActual.nombre }) : titulo}
         </Typography>
         <Typography color='text.secondary' sx={{ mb: 3 }}>
-          {total} resultado(s)
+          {t('resultados', { n: total })}
         </Typography>
 
         <Grid container spacing={3}>
           <Grid item xs={12} md={3}>
             <Paper sx={{ p: 2.5, position: { md: 'sticky' }, top: { md: 100 } }}>
               <Stack spacing={2}>
-                <TextField size='small' label='Buscar' value={texto} onChange={(e) => setTexto(e.target.value)} />
-                <TextField select size='small' label='Destino' value={filtrosUrl.destino} onChange={(e) => cambiarFiltro('destino', e.target.value)}>
-                  <MenuItem value=''>Todos</MenuItem>
+                <TextField size='small' label={t('buscar')} value={texto} onChange={(e) => setTexto(e.target.value)} />
+                <TextField select size='small' label={t('destino')} value={filtrosUrl.destino} onChange={(e) => cambiarFiltro('destino', e.target.value)}>
+                  <MenuItem value=''>{t('todos')}</MenuItem>
                   {destinos.map((d) => <MenuItem key={d.id} value={d.slug}>{d.nombre}</MenuItem>)}
                 </TextField>
-                <TextField select size='small' label='Categoría' value={filtrosUrl.categoria} onChange={(e) => cambiarFiltro('categoria', e.target.value)}>
-                  <MenuItem value=''>Todas</MenuItem>
+                <TextField select size='small' label={t('categoria')} value={filtrosUrl.categoria} onChange={(e) => cambiarFiltro('categoria', e.target.value)}>
+                  <MenuItem value=''>{t('todas')}</MenuItem>
                   {categorias.map((c) => <MenuItem key={c.id} value={c.slug}>{c.nombre}</MenuItem>)}
                 </TextField>
                 <Stack direction='row' spacing={1}>
-                  <TextField size='small' type='number' label='Precio mín.' value={filtrosUrl.precio_min} onChange={(e) => cambiarFiltro('precio_min', e.target.value)} />
-                  <TextField size='small' type='number' label='Precio máx.' value={filtrosUrl.precio_max} onChange={(e) => cambiarFiltro('precio_max', e.target.value)} />
+                  <TextField size='small' type='number' label={t('precioMin')} value={filtrosUrl.precio_min} onChange={(e) => cambiarFiltro('precio_min', e.target.value)} />
+                  <TextField size='small' type='number' label={t('precioMax')} value={filtrosUrl.precio_max} onChange={(e) => cambiarFiltro('precio_max', e.target.value)} />
                 </Stack>
-                <TextField select size='small' label='Ordenar por' value={filtrosUrl.orden || 'relevancia'} onChange={(e) => cambiarFiltro('orden', e.target.value)}>
-                  {ORDENES.map((o) => <MenuItem key={o.id} value={o.id}>{o.nombre}</MenuItem>)}
+                <TextField select size='small' label={t('ordenarPor')} value={filtrosUrl.orden || 'relevancia'} onChange={(e) => cambiarFiltro('orden', e.target.value)}>
+                  {ORDENES.map((o) => <MenuItem key={o.id} value={o.id}>{t(o.texto)}</MenuItem>)}
                 </TextField>
-                <Button startIcon={<FilterAltOffIcon />} onClick={limpiar}>Limpiar filtros</Button>
+                <Button startIcon={<FilterAltOffIcon />} onClick={limpiar}>{t('limpiarFiltros')}</Button>
               </Stack>
             </Paper>
           </Grid>
@@ -118,8 +121,8 @@ const Experiencias = () => {
               <GrillaCargando cantidad={6} columnas={{ xs: 12, sm: 6, lg: 4 }} />
             ) : rows.length === 0 ? (
               <Paper sx={{ p: 5, textAlign: 'center' }}>
-                <Typography variant='h4'>No encontramos experiencias con esos filtros</Typography>
-                <Button sx={{ mt: 2 }} onClick={limpiar}>Ver todas</Button>
+                <Typography variant='h4'>{t('sinResultados')}</Typography>
+                <Button sx={{ mt: 2 }} onClick={limpiar}>{t('verTodas')}</Button>
               </Paper>
             ) : (
               <>

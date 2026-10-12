@@ -6,10 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Chip, Container } from '@mui/material';
 import { onGetColeccion } from '@crema/redux/features/portalCategorias/portalCategoriasSlice';
 import { RUTAS_PORTAL } from '../../../constants/RutasPortal';
+import { useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 
 const CategoryBar = ({ activa }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const t = useTextos('comunes');
   const { rows: categorias } = useSelector((state) => state.portalCategorias);
 
   useEffect(() => {
@@ -27,7 +29,7 @@ const CategoryBar = ({ activa }) => {
       <Container maxWidth='lg'>
         <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', py: 1.5, '&::-webkit-scrollbar': { display: 'none' } }}>
           <Chip
-            label='Todas'
+            label={t('todas')}
             clickable
             color={!activa ? 'primary' : 'default'}
             variant={!activa ? 'filled' : 'outlined'}

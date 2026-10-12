@@ -9,7 +9,7 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import { esPagoEnLinea, formatoMoneda } from '../../../constants/Turismo';
-import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
+import { useApariencia, useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 import { RUTAS_PORTAL } from '../../../constants/RutasPortal';
 
 export const ImagenExperiencia = ({ src, alt, altura }) => {
@@ -31,6 +31,7 @@ ImagenExperiencia.propTypes = {
 };
 
 const ExperienceCard = ({ experiencia }) => {
+  const t = useTextos('comunes');
   const verificada = experiencia.verificada || experiencia.proveedor_verificacion === 'aprobado';
   const calificacion = Number(experiencia.calificacion_promedio) || 0;
 
@@ -40,10 +41,10 @@ const ExperienceCard = ({ experiencia }) => {
         <Box sx={{ position: 'relative' }}>
           <ImagenExperiencia src={experiencia.imagen} alt={experiencia.nombre} altura={190} />
           <Stack direction='row' spacing={0.5} sx={{ position: 'absolute', top: 10, left: 10 }}>
-            {experiencia.promocion_id && <Chip size='small' label='Promo' color='secondary' />}
-            {experiencia.destacada ? <Chip size='small' label='Destacada' sx={{ bgcolor: '#FFED00', color: '#1F2933' }} /> : null}
+            {experiencia.promocion_id && <Chip size='small' label={t('promo')} color='secondary' />}
+            {experiencia.destacada ? <Chip size='small' label={t('destacada')} sx={{ bgcolor: '#FFED00', color: '#1F2933' }} /> : null}
             {esPagoEnLinea(experiencia) && (
-              <Chip size='small' icon={<CreditCardIcon />} label='Pago en línea' sx={{ bgcolor: '#7B1FA2', color: '#fff', '& .MuiChip-icon': { color: '#fff' } }} />
+              <Chip size='small' icon={<CreditCardIcon />} label={t('pagoEnLinea')} sx={{ bgcolor: '#7B1FA2', color: '#fff', '& .MuiChip-icon': { color: '#fff' } }} />
             )}
           </Stack>
         </Box>
@@ -54,7 +55,7 @@ const ExperienceCard = ({ experiencia }) => {
             {verificada && (
               <Stack direction='row' spacing={0.25} alignItems='center' sx={{ ml: 'auto !important', color: 'primary.main' }}>
                 <VerifiedIcon sx={{ fontSize: 16 }} />
-                <Typography variant='caption' fontWeight={600}>Verificada</Typography>
+                <Typography variant='caption' fontWeight={600}>{t('verificada')}</Typography>
               </Stack>
             )}
           </Stack>
@@ -73,7 +74,7 @@ const ExperienceCard = ({ experiencia }) => {
               </Typography>
             </Stack>
             <Box textAlign='right'>
-              <Typography variant='caption' color='text.secondary'>Desde</Typography>
+              <Typography variant='caption' color='text.secondary'>{t('desde')}</Typography>
               <Typography variant='h4' color='primary.main' lineHeight={1}>
                 {formatoMoneda(experiencia.precio_desde)}
               </Typography>

@@ -1,4 +1,4 @@
-// Parametrización > Apariencia: personaliza colores, menú, iconos, logos e imágenes del portal
+// Parametrización > Apariencia: personaliza colores, textos, menú, iconos, logos e imágenes del portal
 // público y del panel. Los cambios se ven al instante (vista previa y panel) y se aplican a
 // todos los visitantes al guardar.
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -20,7 +20,7 @@ import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
 import HelpButton from '../../../shared/components/HelpButton';
 import { urlArchivo } from '../../../shared/functions/Archivos';
 import { IMAGENES_APARIENCIA, combinarApariencia } from '../../../shared/constants/Apariencia';
-import { SeccionInicio, SeccionMarca, SeccionMenu, SeccionPanel, SeccionPortal } from './Secciones';
+import { SeccionInicio, SeccionMarca, SeccionMenu, SeccionPanel, SeccionPortal, SeccionTextos } from './Secciones';
 import VistaPrevia from './VistaPrevia';
 
 const PESTANAS = [
@@ -28,6 +28,7 @@ const PESTANAS = [
   ['Colores del portal', SeccionPortal],
   ['Menú del portal', SeccionMenu],
   ['Página de inicio', SeccionInicio],
+  ['Textos', SeccionTextos],
   ['Panel administrativo', SeccionPanel],
 ];
 
@@ -194,7 +195,7 @@ const Apariencia = ({ route }) => {
             {titulo || 'Apariencia'}
           </Typography>
           <Typography variant='subtitle1' color='text.secondary'>
-            {sucio ? 'Tienes cambios sin guardar: solo tú los ves por ahora.' : 'Colores, menú, iconos, logos e imágenes del sitio.'}
+            {sucio ? 'Tienes cambios sin guardar: solo tú los ves por ahora.' : 'Colores, textos, menú, iconos, logos e imágenes del sitio.'}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2.5 }}>

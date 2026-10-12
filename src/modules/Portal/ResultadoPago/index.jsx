@@ -13,51 +13,32 @@ import jwtAxios from '@crema/services/auth/jwt-auth';
 import { extraerMensajeError } from '@crema/redux/helpers/createCrudSlice';
 import { aHoraCorta, formatoMoneda } from '../../../shared/constants/Turismo';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
+import { useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 
 const REINTENTOS = 6;
 const ESPERA_MS = 5000;
 
-const RESULTADOS = {
-  aprobado: {
-    icono: <CheckCircleRoundedIcon color='success' sx={{ fontSize: 72 }} />,
-    titulo: '¡Pago aprobado!',
-    texto: 'Tu reserva quedó confirmada. Te enviamos los detalles por correo.',
-  },
-  pendiente: {
-    icono: <HourglassTopRoundedIcon color='warning' sx={{ fontSize: 72 }} />,
-    titulo: 'Pago en proceso',
-    texto: 'Tu banco aún no confirma el pago. Te avisaremos por correo apenas se apruebe.',
-  },
-  rechazado: {
-    icono: <CancelRoundedIcon color='error' sx={{ fontSize: 72 }} />,
-    titulo: 'Pago rechazado',
-    texto: 'El pago no se pudo completar. Tu cupo sigue separado: puedes intentarlo de nuevo.',
-  },
-  anulado: {
-    icono: <CancelRoundedIcon color='error' sx={{ fontSize: 72 }} />,
-    titulo: 'Pago anulado',
-    texto: 'La transacción fue anulada. Puedes intentarlo de nuevo desde tu reserva.',
-  },
-  error: {
-    icono: <CancelRoundedIcon color='error' sx={{ fontSize: 72 }} />,
-    titulo: 'No se pudo procesar el pago',
-    texto: 'Hubo un error con el medio de pago. Puedes intentarlo de nuevo desde tu reserva.',
-  },
+// Icono de cada estado del pago. Título y texto son editables: claves "{estado}Titulo" y "{estado}Texto".
+const ICONOS = {
+  aprobado: <CheckCircleRoundedIcon color='success' sx={{ fontSize: 72 }} />,
+  pendiente: <HourglassTopRoundedIcon color='warning' sx={{ fontSize: 72 }} />,
+  rechazado: <CancelRoundedIcon color='error' sx={{ fontSize: 72 }} />,
+  anulado: <CancelRoundedIcon color='error' sx={{ fontSize: 72 }} />,
+  error: <CancelRoundedIcon color='error' sx={{ fontSize: 72 }} />,
 };
 
 const ResultadoPago = () => {
   const [searchParams] = useSearchParams();
+  const t = useTextos('pago');
   const transaccionId = searchParams.get('id');
   const pasarela = searchParams.get('pasarela');
   const [resultado, setResultado] = useState(null);
-  const [error, setError] = useState('');
+  const [errorConsulta, setError] = useState('');
   const intentos = useRef(0);
+  const error = transaccionId ? errorConsulta : t('sinInformacion');
 
   useEffect(() => {
-    if (!transaccionId) {
-      setError('No recibimos la información del pago.');
-      return undefined;
-    }
+    if (!transaccionId) return undefined;
     let temporizador;
     const consultar = () => {
       intentos.current += 1;
@@ -75,7 +56,7 @@ const ResultadoPago = () => {
     return () => clearTimeout(temporizador);
   }, [transaccionId, pasarela]);
 
-  const info = RESULTADOS[resultado?.estado_pago] ?? RESULTADOS.pendiente;
+  const estado = ICONOS[resultado?.estado_pago] ? resultado.estado_pago : 'pendiente';
   const reserva = resultado?.reserva;
 
   return (
@@ -85,14 +66,14 @@ const ResultadoPago = () => {
         {!error && !resultado && (
           <Stack alignItems='center' spacing={2} sx={{ py: 4 }}>
             <CircularProgress />
-            <Typography color='text.secondary'>Confirmando tu pago…</Typography>
+            <Typography color='text.secondary'>{t('confirmando')}</Typography>
           </Stack>
         )}
         {resultado && (
           <>
-            {info.icono}
-            <Typography variant='h2' sx={{ mt: 1 }}>{info.titulo}</Typography>
-            <Typography color='text.secondary' sx={{ mt: 1 }}>{info.texto}</Typography>
+            {ICONOS[estado]}
+            <Typography variant='h2' sx={{ mt: 1 }}>{t(`${estado}Titulo`)}</Typography>
+            <Typography color='text.secondary' sx={{ mt: 1 }}>{t(`${estado}Texto`)}</Typography>
 
             {reserva && (
               <Box sx={{ mt: 3, p: 2, borderRadius: 2, bgcolor: 'action.hover' }}>
@@ -102,7 +83,7 @@ const ResultadoPago = () => {
                 </Typography>
                 <Stack direction='row' spacing={1} justifyContent='center' flexWrap='wrap' useFlexGap sx={{ mt: 1.5 }}>
                   <Chip size='small' icon={<CalendarMonthIcon />} label={`${reserva.fecha} · ${aHoraCorta(reserva.hora_inicio)}`} />
-                  <Chip size='small' icon={<GroupsIcon />} label={`${reserva.cantidad_personas} persona(s)`} />
+                  <Chip size='small' icon={<GroupsIcon />} label={t('personas', { n: reserva.cantidad_personas })} />
                   <Chip size='small' color='primary' variant='outlined' label={formatoMoneda(reserva.valor_total)} />
                 </Stack>
               </Box>
@@ -116,10 +97,10 @@ const ResultadoPago = () => {
                   to={`${RUTAS_PORTAL.consultarReserva}?codigo=${reserva.codigo_reserva}`}
                   state={{ correo: reserva.correo }}
                 >
-                  {resultado.estado_pago === 'aprobado' || resultado.estado_pago === 'pendiente' ? 'Ver mi reserva' : 'Intentar de nuevo'}
+                  {t(resultado.estado_pago === 'aprobado' || resultado.estado_pago === 'pendiente' ? 'verReserva' : 'reintentar')}
                 </Button>
               )}
-              <Button component={RouterLink} to={RUTAS_PORTAL.tours}>Seguir explorando</Button>
+              <Button component={RouterLink} to={RUTAS_PORTAL.tours}>{t('seguir')}</Button>
             </Stack>
           </>
         )}

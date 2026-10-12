@@ -1,6 +1,6 @@
 // Consulta de una reserva hecha sin cuenta: código + correo (GET publico/reservas/{codigo}?correo=).
 // El código llega por query string desde la confirmación; el correo por el state de la navegación.
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link as RouterLink, useLocation, useSearchParams } from 'react-router-dom';
 import { Form, Formik } from 'formik';
 import * as yup from 'yup';
@@ -14,19 +14,23 @@ import { TituloSeccion } from '../../../shared/components/Portal/Secciones';
 import { ESTADOS_RESERVA, aHoraCorta, colorDe, formatoMoneda, nombreDe } from '../../../shared/constants/Turismo';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
 import { irAPagar } from '../../../shared/functions/Pagos';
+import { useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 
-const validacion = yup.object({
-  codigo: yup.string().trim().required('Requerido').max(30),
-  correo: yup.string().trim().required('Requerido').email('Correo inválido'),
-});
+// c: textos comunes de formularios (useTextos('comunes')).
+const crearValidacion = (c) =>
+  yup.object({
+    codigo: yup.string().trim().required(c('requerido')).max(30),
+    correo: yup.string().trim().required(c('requerido')).email(c('correoInvalido')),
+  });
 
+// Estado de la reserva -> clave de su mensaje en los textos editables.
 const MENSAJE_ESTADO = {
-  pendiente: 'El proveedor aún no ha revisado tu solicitud. Te contactará pronto.',
-  pendiente_pago: 'Tu cupo está separado. Paga en línea para confirmar la reserva.',
-  aceptada: '¡Tu reserva está confirmada! Preséntate en el punto de encuentro a la hora indicada.',
-  rechazada: 'El proveedor no pudo aceptar esta reserva. Puedes elegir otra fecha u otra experiencia.',
-  cancelada: 'Esta reserva fue cancelada.',
-  finalizada: 'Esta experiencia ya se realizó. ¡Gracias por viajar con nosotros!',
+  pendiente: 'estadoPendiente',
+  pendiente_pago: 'estadoPendientePago',
+  aceptada: 'estadoAceptada',
+  rechazada: 'estadoRechazada',
+  cancelada: 'estadoCancelada',
+  finalizada: 'estadoFinalizada',
 };
 
 const Fila = ({ etiqueta, valor }) =>
@@ -40,6 +44,9 @@ const Fila = ({ etiqueta, valor }) =>
 const ConsultarReserva = () => {
   const [searchParams] = useSearchParams();
   const { state } = useLocation();
+  const t = useTextos('consulta');
+  const c = useTextos('comunes');
+  const validacion = useMemo(() => crearValidacion(c), [c]);
   const [reserva, setReserva] = useState(null);
   const [error, setError] = useState('');
   const [buscando, setBuscando] = useState(false);
@@ -77,16 +84,16 @@ const ConsultarReserva = () => {
 
   return (
     <Container maxWidth='sm' sx={{ py: 5 }}>
-      <TituloSeccion titulo='Consulta tu reserva' subtitulo='Usa el código que recibiste al reservar y tu correo' />
+      <TituloSeccion titulo={t('titulo')} subtitulo={t('subtitulo')} />
 
       <Paper sx={{ p: 3 }}>
         <Formik initialValues={initialValues} validationSchema={validacion} onSubmit={buscar}>
           <Form noValidate>
             <Stack spacing={2}>
-              <MyTextField name='codigo' label='Código de reserva' placeholder='RES-…' fullWidth required />
-              <MyTextField name='correo' label='Correo' type='email' fullWidth required autoComplete='email' />
+              <MyTextField name='codigo' label={t('codigo')} placeholder={t('codigoPlaceholder')} fullWidth required />
+              <MyTextField name='correo' label={t('correo')} type='email' fullWidth required autoComplete='email' />
               <Button type='submit' variant='contained' size='large' disabled={buscando}>
-                {buscando ? 'Buscando…' : 'Consultar'}
+                {t(buscando ? 'buscando' : 'consultar')}
               </Button>
             </Stack>
           </Form>
@@ -105,28 +112,28 @@ const ConsultarReserva = () => {
             />
           </Stack>
           {MENSAJE_ESTADO[reserva.estado] && (
-            <Typography color='text.secondary' sx={{ mt: 1.5 }}>{MENSAJE_ESTADO[reserva.estado]}</Typography>
+            <Typography color='text.secondary' sx={{ mt: 1.5 }}>{t(MENSAJE_ESTADO[reserva.estado])}</Typography>
           )}
           <Divider sx={{ my: 2 }} />
           <Stack spacing={1}>
             <Fila
-              etiqueta='Experiencia'
+              etiqueta={t('experiencia')}
               valor={
                 <Link component={RouterLink} to={RUTAS_PORTAL.tour(reserva.experiencia_slug)}>
                   {reserva.experiencia_nombre}
                 </Link>
               }
             />
-            <Fila etiqueta='Fecha' valor={`${reserva.fecha} · ${aHoraCorta(reserva.hora_inicio)}`} />
-            <Fila etiqueta='Personas' valor={reserva.cantidad_personas} />
-            <Fila etiqueta='Titular' valor={reserva.nombre} />
-            <Fila etiqueta='Punto de encuentro' valor={reserva.punto_encuentro} />
-            <Fila etiqueta='Proveedor' valor={reserva.proveedor_nombre} />
-            <Fila etiqueta='Contacto del proveedor' valor={reserva.proveedor_telefono} />
+            <Fila etiqueta={t('fecha')} valor={`${reserva.fecha} · ${aHoraCorta(reserva.hora_inicio)}`} />
+            <Fila etiqueta={t('personas')} valor={reserva.cantidad_personas} />
+            <Fila etiqueta={t('titular')} valor={reserva.nombre} />
+            <Fila etiqueta={t('puntoEncuentro')} valor={reserva.punto_encuentro} />
+            <Fila etiqueta={t('proveedor')} valor={reserva.proveedor_nombre} />
+            <Fila etiqueta={t('contactoProveedor')} valor={reserva.proveedor_telefono} />
           </Stack>
           <Divider sx={{ my: 2 }} />
           <Stack direction='row' justifyContent='space-between'>
-            <Typography fontWeight={700}>Total</Typography>
+            <Typography fontWeight={700}>{t('total')}</Typography>
             <Typography fontWeight={700}>{formatoMoneda(reserva.valor_total)}</Typography>
           </Stack>
           {reserva.estado === 'pendiente_pago' && (
@@ -140,7 +147,7 @@ const ConsultarReserva = () => {
                 disabled={pagando}
                 onClick={pagar}
               >
-                {pagando ? 'Te llevamos a la pasarela de pagos…' : 'Pagar ahora'}
+                {t(pagando ? 'llevandoPasarela' : 'pagarAhora')}
               </Button>
               {errorPago && <Alert severity='warning' sx={{ mt: 2 }}>{errorPago}</Alert>}
             </>
@@ -150,8 +157,8 @@ const ConsultarReserva = () => {
 
       <Box sx={{ mt: 3, textAlign: 'center' }}>
         <Typography variant='body2' color='text.secondary'>
-          ¿Quieres ver todas tus reservas en un solo lugar?{' '}
-          <Link component={RouterLink} to={RUTAS_PORTAL.registro}>Crea una cuenta</Link>
+          {t('quieresCuenta')}{' '}
+          <Link component={RouterLink} to={RUTAS_PORTAL.registro}>{t('creaCuenta')}</Link>
         </Typography>
       </Box>
     </Container>

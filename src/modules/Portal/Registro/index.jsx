@@ -1,6 +1,6 @@
 // Registro público: viajero (rol Cliente) o proveedor (rol Proveedor, verificación pendiente).
 // Tras crear la cuenta inicia sesión con el mismo login del proyecto y redirige.
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { Form, Formik } from 'formik';
@@ -32,31 +32,35 @@ import { login } from '@crema/redux/features/auth/authSlice';
 import { useAuthMethod } from '@crema/hooks/AuthHooks';
 import MyTextField from '../../../shared/components/MyTextField';
 import { urlPanelDe } from '../../../shared/components/Portal/PortalHeader';
-import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
+import { useApariencia, useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
+import { conNegrita } from '../../../shared/constants/TextosPortal';
 
-const esquemaBase = {
-  nombre: yup.string().required('Requerido').max(128, 'Máximo 128 caracteres'),
-  identificacion_usuario: yup
-    .string()
-    .required('Requerido')
-    .max(128, 'Máximo 128 caracteres')
-    .matches(/^[A-Za-z0-9.-]+$/, 'Solo letras, números, puntos o guiones'),
-  correo_electronico: yup.string().required('Requerido').email('Correo inválido'),
-  clave: yup.string().required('Requerido').min(8, 'Mínimo 8 caracteres'),
-  clave_confirmation: yup
-    .string()
-    .required('Requerido')
-    .oneOf([yup.ref('clave')], 'Las contraseñas no coinciden'),
-  acepta_terminos: yup.boolean().oneOf([true], 'Debe aceptar para continuar'),
-};
+// t: textos del registro; c: textos comunes de formularios (useTextos).
+const crearEsquemas = (t, c) => {
+  const esquemaBase = {
+    nombre: yup.string().required(c('requerido')).max(128, c('maximo', { n: 128 })),
+    identificacion_usuario: yup
+      .string()
+      .required(c('requerido'))
+      .max(128, c('maximo', { n: 128 }))
+      .matches(/^[A-Za-z0-9.-]+$/, t('documentoInvalido')),
+    correo_electronico: yup.string().required(c('requerido')).email(c('correoInvalido')),
+    clave: yup.string().required(c('requerido')).min(8, t('claveMinimo', { n: 8 })),
+    clave_confirmation: yup
+      .string()
+      .required(c('requerido'))
+      .oneOf([yup.ref('clave')], t('clavesNoCoinciden')),
+    acepta_terminos: yup.boolean().oneOf([true], t('debeAceptar')),
+  };
 
-const esquemas = {
-  cliente: yup.object(esquemaBase),
-  proveedor: yup.object({
-    ...esquemaBase,
-    nombre_comercial: yup.string().required('Requerido').max(150, 'Máximo 150 caracteres'),
-    telefono: yup.string().max(30).matches(/^[+]?[0-9\s-]*$/, 'Teléfono inválido').nullable(),
-  }),
+  return {
+    cliente: yup.object(esquemaBase),
+    proveedor: yup.object({
+      ...esquemaBase,
+      nombre_comercial: yup.string().required(c('requerido')).max(150, c('maximo', { n: 150 })),
+      telefono: yup.string().max(30).matches(/^[+]?[0-9\s-]*$/, c('telefonoInvalido')).nullable(),
+    }),
+  };
 };
 
 const valoresIniciales = {
@@ -75,6 +79,9 @@ const valoresIniciales = {
 const Registro = () => {
   const dispatch = useDispatch();
   const { apariencia } = useApariencia();
+  const t = useTextos('registro');
+  const c = useTextos('comunes');
+  const esquemas = useMemo(() => crearEsquemas(t, c), [t, c]);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const tipo = searchParams.get('tipo') === 'proveedor' ? 'proveedor' : 'cliente';
@@ -121,21 +128,20 @@ const Registro = () => {
       <Paper sx={{ p: { xs: 3, md: 5 } }}>
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Box component='img' src={apariencia.logos.principal} alt={apariencia.marca.nombre} sx={{ height: 80 }} />
-          <Typography variant='h2' sx={{ mt: 1 }}>Crea tu cuenta</Typography>
+          <Typography variant='h2' sx={{ mt: 1 }}>{t('titulo')}</Typography>
           <Typography color='text.secondary'>
-            ¿Ya tienes una? <Link component={RouterLink} to={redirect ? `/signin?redirect=${redirect}` : '/signin'}>Ingresa</Link>
+            {t('yaTienes')} <Link component={RouterLink} to={redirect ? `/signin?redirect=${redirect}` : '/signin'}>{t('ingresa')}</Link>
           </Typography>
         </Box>
 
         <Tabs value={tipo} onChange={(e, v) => cambiarTipo(v)} variant='fullWidth' sx={{ mb: 3 }}>
-          <Tab value='cliente' icon={<LuggageIcon />} iconPosition='start' label='Quiero viajar' />
-          <Tab value='proveedor' icon={<StorefrontIcon />} iconPosition='start' label='Tengo un negocio turístico' />
+          <Tab value='cliente' icon={<LuggageIcon />} iconPosition='start' label={t('quieroViajar')} />
+          <Tab value='proveedor' icon={<StorefrontIcon />} iconPosition='start' label={t('tengoNegocio')} />
         </Tabs>
 
         {tipo === 'proveedor' && (
           <Alert severity='info' sx={{ mb: 3 }}>
-            Tu negocio quedará <strong>pendiente de verificación</strong>. Mientras tanto puedes crear tus experiencias
-            en borrador; nuestro equipo las revisa antes de publicarlas.
+            {conNegrita(t('avisoProveedor'))}
           </Alert>
         )}
 
@@ -152,48 +158,48 @@ const Registro = () => {
                 {tipo === 'proveedor' && (
                   <>
                     <Grid item xs={12}>
-                      <Divider textAlign='left'>Tu negocio</Divider>
+                      <Divider textAlign='left'>{t('tuNegocio')}</Divider>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <MyTextField name='nombre_comercial' label='Nombre comercial' fullWidth required variant='outlined' />
+                      <MyTextField name='nombre_comercial' label={t('nombreComercial')} fullWidth required variant='outlined' />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <MyTextField name='nit' label='NIT (opcional)' fullWidth variant='outlined' />
+                      <MyTextField name='nit' label={t('nit')} fullWidth variant='outlined' />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <MyTextField name='telefono' label='Teléfono / WhatsApp' fullWidth variant='outlined' />
+                      <MyTextField name='telefono' label={t('telefono')} fullWidth variant='outlined' />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <TextField select name='destino_id' label='Destino principal' fullWidth value={values.destino_id} onChange={handleChange}>
-                        <MenuItem value=''>Sin definir</MenuItem>
+                      <TextField select name='destino_id' label={t('destinoPrincipal')} fullWidth value={values.destino_id} onChange={handleChange}>
+                        <MenuItem value=''>{t('sinDefinir')}</MenuItem>
                         {destinos.map((d) => <MenuItem key={d.id} value={d.id}>{d.nombre}</MenuItem>)}
                       </TextField>
                     </Grid>
                     <Grid item xs={12}>
-                      <Divider textAlign='left'>Tus datos de acceso</Divider>
+                      <Divider textAlign='left'>{t('datosAcceso')}</Divider>
                     </Grid>
                   </>
                 )}
                 <Grid item xs={12} sm={6}>
-                  <MyTextField name='nombre' label='Nombre completo' fullWidth required variant='outlined' />
+                  <MyTextField name='nombre' label={t('nombre')} fullWidth required variant='outlined' />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <MyTextField name='correo_electronico' label='Correo electrónico' type='email' fullWidth required variant='outlined' />
+                  <MyTextField name='correo_electronico' label={t('correo')} type='email' fullWidth required variant='outlined' />
                 </Grid>
                 <Grid item xs={12}>
                   <MyTextField
                     name='identificacion_usuario'
-                    label='Número de documento (será tu usuario para ingresar)'
+                    label={t('documento')}
                     fullWidth
                     required
                     variant='outlined'
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <MyTextField name='clave' label='Contraseña' type='password' fullWidth required variant='outlined' />
+                  <MyTextField name='clave' label={t('clave')} type='password' fullWidth required variant='outlined' />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <MyTextField name='clave_confirmation' label='Repite la contraseña' type='password' fullWidth required variant='outlined' />
+                  <MyTextField name='clave_confirmation' label={t('repiteClave')} type='password' fullWidth required variant='outlined' />
                 </Grid>
                 <Grid item xs={12}>
                   <FormControlLabel
@@ -203,7 +209,7 @@ const Registro = () => {
                         onChange={(e) => setFieldValue('acepta_terminos', e.target.checked)}
                       />
                     }
-                    label='Acepto los términos de uso y la política de tratamiento de datos personales.'
+                    label={t('terminos')}
                   />
                   {touched.acepta_terminos && errors.acepta_terminos && (
                     <FormHelperText error>{errors.acepta_terminos}</FormHelperText>
@@ -218,7 +224,7 @@ const Registro = () => {
                     disabled={ocupado}
                     startIcon={ocupado ? <CircularProgress size={18} color='inherit' /> : null}
                   >
-                    {ingresando ? 'Ingresando...' : tipo === 'proveedor' ? 'Registrar mi negocio' : 'Crear cuenta'}
+                    {t(ingresando ? 'ingresando' : tipo === 'proveedor' ? 'registrarNegocio' : 'crearCuenta')}
                   </Button>
                 </Grid>
               </Grid>

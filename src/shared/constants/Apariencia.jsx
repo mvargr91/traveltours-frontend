@@ -7,6 +7,7 @@ import { coloresPanel } from '@crema/constants/defaultConfig';
 import { urlArchivo } from '../functions/Archivos';
 import { ARCOIRIS, COLORES_MARCA, MARCA } from './Marca';
 import { RUTAS_PORTAL } from './RutasPortal';
+import { TEXTOS_BASE, combinarTextos } from './TextosPortal';
 
 // Enlaces del menú del portal: la clave es fija (define la ruta), el resto se personaliza.
 export const RUTAS_MENU_PORTAL = {
@@ -66,6 +67,8 @@ export const APARIENCIA_BASE = {
       { icono: 'event_available', titulo: 'Reserva con confianza', texto: 'Cupos y horarios actualizados por el proveedor, confirmación en tu cuenta.' },
     ],
   },
+  // Textos del portal por página (catálogo en TextosPortal).
+  textos: TEXTOS_BASE,
   panel: {
     principal: coloresPanel.principal,
     acento: coloresPanel.acento,
@@ -171,6 +174,7 @@ export const combinarApariencia = (guardada) => {
   resultado.portal.franja = combinarFranja(APARIENCIA_BASE.portal.franja, origen.portal?.franja);
   resultado.portal.menu = combinarMenu(APARIENCIA_BASE.portal.menu, origen.portal?.menu);
   resultado.inicio.propuestas = combinarPropuestas(APARIENCIA_BASE.inicio.propuestas, origen.inicio?.propuestas);
+  resultado.textos = combinarTextos(origen.textos);
   resultado.inicio.oscurecer = Math.min(0.9, Math.max(0, resultado.inicio.oscurecer));
   return resultado;
 };

@@ -41,6 +41,7 @@ import { ImagenExperiencia } from '../../../shared/components/Portal/ExperienceC
 import ReservaWidget from './ReservaWidget';
 import { urlArchivo } from '../../../shared/functions/Archivos';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
+import { useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 
 // Lista "incluye / no incluye": texto libre (una línea por ítem) + características marcadas.
 const ListaIncluye = ({ titulo, lineas, incluida }) =>
@@ -65,6 +66,7 @@ const lineasDe = (texto) => (texto ? texto.split(/\r?\n/).map((l) => l.trim()).f
 const ExperienciaDetalle = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const t = useTextos('detalle');
   const { slug } = useParams();
   const { actual: exp, loadingActual, error } = useSelector((state) => state.portalExperiencias);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -88,9 +90,9 @@ const ExperienciaDetalle = () => {
   if (!exp) {
     return (
       <Container maxWidth='md' sx={{ py: 10, textAlign: 'center' }}>
-        <Typography variant='h2'>Experiencia no disponible</Typography>
-        <Typography color='text.secondary' sx={{ my: 2 }}>Puede que ya no esté publicada.</Typography>
-        <Button variant='contained' component={RouterLink} to={RUTAS_PORTAL.tours}>Ver experiencias</Button>
+        <Typography variant='h2'>{t('noDisponibleTitulo')}</Typography>
+        <Typography color='text.secondary' sx={{ my: 2 }}>{t('noDisponibleTexto')}</Typography>
+        <Button variant='contained' component={RouterLink} to={RUTAS_PORTAL.tours}>{t('verExperiencias')}</Button>
       </Container>
     );
   }
@@ -115,7 +117,7 @@ const ExperienciaDetalle = () => {
   return (
     <Container maxWidth='lg' sx={{ py: 4 }}>
       <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} to='/' underline='hover' color='inherit'>Inicio</Link>
+        <Link component={RouterLink} to='/' underline='hover' color='inherit'>{t('inicio')}</Link>
         <Link component={RouterLink} to={`${RUTAS_PORTAL.tours}?destino=${exp.destino_slug}`} underline='hover' color='inherit'>{exp.destino_nombre}</Link>
         <Typography color='text.primary'>{exp.nombre}</Typography>
       </Breadcrumbs>
@@ -151,23 +153,23 @@ const ExperienciaDetalle = () => {
             {exp.categorias.map((c) => (
               <Chip key={c.id} label={c.nombre} size='small' component={RouterLink} to={`${RUTAS_PORTAL.tours}?categoria=${c.slug}`} clickable />
             ))}
-            {verificada && <Chip icon={<VerifiedIcon />} label='Verificada' color='primary' size='small' />}
+            {verificada && <Chip icon={<VerifiedIcon />} label={t('verificada')} color='primary' size='small' />}
           </Stack>
           <Typography variant='h1' sx={{ fontSize: { xs: '1.8rem', md: '2.3rem' } }}>{exp.nombre}</Typography>
           <Stack direction='row' spacing={2} alignItems='center' sx={{ mt: 1, mb: 3, flexWrap: 'wrap', color: 'text.secondary' }}>
             <Stack direction='row' spacing={0.5} alignItems='center'>
               <Rating value={Number(exp.calificacion_promedio) || 0} precision={0.5} readOnly size='small' />
-              <Typography variant='body2'>{exp.calificacion_promedio ?? '—'} ({exp.total_resenas} reseñas)</Typography>
+              <Typography variant='body2'>{exp.calificacion_promedio ?? '—'} {t('resenasCantidad', { n: exp.total_resenas })}</Typography>
             </Stack>
             <Stack direction='row' spacing={0.5} alignItems='center'><PlaceIcon fontSize='small' /><Typography variant='body2'>{exp.destino_nombre}</Typography></Stack>
-            <Button size='small' startIcon={<FavoriteBorderIcon />} onClick={guardarFavorito}>Guardar</Button>
+            <Button size='small' startIcon={<FavoriteBorderIcon />} onClick={guardarFavorito}>{t('guardar')}</Button>
           </Stack>
 
           <Grid container spacing={2} sx={{ mb: 3 }}>
             {[
-              { icono: ScheduleIcon, etiqueta: 'Duración', valor: exp.duracion },
-              { icono: GroupsIcon, etiqueta: 'Capacidad', valor: exp.capacidad_maxima && `${exp.capacidad_maxima} personas` },
-              { icono: TranslateIcon, etiqueta: 'Idioma', valor: exp.idioma },
+              { icono: ScheduleIcon, etiqueta: t('duracion'), valor: exp.duracion },
+              { icono: GroupsIcon, etiqueta: t('capacidad'), valor: exp.capacidad_maxima && t('capacidadValor', { n: exp.capacidad_maxima }) },
+              { icono: TranslateIcon, etiqueta: t('idioma'), valor: exp.idioma },
             ].filter((d) => d.valor).map(({ icono: Icono, etiqueta, valor }) => (
               <Grid item xs={12} sm={4} key={etiqueta}>
                 <Paper variant='outlined' sx={{ p: 1.5, display: 'flex', gap: 1.5, alignItems: 'center' }}>
@@ -186,13 +188,13 @@ const ExperienciaDetalle = () => {
           )}
 
           <Grid container spacing={3} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={6}><ListaIncluye titulo='Incluye' lineas={incluye} incluida /></Grid>
-            <Grid item xs={12} sm={6}><ListaIncluye titulo='No incluye' lineas={noIncluye} incluida={false} /></Grid>
+            <Grid item xs={12} sm={6}><ListaIncluye titulo={t('incluye')} lineas={incluye} incluida /></Grid>
+            <Grid item xs={12} sm={6}><ListaIncluye titulo={t('noIncluye')} lineas={noIncluye} incluida={false} /></Grid>
           </Grid>
 
           {exp.precios.length > 0 && (
             <Box sx={{ mb: 3 }}>
-              <Typography variant='h4' sx={{ mb: 1 }}>Tarifas</Typography>
+              <Typography variant='h4' sx={{ mb: 1 }}>{t('tarifas')}</Typography>
               <Table size='small'>
                 <TableBody>
                   {exp.precios.flatMap((p) =>
@@ -207,7 +209,7 @@ const ExperienciaDetalle = () => {
                           )}
                         </TableCell>
                         <TableCell>{textoCantidad(c.cantidad)}</TableCell>
-                        <TableCell align='right'><strong>{formatoMoneda(c.valor)}</strong> <Typography component='span' variant='body2' color='text.secondary'>c/u</Typography></TableCell>
+                        <TableCell align='right'><strong>{formatoMoneda(c.valor)}</strong> <Typography component='span' variant='body2' color='text.secondary'>{t('cadaUno')}</Typography></TableCell>
                       </TableRow>
                     )),
                   )}
@@ -218,7 +220,7 @@ const ExperienciaDetalle = () => {
 
           {exp.horarios.length > 0 && (
             <Box sx={{ mb: 3 }}>
-              <Typography variant='h4' sx={{ mb: 1 }}>Horarios habituales</Typography>
+              <Typography variant='h4' sx={{ mb: 1 }}>{t('horarios')}</Typography>
               <Stack direction='row' sx={{ flexWrap: 'wrap', gap: 1 }}>
                 {exp.horarios.map((h) => (
                   <Chip key={h.id} variant='outlined' label={`${nombreDe(DIAS_SEMANA, h.dia_semana)} ${aHoraCorta(h.hora_inicio)} - ${aHoraCorta(h.hora_fin)}`} />
@@ -229,17 +231,17 @@ const ExperienciaDetalle = () => {
 
           {(exp.punto_encuentro || exp.direccion) && (
             <Box sx={{ mb: 3 }}>
-              <Typography variant='h4' sx={{ mb: 1 }}>Punto de encuentro</Typography>
+              <Typography variant='h4' sx={{ mb: 1 }}>{t('puntoEncuentro')}</Typography>
               <Typography>{[exp.punto_encuentro, exp.direccion].filter(Boolean).join(' · ')}</Typography>
-              {urlMapa && <Button size='small' startIcon={<PlaceIcon />} href={urlMapa} target='_blank' rel='noopener noreferrer'>Ver en el mapa</Button>}
+              {urlMapa && <Button size='small' startIcon={<PlaceIcon />} href={urlMapa} target='_blank' rel='noopener noreferrer'>{t('verEnMapa')}</Button>}
             </Box>
           )}
 
           {videos.length > 0 && (
             <Box sx={{ mb: 3 }}>
-              <Typography variant='h4' sx={{ mb: 1 }}>Videos</Typography>
+              <Typography variant='h4' sx={{ mb: 1 }}>{t('videos')}</Typography>
               {videos.map((v) => (
-                <Button key={v.id} startIcon={<PlayCircleIcon />} href={urlArchivo(v.ruta_archivo)} target='_blank' rel='noopener noreferrer'>{v.titulo || 'Ver video'}</Button>
+                <Button key={v.id} startIcon={<PlayCircleIcon />} href={urlArchivo(v.ruta_archivo)} target='_blank' rel='noopener noreferrer'>{v.titulo || t('verVideo')}</Button>
               ))}
             </Box>
           )}
@@ -247,21 +249,21 @@ const ExperienciaDetalle = () => {
           <Divider sx={{ my: 3 }} />
           <Paper variant='outlined' sx={{ p: 2.5, mb: 3 }}>
             <Stack direction='row' spacing={1} alignItems='center'>
-              <Typography variant='h4'>Ofrecido por {exp.proveedor_nombre}</Typography>
+              <Typography variant='h4'>{t('ofrecidoPor', { proveedor: exp.proveedor_nombre })}</Typography>
               {exp.proveedor_verificacion === 'aprobado' && <VerifiedIcon color='primary' />}
             </Stack>
             {exp.proveedor_descripcion && <Typography color='text.secondary' sx={{ mt: 1 }}>{exp.proveedor_descripcion}</Typography>}
           </Paper>
 
-          <Typography variant='h3' sx={{ mb: 2 }}>Reseñas</Typography>
+          <Typography variant='h3' sx={{ mb: 2 }}>{t('resenas')}</Typography>
           {exp.resenas.length === 0 ? (
-            <Alert severity='info'>Aún no hay reseñas. ¡Sé la primera persona en contar tu experiencia!</Alert>
+            <Alert severity='info'>{t('sinResenas')}</Alert>
           ) : (
             <Stack spacing={2}>
               {exp.resenas.map((r) => (
                 <Paper key={r.id} variant='outlined' sx={{ p: 2 }}>
                   <Stack direction='row' justifyContent='space-between'>
-                    <Typography fontWeight={600}>{r.usuario_nombre || 'Viajero'}</Typography>
+                    <Typography fontWeight={600}>{r.usuario_nombre || t('viajero')}</Typography>
                     <Typography variant='caption' color='text.secondary'>{String(r.fecha).substring(0, 10)}</Typography>
                   </Stack>
                   <Rating value={r.calificacion} readOnly size='small' />

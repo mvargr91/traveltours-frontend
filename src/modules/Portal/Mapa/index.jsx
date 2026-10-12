@@ -30,7 +30,7 @@ import { onGetColeccion as onGetExperiencias } from '@crema/redux/features/porta
 import { onGetColeccion as onGetDestinos } from '@crema/redux/features/portalDestinos/portalDestinosSlice';
 import { onGetColeccion as onGetCategorias } from '@crema/redux/features/portalCategorias/portalCategoriasSlice';
 import { formatoMoneda } from '../../../shared/constants/Turismo';
-import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
+import { useApariencia, useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 
 // Coordenadas centrales de Colombia [longitud, latitud]
 const CENTRO_COLOMBIA = [-74.08175, 4.60971];
@@ -64,6 +64,10 @@ const ESTILO_MAPA_BASE = {
   ],
 };
 
+// Los globos de Mapbox se arman como HTML: todo texto que entra se escapa.
+const escapar = (valor) =>
+  String(valor ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
 const Mapa = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -71,6 +75,8 @@ const Mapa = () => {
   // Colores de Parametrización > Apariencia: primario del portal y franja para los marcadores.
   const colorPrimario = theme.palette.primary.main;
   const { franja } = useApariencia().apariencia.portal;
+  // Textos de Parametrización > Apariencia > Textos.
+  const t = useTextos('mapa');
 
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -307,15 +313,15 @@ const Mapa = () => {
 
       // Contenido del popup
       const precioHtml = lugar.precio_desde
-        ? `<div style="font-weight: 700; color: ${colorPrimario}; margin-top: 6px; font-size: 13px;">Desde ${formatoMoneda(
-            lugar.precio_desde
+        ? `<div style="font-weight: 700; color: ${colorPrimario}; margin-top: 6px; font-size: 13px;">${escapar(
+            t('popupDesde', { precio: formatoMoneda(lugar.precio_desde) })
           )}</div>`
         : '';
 
       const enlaceHtml =
         lugar.tipo === 'experiencia'
-          ? `<a href="/tours/${lugar.slug}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: ${colorPrimario}; text-decoration: none; font-weight: 700;">Ver experiencia &rarr;</a>`
-          : `<a href="/tours?destino=${lugar.slug}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: ${colorPrimario}; text-decoration: none; font-weight: 700;">Ver tours en destino &rarr;</a>`;
+          ? `<a href="/tours/${encodeURIComponent(lugar.slug)}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: ${colorPrimario}; text-decoration: none; font-weight: 700;">${escapar(t('popupVerExperiencia'))} &rarr;</a>`
+          : `<a href="/tours?destino=${encodeURIComponent(lugar.slug)}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: ${colorPrimario}; text-decoration: none; font-weight: 700;">${escapar(t('popupVerDestino'))} &rarr;</a>`;
 
       const popup = new mapboxgl.Popup({
         offset: 25,
@@ -324,13 +330,13 @@ const Mapa = () => {
       }).setHTML(`
         <div style="font-family: inherit; padding: 6px; max-width: 220px; color: #1e293b;">
           <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: ${colorArcoiris}; font-weight: 800;">
-            ${lugar.tipo === 'experiencia' ? 'Experiencia LGTBIQ+' : 'Destino Turístico'}
+            ${escapar(t(lugar.tipo === 'experiencia' ? 'popupExperiencia' : 'popupDestino'))}
           </div>
-          <h4 style="margin: 4px 0 2px; font-size: 14px; font-weight: 700; line-height: 1.25; color: #0f172a;">${lugar.nombre}</h4>
-          <div style="font-size: 12px; color: #64748b;">${lugar.destino_nombre || ''}</div>
+          <h4 style="margin: 4px 0 2px; font-size: 14px; font-weight: 700; line-height: 1.25; color: #0f172a;">${escapar(lugar.nombre)}</h4>
+          <div style="font-size: 12px; color: #64748b;">${escapar(lugar.destino_nombre)}</div>
           ${
             lugar.direccion
-              ? `<div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">📍 ${lugar.direccion}</div>`
+              ? `<div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">📍 ${escapar(lugar.direccion)}</div>`
               : ''
           }
           ${precioHtml}
@@ -362,7 +368,7 @@ const Mapa = () => {
         duration: 800,
       });
     }
-  }, [lugaresFiltrados, franja, colorPrimario]);
+  }, [lugaresFiltrados, franja, colorPrimario, t]);
 
   // Al hacer clic en un lugar de la lista lateral: enfocar y desplegar popup
   const seleccionarLugar = useCallback((lugar) => {
@@ -425,7 +431,7 @@ const Mapa = () => {
               mb: 1,
             }}
           >
-            Mapa de experiencias
+            {t('titulo')}
           </Typography>
           <Typography
             component='h3'
@@ -436,7 +442,7 @@ const Mapa = () => {
               color: 'text.secondary',
             }}
           >
-            Encuentra experiencias LGTBIQ+ friendly por toda Colombia
+            {t('subtitulo')}
           </Typography>
         </Box>
 
@@ -457,7 +463,7 @@ const Mapa = () => {
                 <TextField
                   sx={{ width: { xs: '100%', md: '85%' } }}
                   size='small'
-                  placeholder='Buscar por experiencia, destino o ciudad...'
+                  placeholder={t('buscarPlaceholder')}
                   value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
                   InputProps={{
@@ -490,7 +496,7 @@ const Mapa = () => {
                 }}
               >
                 <Chip
-                  label='Todas las categorías'
+                  label={t('todasCategorias')}
                   clickable
                   color={categoriaActiva === 'todas' ? 'primary' : 'default'}
                   variant={categoriaActiva === 'todas' ? 'filled' : 'outlined'}
@@ -538,9 +544,9 @@ const Mapa = () => {
                 }}
               >
                 <Typography variant='subtitle1' fontWeight={700}>
-                  Lugares registrados ({lugaresFiltrados.length})
+                  {t('lugares', { n: lugaresFiltrados.length })}
                 </Typography>
-                <Tooltip title='Centrar en Colombia'>
+                <Tooltip title={t('centrar')}>
                   <IconButton size='small' onClick={centrarColombia} color='primary'>
                     <MyLocationIcon fontSize='small' />
                   </IconButton>
@@ -552,7 +558,7 @@ const Mapa = () => {
                   <Box sx={{ py: 6, textAlign: 'center' }}>
                     <PlaceIcon sx={{ fontSize: 44, color: 'text.disabled', mb: 1 }} />
                     <Typography color='text.secondary'>
-                      No se encontraron experiencias o destinos con los filtros aplicados.
+                      {t('sinResultados')}
                     </Typography>
                     <Button
                       size='small'
@@ -562,7 +568,7 @@ const Mapa = () => {
                         setCategoriaActiva('todas');
                       }}
                     >
-                      Limpiar filtros
+                      {t('limpiarFiltros')}
                     </Button>
                   </Box>
                 ) : (
@@ -613,7 +619,7 @@ const Mapa = () => {
                                 {lugar.nombre}
                               </Typography>
                               {lugar.verificada && (
-                                <Tooltip title='Verificada por Travel City'>
+                                <Tooltip title={t('verificada')}>
                                   <VerifiedIcon
                                     color='primary'
                                     sx={{ fontSize: 18, flexShrink: 0 }}
@@ -664,11 +670,7 @@ const Mapa = () => {
                             >
                               <Chip
                                 size='small'
-                                label={
-                                  lugar.tipo === 'experiencia'
-                                    ? 'Experiencia'
-                                    : 'Destino'
-                                }
+                                label={t(lugar.tipo === 'experiencia' ? 'experiencia' : 'destino')}
                                 sx={{
                                   fontSize: 11,
                                   height: 20,
@@ -693,7 +695,7 @@ const Mapa = () => {
                                   variant='caption'
                                   color='text.secondary'
                                 >
-                                  {lugar.total_experiencias ?? 0} tours
+                                  {t('tours', { n: lugar.total_experiencias ?? 0 })}
                                 </Typography>
                               ) : null}
                             </Box>
@@ -765,7 +767,7 @@ const Mapa = () => {
                     },
                   }}
                 >
-                  Ver toda Colombia
+                  {t('verTodo')}
                 </Button>
               </Box>
             </Paper>
