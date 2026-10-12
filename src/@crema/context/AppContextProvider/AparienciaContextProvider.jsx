@@ -11,6 +11,7 @@ import {
   gradienteFranja,
   resolverImagenes,
 } from '../../../shared/constants/Apariencia';
+import { formatear } from '../../../shared/constants/TextosPortal';
 
 const CLAVE_CACHE = 'tt-apariencia';
 const MULTIPART = { headers: { 'Content-Type': 'multipart/form-data' } };
@@ -51,6 +52,15 @@ const AparienciaActionsContext = createContext({});
 
 /** { apariencia, guardada, cargada }: "apariencia" ya trae los valores de fábrica donde no hay personalización. */
 export const useApariencia = () => useContext(AparienciaContext);
+
+/**
+ * Textos editables de una página del portal (grupo de TextosPortal).
+ * const t = useTextos('mapa'); t('titulo'); t('lugares', { n: 5 })
+ */
+export const useTextos = (grupo) => {
+  const textos = useContext(AparienciaContext).apariencia.textos[grupo];
+  return useCallback((clave, variables) => formatear(textos[clave], variables), [textos]);
+};
 
 export const useAparienciaActions = () => useContext(AparienciaActionsContext);
 

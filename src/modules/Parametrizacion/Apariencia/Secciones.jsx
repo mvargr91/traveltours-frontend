@@ -3,14 +3,19 @@
 //   cambiar(ruta, v)  cambia un valor por su ruta ('portal.claro.fondo', 'portal.menu[0].color'...)
 //   imagen(clave)     props de CampoImagen para esa imagen
 //   disabled          sin permiso para modificar
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Alert,
   Box,
   Button,
+  Chip,
   FormControlLabel,
   IconButton,
+  InputAdornment,
   Slider,
   Switch,
   TextField,
@@ -21,7 +26,11 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import RestoreIcon from '@mui/icons-material/Restore';
+import SearchIcon from '@mui/icons-material/Search';
 import { MAX_COLORES_FRANJA, MAX_PROPUESTAS, RUTAS_MENU_PORTAL } from '../../../shared/constants/Apariencia';
+import { MAX_TEXTO, TEXTOS_PORTAL, variablesDe } from '../../../shared/constants/TextosPortal';
 import { CampoColor, CampoIcono, CampoImagen, Grupo, Rejilla } from './Campos';
 
 const propTypes = {
@@ -290,6 +299,137 @@ export const SeccionInicio = ({ config, cambiar, imagen, disabled }) => {
   );
 };
 SeccionInicio.propTypes = propTypes;
+
+// Un texto del portal: muestra las variables que admite y permite volver al de fábrica.
+const CampoTexto = ({ etiqueta, base, valor, onChange, disabled }) => {
+  const variables = variablesDe(base);
+  const ayuda = [
+    !valor.trim() && 'Vacío: se usará el texto original.',
+    variables.length > 0 && `Variables: ${variables.join(' ')}`,
+    base.includes('**') && '**así** va en negrita',
+  ].filter(Boolean).join(' · ');
+
+  return (
+    <TextField
+      fullWidth
+      multiline
+      size='small'
+      label={etiqueta}
+      value={valor}
+      placeholder={base}
+      helperText={ayuda}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.value.replace(/\s*\n\s*/g, ' ').slice(0, MAX_TEXTO))}
+      inputProps={{ maxLength: MAX_TEXTO }}
+      InputLabelProps={{ shrink: true }}
+      InputProps={{
+        endAdornment:
+          !disabled && valor !== base ? (
+            <InputAdornment position='end'>
+              <Tooltip title='Volver al texto original'>
+                <IconButton size='small' edge='end' onClick={() => onChange(base)}>
+                  <RestoreIcon fontSize='small' />
+                </IconButton>
+              </Tooltip>
+            </InputAdornment>
+          ) : null,
+      }}
+    />
+  );
+};
+CampoTexto.propTypes = {
+  etiqueta: PropTypes.string.isRequired,
+  base: PropTypes.string.isRequired,
+  valor: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+};
+
+export const SeccionTextos = ({ config, cambiar, disabled }) => {
+  const { textos } = config;
+  const [busqueda, setBusqueda] = useState('');
+  const [abierto, setAbierto] = useState('');
+  const buscado = busqueda.trim().toLowerCase();
+
+  // Se filtra con los textos del momento en que se busca: así un campo no desaparece mientras se edita.
+  const grupos = useMemo(
+    () =>
+      TEXTOS_PORTAL.map((grupo) => ({
+        ...grupo,
+        campos: grupo.campos.filter(([clave, etiqueta, base]) =>
+          [etiqueta, base, textos[grupo.clave][clave]].some((valor) => valor.toLowerCase().includes(buscado)),
+        ),
+      })).filter((grupo) => grupo.campos.length > 0),
+    [buscado], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  return (
+    <Grupo
+      titulo='Textos del portal'
+      ayuda='Títulos, botones y mensajes de cada página del portal público. Busca el texto tal como se ve en el sitio para encontrarlo.'
+    >
+      <TextField
+        fullWidth
+        size='small'
+        sx={{ mb: 4 }}
+        placeholder='Buscar un texto…'
+        value={busqueda}
+        onChange={(e) => setBusqueda(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position='start'>
+              <SearchIcon fontSize='small' />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {grupos.length === 0 && <Alert severity='info'>Ningún texto coincide con la búsqueda.</Alert>}
+      {grupos.map((grupo) => {
+        const modificados = grupo.campos.filter(([clave, , base]) => textos[grupo.clave][clave] !== base).length;
+        return (
+          <Accordion
+            key={grupo.clave}
+            disableGutters
+            variant='outlined'
+            expanded={Boolean(buscado) || abierto === grupo.clave}
+            onChange={(_, expandido) => setAbierto(expandido ? grupo.clave : '')}
+            TransitionProps={{ unmountOnExit: true }}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                <Typography sx={{ fontWeight: 500 }}>{grupo.titulo}</Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  {grupo.campos.length} texto(s)
+                </Typography>
+                {modificados > 0 && <Chip size='small' color='primary' variant='outlined' label={`${modificados} modificado(s)`} />}
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              {grupo.ayuda && (
+                <Typography variant='body2' color='text.secondary' sx={{ mb: 4 }}>
+                  {grupo.ayuda}
+                </Typography>
+              )}
+              <Rejilla columnas={2}>
+                {grupo.campos.map(([clave, etiqueta, base]) => (
+                  <CampoTexto
+                    key={clave}
+                    etiqueta={etiqueta}
+                    base={base}
+                    valor={textos[grupo.clave][clave]}
+                    disabled={disabled}
+                    onChange={(valor) => cambiar(`textos.${grupo.clave}.${clave}`, valor)}
+                  />
+                ))}
+              </Rejilla>
+            </AccordionDetails>
+          </Accordion>
+        );
+      })}
+    </Grupo>
+  );
+};
+SeccionTextos.propTypes = propTypes;
 
 const COLORES_MODO_PANEL = [
   ['fondo', 'Fondo de la página'],

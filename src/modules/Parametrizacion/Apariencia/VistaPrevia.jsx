@@ -25,7 +25,7 @@ Marco.propTypes = {
 };
 
 const Portal = ({ config, imagenes, oscuro }) => {
-  const { marca, portal, inicio } = config;
+  const { marca, portal, inicio, textos } = config;
   const theme = useMemo(() => getPortalTheme(oscuro ? 'dark' : 'light', portal), [oscuro, portal]);
   const colores = oscuro ? portal.oscuro : portal.claro;
   const enlaces = portal.menu.filter((enlace) => enlace.visible);
@@ -69,7 +69,7 @@ const Portal = ({ config, imagenes, oscuro }) => {
           <Typography sx={{ fontSize: 17, fontWeight: Fonts.BOLD, lineHeight: 1.2 }}>{marca.eslogan}</Typography>
           <Typography sx={{ fontSize: 10, opacity: 0.9, mt: 1, mb: 2.5, maxWidth: 260 }}>{marca.descripcion}</Typography>
           <Button variant='contained' size='small' sx={{ fontSize: 10, py: 0.5 }}>
-            Buscar
+            {textos.inicio.buscar}
           </Button>
         </Box>
 

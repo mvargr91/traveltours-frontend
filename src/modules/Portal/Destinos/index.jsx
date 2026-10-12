@@ -6,9 +6,11 @@ import { onGetColeccion } from '@crema/redux/features/portalDestinos/portalDesti
 import { ImagenExperiencia } from '../../../shared/components/Portal/ExperienceCard';
 import { GrillaCargando, TituloSeccion } from '../../../shared/components/Portal/Secciones';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
+import { useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 
 const Destinos = () => {
   const dispatch = useDispatch();
+  const t = useTextos('destinos');
   const { rows: destinos, loading } = useSelector((state) => state.portalDestinos);
 
   useEffect(() => {
@@ -17,7 +19,7 @@ const Destinos = () => {
 
   return (
     <Container maxWidth='lg' sx={{ py: 5 }}>
-      <TituloSeccion titulo='Destinos' subtitulo='Descubre a dónde viajar y qué vivir en cada lugar' />
+      <TituloSeccion titulo={t('titulo')} subtitulo={t('subtitulo')} />
       {loading ? (
         <GrillaCargando cantidad={6} columnas={{ xs: 12, sm: 6, md: 4 }} />
       ) : (
@@ -29,7 +31,7 @@ const Destinos = () => {
                   <ImagenExperiencia src={d.imagen} alt={d.nombre} altura={200} />
                   <CardContent>
                     <Typography variant='h3'>
-                      {d.nombre} {d.destacado ? <Chip size='small' label='Destacado' color='primary' sx={{ ml: 1 }} /> : null}
+                      {d.nombre} {d.destacado ? <Chip size='small' label={t('destacado')} color='primary' sx={{ ml: 1 }} /> : null}
                     </Typography>
                     <Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
                       {[d.ciudad, d.departamento].filter(Boolean).join(', ')}
@@ -40,7 +42,7 @@ const Destinos = () => {
                       </Typography>
                     )}
                     <Typography variant='body2' color='primary.main' fontWeight={600} sx={{ mt: 1 }}>
-                      {d.total_experiencias} experiencia(s)
+                      {t('experiencias', { n: d.total_experiencias })}
                     </Typography>
                   </CardContent>
                 </CardActionArea>

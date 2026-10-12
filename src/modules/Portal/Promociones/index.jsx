@@ -6,14 +6,17 @@ import { onGetColeccion } from '@crema/redux/features/portalPromociones/portalPr
 import ExperienceCard from '../../../shared/components/Portal/ExperienceCard';
 import { GrillaCargando, TituloSeccion } from '../../../shared/components/Portal/Secciones';
 import { formatoMoneda } from '../../../shared/constants/Turismo';
-import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
+import { useApariencia, useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 
-const etiquetaDescuento = (p) =>
-  p.tipo_descuento === 'porcentaje' ? `${Number(p.valor_descuento)}% OFF` : `${formatoMoneda(p.valor_descuento)} de descuento`;
+const etiquetaDescuento = (p, t) =>
+  p.tipo_descuento === 'porcentaje'
+    ? t('descuentoPorcentaje', { valor: Number(p.valor_descuento) })
+    : t('descuentoValor', { valor: formatoMoneda(p.valor_descuento) });
 
 const Promociones = () => {
   const dispatch = useDispatch();
   const { gradienteFranja } = useApariencia().apariencia;
+  const t = useTextos('promociones');
   const { rows: promociones, loading } = useSelector((state) => state.portalPromociones);
 
   useEffect(() => {
@@ -22,11 +25,11 @@ const Promociones = () => {
 
   return (
     <Container maxWidth='lg' sx={{ py: 5 }}>
-      <TituloSeccion titulo='Promociones' subtitulo='Descuentos vigentes en experiencias seleccionadas' />
+      <TituloSeccion titulo={t('titulo')} subtitulo={t('subtitulo')} />
       {loading && <GrillaCargando />}
       {!loading && promociones.length === 0 && (
         <Paper sx={{ p: 5, textAlign: 'center' }}>
-          <Typography variant='h4'>No hay promociones vigentes en este momento</Typography>
+          <Typography variant='h4'>{t('sinPromociones')}</Typography>
         </Paper>
       )}
       <Stack spacing={5}>
@@ -36,9 +39,9 @@ const Promociones = () => {
               <Stack direction='row' spacing={2} alignItems='center' sx={{ flexWrap: 'wrap', gap: 1 }}>
                 <LocalOfferIcon color='secondary' />
                 <Typography variant='h3'>{promo.nombre}</Typography>
-                <Chip color='secondary' label={etiquetaDescuento(promo)} />
+                <Chip color='secondary' label={etiquetaDescuento(promo, t)} />
                 <Typography variant='body2' color='text.secondary' sx={{ ml: 'auto !important' }}>
-                  Del {promo.fecha_inicio} al {promo.fecha_fin}
+                  {t('vigencia', { inicio: promo.fecha_inicio, fin: promo.fecha_fin })}
                 </Typography>
               </Stack>
               {promo.descripcion && <Typography color='text.secondary' sx={{ mt: 1 }}>{promo.descripcion}</Typography>}

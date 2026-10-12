@@ -41,13 +41,17 @@ import MyTextField from '../../../shared/components/MyTextField';
 import { aHoraCorta, esPagoEnLinea, formatoMoneda } from '../../../shared/constants/Turismo';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
 import { irAPagar } from '../../../shared/functions/Pagos';
+import { useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
+import { conNegrita } from '../../../shared/constants/TextosPortal';
 
-const validacionContacto = yup.object({
-  nombre: yup.string().required('Requerido').max(150),
-  correo: yup.string().required('Requerido').email('Correo inválido'),
-  telefono: yup.string().required('Requerido').max(30).matches(/^[+]?[0-9\s-]*$/, 'Teléfono inválido'),
-  observaciones: yup.string().max(1000, 'Máximo 1000 caracteres'),
-});
+// c: textos comunes de formularios (useTextos('comunes')).
+const validacionContacto = (c) =>
+  yup.object({
+    nombre: yup.string().required(c('requerido')).max(150),
+    correo: yup.string().required(c('requerido')).email(c('correoInvalido')),
+    telefono: yup.string().required(c('requerido')).max(30).matches(/^[+]?[0-9\s-]*$/, c('telefonoInvalido')),
+    observaciones: yup.string().max(1000, c('maximo', { n: 1000 })),
+  });
 
 // Descuento de la promoción vigente sobre el total.
 export const calcularTotal = (precio, personas, promocion) => {
@@ -64,6 +68,7 @@ export const calcularTotal = (precio, personas, promocion) => {
 const ReservaConfirmada = ({ reserva, onCerrar }) => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const t = useTextos('reserva');
   const [copiado, setCopiado] = useState(false);
   const [pagando, setPagando] = useState(false);
   const [errorPago, setErrorPago] = useState('');
@@ -92,20 +97,18 @@ const ReservaConfirmada = ({ reserva, onCerrar }) => {
         <CheckCircleRoundedIcon color='success' sx={{ fontSize: 64 }} />
         {pendientePago ? (
           <>
-            <Typography variant='h3' sx={{ mt: 1 }}>¡Cupo separado!</Typography>
+            <Typography variant='h3' sx={{ mt: 1 }}>{t('cupoSeparado')}</Typography>
             <Typography color='text.secondary' sx={{ mt: 1 }}>
-              {pagando
-                ? 'Te estamos llevando a la pasarela de pagos para pagar de forma segura…'
-                : 'Paga en línea para confirmar tu reserva.'}
+              {t(pagando ? 'llevandoPasarela' : 'pagaParaConfirmar')}
             </Typography>
             {pagando && <LinearProgress sx={{ mt: 2 }} />}
             {errorPago && <Alert severity='warning' sx={{ mt: 2, textAlign: 'left' }}>{errorPago}</Alert>}
           </>
         ) : (
           <>
-            <Typography variant='h3' sx={{ mt: 1 }}>¡Solicitud enviada!</Typography>
+            <Typography variant='h3' sx={{ mt: 1 }}>{t('solicitudEnviada')}</Typography>
             <Typography color='text.secondary' sx={{ mt: 1 }}>
-              {reserva.proveedor_nombre} revisará tu reserva y te contactará a <b>{reserva.correo}</b>.
+              {conNegrita(t('proveedorContactara', { proveedor: reserva.proveedor_nombre, correo: reserva.correo }))}
             </Typography>
           </>
         )}
@@ -119,31 +122,31 @@ const ReservaConfirmada = ({ reserva, onCerrar }) => {
             bgcolor: alpha(theme.palette.primary.main, 0.06),
           }}
         >
-          <Typography variant='caption' color='text.secondary'>Tu código de reserva</Typography>
+          <Typography variant='caption' color='text.secondary'>{t('tuCodigo')}</Typography>
           <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
             <Typography variant='h2' sx={{ letterSpacing: 1, fontFamily: 'monospace' }}>
               {reserva.codigo_reserva}
             </Typography>
-            <Tooltip title={copiado ? '¡Copiado!' : 'Copiar código'}>
-              <IconButton size='small' onClick={copiar} aria-label='Copiar código'>
+            <Tooltip title={t(copiado ? 'copiado' : 'copiar')}>
+              <IconButton size='small' onClick={copiar} aria-label={t('copiar')}>
                 <ContentCopyIcon fontSize='small' />
               </IconButton>
             </Tooltip>
           </Stack>
-          <Typography variant='caption' color='text.secondary'>Guárdalo para consultar el estado.</Typography>
+          <Typography variant='caption' color='text.secondary'>{t('guardalo')}</Typography>
         </Box>
 
         <Stack direction='row' spacing={1} justifyContent='center' flexWrap='wrap' useFlexGap sx={{ mt: 2 }}>
           <Chip icon={<CalendarMonthIcon />} label={`${reserva.fecha} · ${aHoraCorta(reserva.hora_inicio)}`} />
-          <Chip icon={<GroupsIcon />} label={`${reserva.cantidad_personas} persona(s)`} />
+          <Chip icon={<GroupsIcon />} label={t('resumenPersonas', { n: reserva.cantidad_personas })} />
           <Chip color='primary' variant='outlined' label={formatoMoneda(reserva.valor_total)} />
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button onClick={onCerrar} disabled={pagando}>Cerrar</Button>
+        <Button onClick={onCerrar} disabled={pagando}>{t('cerrar')}</Button>
         {pendientePago ? (
           <Button variant='contained' startIcon={<CreditCardIcon />} onClick={pagar} disabled={pagando}>
-            Pagar ahora
+            {t('pagarAhora')}
           </Button>
         ) : (
           <Button
@@ -154,7 +157,7 @@ const ReservaConfirmada = ({ reserva, onCerrar }) => {
               })
             }
           >
-            Ver estado
+            {t('verEstado')}
           </Button>
         )}
       </DialogActions>
@@ -171,6 +174,9 @@ const ReservaWidget = ({ experiencia }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
+  const t = useTextos('reserva');
+  const c = useTextos('comunes');
+  const validacion = useMemo(() => validacionContacto(c), [c]);
   const pantallaChica = useMediaQuery(theme.breakpoints.down('sm'));
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const guardandoCliente = useSelector((state) => state.reservas.saving);
@@ -242,36 +248,42 @@ const ReservaWidget = ({ experiencia }) => {
 
   return (
     <Paper sx={{ p: 3, position: { md: 'sticky' }, top: { md: 100 } }}>
-      <Typography variant='caption' color='text.secondary'>Desde</Typography>
+      <Typography variant='caption' color='text.secondary'>{t('desde')}</Typography>
       <Typography variant='h2' color='primary.main'>
         {formatoMoneda(experiencia.precio_desde)}
-        <Typography component='span' color='text.secondary'> / persona</Typography>
+        <Typography component='span' color='text.secondary'> {t('porPersona')}</Typography>
       </Typography>
       {experiencia.promocion && (
         <Alert severity='success' sx={{ mt: 1 }}>
-          {experiencia.promocion.nombre}:{' '}
           {experiencia.promocion.tipo_descuento === 'porcentaje'
-            ? `${Number(experiencia.promocion.valor_descuento)}% de descuento`
-            : `${formatoMoneda(experiencia.promocion.valor_descuento)} de descuento`}{' '}
-          hasta {experiencia.promocion.fecha_fin}
+            ? t('promoPorcentaje', {
+                nombre: experiencia.promocion.nombre,
+                valor: Number(experiencia.promocion.valor_descuento),
+                fecha: experiencia.promocion.fecha_fin,
+              })
+            : t('promoValor', {
+                nombre: experiencia.promocion.nombre,
+                valor: formatoMoneda(experiencia.promocion.valor_descuento),
+                fecha: experiencia.promocion.fecha_fin,
+              })}
         </Alert>
       )}
 
       <Stack spacing={2} sx={{ mt: 2.5 }}>
         {experiencia.disponibilidad.length > 0 ? (
-          <TextField select label='Fecha y hora' value={disponibilidadId} onChange={(e) => setDisponibilidadId(e.target.value)}>
+          <TextField select label={t('fechaHora')} value={disponibilidadId} onChange={(e) => setDisponibilidadId(e.target.value)}>
             {experiencia.disponibilidad.map((d) => (
               <MenuItem key={d.id} value={d.id}>
-                {d.fecha} · {aHoraCorta(d.hora_inicio)} ({d.cupos_disponibles} cupos)
+                {d.fecha} · {aHoraCorta(d.hora_inicio)} {t('cupos', { n: d.cupos_disponibles })}
               </MenuItem>
             ))}
           </TextField>
         ) : (
-          <Alert severity='info'>No hay fechas publicadas. Pronto el proveedor abrirá nuevos cupos.</Alert>
+          <Alert severity='info'>{t('sinFechas')}</Alert>
         )}
         <TextField
           type='number'
-          label='Personas'
+          label={t('personas')}
           value={personas}
           inputProps={{ min: 1, max: maxPersonas }}
           onChange={(e) => setPersonas(Math.max(1, Math.min(maxPersonas, Number(e.target.value) || 1)))}
@@ -285,13 +297,13 @@ const ReservaWidget = ({ experiencia }) => {
         </Stack>
         {descuento > 0 && (
           <Stack direction='row' justifyContent='space-between' sx={{ color: 'success.main' }}>
-            <Typography>Descuento</Typography>
+            <Typography>{t('descuento')}</Typography>
             <Typography>- {formatoMoneda(descuento)}</Typography>
           </Stack>
         )}
         <Divider sx={{ my: 1 }} />
         <Stack direction='row' justifyContent='space-between'>
-          <Typography fontWeight={700}>Total estimado</Typography>
+          <Typography fontWeight={700}>{t('totalEstimado')}</Typography>
           <Typography fontWeight={700}>{formatoMoneda(total)}</Typography>
         </Stack>
       </Box>
@@ -305,12 +317,12 @@ const ReservaWidget = ({ experiencia }) => {
         disabled={!disponibilidad}
         onClick={() => setConfirmando(true)}
       >
-        {pagoEnLinea ? 'Reservar y pagar' : 'Reservar ahora'}
+        {t(pagoEnLinea ? 'reservarPagar' : 'reservarAhora')}
       </Button>
       <Typography variant='caption' color='text.secondary' component='p' sx={{ mt: 1, textAlign: 'center' }}>
-        {pagoEnLinea && 'Pago en línea: tu reserva se confirma al pagar.'}
-        {!pagoEnLinea && isAuthenticated && 'El proveedor confirmará tu reserva. Podrás verla en “Mis reservas”.'}
-        {!pagoEnLinea && !isAuthenticated && 'Sin registro y sin pago ahora. El proveedor confirmará tu reserva.'}
+        {pagoEnLinea && t('notaPagoEnLinea')}
+        {!pagoEnLinea && isAuthenticated && t('notaConCuenta')}
+        {!pagoEnLinea && !isAuthenticated && t('notaSinCuenta')}
       </Typography>
 
       <Dialog open={confirmando} onClose={cerrar} maxWidth='xs' fullWidth fullScreen={pantallaChica}>
@@ -324,41 +336,41 @@ const ReservaWidget = ({ experiencia }) => {
               telefono: user?.usuario?.telefono ?? '',
               observaciones: '',
             }}
-            validationSchema={validacionContacto}
+            validationSchema={validacion}
             onSubmit={isAuthenticated ? enviarCliente : enviarInvitado}
           >
             <Form noValidate>
-              <DialogTitle>Completa tu reserva</DialogTitle>
+              <DialogTitle>{t('dialogoTitulo')}</DialogTitle>
               <DialogContent>
                 <Box sx={{ p: 2, mb: 2.5, borderRadius: 2, bgcolor: alpha(theme.palette.primary.main, 0.06) }}>
                   <Typography fontWeight={700}>{experiencia.nombre}</Typography>
                   <Stack direction='row' justifyContent='space-between' sx={{ mt: 0.5 }}>
                     <Typography variant='body2' color='text.secondary'>
-                      {disponibilidad?.fecha} · {aHoraCorta(disponibilidad?.hora_inicio)} · {personas} persona(s)
+                      {disponibilidad?.fecha} · {aHoraCorta(disponibilidad?.hora_inicio)} · {t('resumenPersonas', { n: personas })}
                     </Typography>
                     <Typography variant='body2' fontWeight={700}>{formatoMoneda(total)}</Typography>
                   </Stack>
                 </Box>
                 <Stack spacing={2}>
-                  <MyTextField name='nombre' label='Nombre completo' fullWidth required autoComplete='name' />
-                  <MyTextField name='correo' label='Correo' type='email' fullWidth required autoComplete='email' />
-                  <MyTextField name='telefono' label='Teléfono / WhatsApp' fullWidth required autoComplete='tel' />
-                  <MyTextField name='observaciones' label='Comentarios para el proveedor (opcional)' fullWidth multiline minRows={2} />
+                  <MyTextField name='nombre' label={t('nombre')} fullWidth required autoComplete='name' />
+                  <MyTextField name='correo' label={t('correo')} type='email' fullWidth required autoComplete='email' />
+                  <MyTextField name='telefono' label={t('telefono')} fullWidth required autoComplete='tel' />
+                  <MyTextField name='observaciones' label={t('observaciones')} fullWidth multiline minRows={2} />
                 </Stack>
                 {!isAuthenticated && (
                   <Typography variant='body2' color='text.secondary' sx={{ mt: 2 }}>
-                    ¿Ya tienes cuenta?{' '}
+                    {t('yaTienesCuenta')}{' '}
                     <Link component={RouterLink} to={`/signin?redirect=${RUTAS_PORTAL.tour(experiencia.slug)}`}>
-                      Ingresa
+                      {t('ingresa')}
                     </Link>{' '}
-                    para verla luego en “Mis reservas”.
+                    {t('paraVerla')}
                   </Typography>
                 )}
               </DialogContent>
               <DialogActions sx={{ px: 3, pb: 3 }}>
-                <Button onClick={cerrar}>Cancelar</Button>
+                <Button onClick={cerrar}>{t('cancelar')}</Button>
                 <Button type='submit' variant='contained' disabled={guardandoCliente || guardandoInvitado}>
-                  {pagoEnLinea ? 'Reservar y pagar' : 'Confirmar reserva'}
+                  {t(pagoEnLinea ? 'reservarPagar' : 'confirmar')}
                 </Button>
               </DialogActions>
             </Form>

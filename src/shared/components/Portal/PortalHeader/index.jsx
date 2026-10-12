@@ -25,7 +25,7 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import { useAuthMethod } from '@crema/hooks/AuthHooks';
 import { logoutUser } from '@crema/redux/features/auth/authSlice';
 import { useThemeContext } from '@crema/context/AppContextProvider/ThemeContextProvider';
-import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
+import { useApariencia, useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 import { RUTAS_MENU_PORTAL } from '../../../constants/Apariencia';
 import { RUTAS_PORTAL, RUTA_MI_CUENTA } from '../../../constants/RutasPortal';
 import AppThemeModeSwitcher from '@crema/components/AppThemeModeSwitcher';
@@ -59,6 +59,7 @@ const PortalHeader = () => {
   const { themeMode } = useThemeContext();
   const { apariencia } = useApariencia();
   const enlaces = useEnlacesPortal();
+  const t = useTextos('encabezado');
   const [menuMovil, setMenuMovil] = useState(false);
 
   const logoSrc = themeMode === 'dark' ? apariencia.logos.oscuro : apariencia.logos.principal;
@@ -71,23 +72,23 @@ const PortalHeader = () => {
   const acciones = isAuthenticated ? (
     <>
       <Button variant='outlined' startIcon={<DashboardIcon />} onClick={() => navigate(urlPanelDe(user))}>
-        Mi panel
+        {t('miPanel')}
       </Button>
-      <IconButton onClick={() => navigate(RUTA_MI_CUENTA)} title='Mi cuenta' aria-label='Mi cuenta'>
+      <IconButton onClick={() => navigate(RUTA_MI_CUENTA)} title={t('miCuenta')} aria-label={t('miCuenta')}>
         <ManageAccountsIcon />
       </IconButton>
       <AppThemeModeSwitcher />
-      <IconButton onClick={salir} title='Cerrar sesión'>
+      <IconButton onClick={salir} title={t('cerrarSesion')}>
         <LogoutIcon />
       </IconButton>
     </>
   ) : (
     <>
       <Button color='inherit' onClick={() => navigate(RUTAS_PORTAL.registro)}>
-        Crear cuenta
+        {t('crearCuenta')}
       </Button>
       <Button variant='contained' startIcon={<LoginIcon />} onClick={() => navigate('/signin')}>
-        Ingresar
+        {t('ingresar')}
       </Button>
       <AppThemeModeSwitcher />
     </>
@@ -124,7 +125,7 @@ const PortalHeader = () => {
 
           <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 0.5 }}>
             <AppThemeModeSwitcher size='small' />
-            <IconButton onClick={() => setMenuMovil(true)} aria-label='Abrir menú'>
+            <IconButton onClick={() => setMenuMovil(true)} aria-label={t('abrirMenu')}>
               <MenuIcon />
             </IconButton>
           </Box>

@@ -25,7 +25,7 @@ import { onGetColeccion as onGetDestinos } from '@crema/redux/features/portalDes
 import { onGetColeccion as onGetPromociones } from '@crema/redux/features/portalPromociones/portalPromocionesSlice';
 import CategoryBar from '../../../shared/components/Portal/CategoryBar';
 import ExperienceCard, { ImagenExperiencia } from '../../../shared/components/Portal/ExperienceCard';
-import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
+import { useApariencia, useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 import { textoSobre } from '../../../shared/constants/Apariencia';
 import { GrillaCargando, TituloSeccion } from '../../../shared/components/Portal/Secciones';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
@@ -39,6 +39,7 @@ const Home = () => {
   const [busqueda, setBusqueda] = useState({ texto: '', destino: '' });
   // Textos, colores e imagen principal: Parametrización > Apariencia.
   const { marca, portal, inicio, imagenes } = useApariencia().apariencia;
+  const t = useTextos('inicio');
 
   useEffect(() => {
     dispatch(onGetExperiencias({ rowsPerPage: 8, filtros: { orden: 'relevancia' } }));
@@ -78,7 +79,7 @@ const Home = () => {
                 <TextField
                   fullWidth
                   size='small'
-                  placeholder='¿Qué quieres vivir?'
+                  placeholder={t('buscarPlaceholder')}
                   value={busqueda.texto}
                   onChange={(e) => setBusqueda({ ...busqueda, texto: e.target.value })}
                 />
@@ -86,17 +87,17 @@ const Home = () => {
                   select
                   size='small'
                   sx={{ minWidth: 180 }}
-                  label='Destino'
+                  label={t('destino')}
                   value={busqueda.destino}
                   onChange={(e) => setBusqueda({ ...busqueda, destino: e.target.value })}
                 >
-                  <MenuItem value=''>Todos</MenuItem>
+                  <MenuItem value=''>{t('todos')}</MenuItem>
                   {destinos.map((d) => (
                     <MenuItem key={d.id} value={d.slug}>{d.nombre}</MenuItem>
                   ))}
                 </TextField>
                 <Button type='submit' variant='contained' startIcon={<SearchIcon />} sx={{ px: 4 }}>
-                  Buscar
+                  {t('buscar')}
                 </Button>
               </Paper>
             </Grid>
@@ -108,14 +109,14 @@ const Home = () => {
 
       <Container maxWidth='lg' sx={{ py: 7 }}>
         <TituloSeccion
-          titulo='Experiencias recomendadas'
-          subtitulo='Seleccionadas y verificadas por nuestro equipo'
-          accion={<Button component={RouterLink} to={RUTAS_PORTAL.tours}>Ver todas</Button>}
+          titulo={t('recomendadasTitulo')}
+          subtitulo={t('recomendadasSubtitulo')}
+          accion={<Button component={RouterLink} to={RUTAS_PORTAL.tours}>{t('verTodas')}</Button>}
         />
         {experiencias.loading ? (
           <GrillaCargando />
         ) : experiencias.rows.length === 0 ? (
-          <Typography color='text.secondary'>Pronto publicaremos nuevas experiencias.</Typography>
+          <Typography color='text.secondary'>{t('sinExperiencias')}</Typography>
         ) : (
           <Grid container spacing={3}>
             {experiencias.rows.map((exp) => (
@@ -130,7 +131,7 @@ const Home = () => {
       {destinos.length > 0 && (
         <Box sx={{ bgcolor: 'background.paper', py: 7 }}>
           <Container maxWidth='lg'>
-            <TituloSeccion titulo='Destinos' accion={<Button component={RouterLink} to={RUTAS_PORTAL.destinos}>Ver destinos</Button>} />
+            <TituloSeccion titulo={t('destinosTitulo')} accion={<Button component={RouterLink} to={RUTAS_PORTAL.destinos}>{t('verDestinos')}</Button>} />
             <Grid container spacing={3}>
               {destinos.slice(0, 6).map((d) => (
                 <Grid item xs={12} sm={6} md={4} key={d.id}>
@@ -140,7 +141,7 @@ const Home = () => {
                       <CardContent>
                         <Typography variant='h4'>{d.nombre}</Typography>
                         <Typography variant='body2' color='text.secondary'>
-                          {[d.ciudad, d.departamento].filter(Boolean).join(', ')} · {d.total_experiencias} experiencia(s)
+                          {[d.ciudad, d.departamento].filter(Boolean).join(', ')} · {t('experiencias', { n: d.total_experiencias })}
                         </Typography>
                       </CardContent>
                     </CardActionArea>
@@ -188,12 +189,12 @@ const Home = () => {
           }}
         >
           <Box sx={{ maxWidth: 640 }}>
-            <Chip label='Nuevo Mapa Interactivo' color='primary' size='small' sx={{ mb: 1.5, fontWeight: 700 }} />
+            <Chip label={t('mapaEtiqueta')} color='primary' size='small' sx={{ mb: 1.5, fontWeight: 700 }} />
             <Typography variant='h2' sx={{ fontWeight: 800, mb: 1 }}>
-              Mapa de experiencias
+              {t('mapaTitulo')}
             </Typography>
             <Typography variant='h4' sx={{ color: 'text.secondary', fontWeight: 400, fontSize: { xs: '1rem', md: '1.2rem' } }}>
-              Encuentra experiencias LGTBIQ+ friendly por toda Colombia en el mapa interactivo con Mapbox.
+              {t('mapaTexto')}
             </Typography>
           </Box>
           <Button
@@ -204,7 +205,7 @@ const Home = () => {
             startIcon={<ExploreIcon />}
             sx={{ px: 4, py: 1.5, borderRadius: 3, fontWeight: 700 }}
           >
-            Explorar en el mapa
+            {t('mapaBoton')}
           </Button>
         </Paper>
       </Container>
@@ -216,11 +217,11 @@ const Home = () => {
             <Box sx={{ flex: 1 }}>
               <Typography variant='h3'>{promociones[0].nombre}</Typography>
               <Typography sx={{ opacity: 0.9 }}>
-                {promociones.length > 1 ? `y ${promociones.length - 1} promoción(es) más vigentes` : `Válida hasta ${promociones[0].fecha_fin}`}
+                {promociones.length > 1 ? t('promoMas', { n: promociones.length - 1 }) : t('promoValida', { fecha: promociones[0].fecha_fin })}
               </Typography>
             </Box>
             <Button variant='contained' color='inherit' sx={{ color: portal.claro.texto }} component={RouterLink} to={RUTAS_PORTAL.promociones}>
-              Ver promociones
+              {t('verPromociones')}
             </Button>
           </Paper>
         </Container>
