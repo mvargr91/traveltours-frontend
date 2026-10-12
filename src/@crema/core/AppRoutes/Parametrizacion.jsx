@@ -3,6 +3,7 @@ import { authRole } from '@crema/constants/AppConst';
 import { RoutePermittedRole } from '@crema/constants/AppEnums';
 
 const ParametroConstante = React.lazy(() => import('../../../modules/Parametrizacion/ParametroConstante')); 
+const Apariencia = React.lazy(() => import('../../../modules/Parametrizacion/Apariencia'));
 const ParametroCorreo = React.lazy(() => import('../../../modules/Parametrizacion/ParametroCorreo')); 
 const Ciudad = React.lazy(() => import('../../../modules/Parametrizacion/Ciudad')); 
 const TipoProyecto = React.lazy(() => import('../../../modules/Parametrizacion/TipoProyecto')); 
@@ -32,6 +33,11 @@ const NivelConsumo = React.lazy(() => import('../../../modules/Parametrizacion/N
 const DescuentoTarifa = React.lazy(() => import('../../../modules/Parametrizacion/DescuentoTarifa/DescuentoTarifaCreador')); 
 
 export const parametrizacionConfigs = [
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/apariencia',
+    element: <Apariencia route={{auth: authRole, path: '/apariencia'}}/>,
+  },
   {
     permittedRole: RoutePermittedRole.User,
     path: '/parametros-constantes',

@@ -5,15 +5,16 @@ import {
   useEffect,
   useState,
 } from "react";
+import { alpha } from "@mui/material/styles";
 import defaultConfig, {
   defaultTheme,
-  backgroundLight,
-  backgroundDark,
   textDark,
   textLight,
 } from "@crema/constants/defaultConfig";
 import PropTypes from "prop-types";
 import { LayoutDirection, ThemeMode } from "@crema/constants/AppEnums";
+import { APARIENCIA_BASE, textoSobre } from "../../../shared/constants/Apariencia";
+import { useApariencia } from "./AparienciaContextProvider";
 
 const getSavedThemeMode = () => {
   try {
@@ -27,16 +28,32 @@ const getSavedThemeMode = () => {
   return defaultConfig.themeMode;
 };
 
-const getInitialTheme = (mode) => {
+// Tema del panel: la base de defaultConfig con los colores de Parametrización > Apariencia.
+const getInitialTheme = (mode, panel = APARIENCIA_BASE.panel) => {
   const isDark = mode === ThemeMode.DARK;
+  const colores = isDark ? panel.oscuro : panel.claro;
+  const { palette } = defaultTheme.theme;
   return {
     ...defaultTheme.theme,
     palette: {
-      ...defaultTheme.theme.palette,
+      ...palette,
       mode: isDark ? ThemeMode.DARK : ThemeMode.LIGHT,
-      background: isDark ? backgroundDark : backgroundLight,
-      text: isDark ? textDark : textLight,
+      background: { paper: colores.superficie, default: colores.fondo },
+      text: {
+        ...(isDark ? textDark : textLight),
+        primary: colores.texto,
+        secondary: colores.textoSecundario,
+      },
       divider: isDark ? "rgba(255, 255, 255, 0.12)" : "rgba(224, 224, 224, 1)",
+      grayBottoms: panel.principal,
+      redBottoms: panel.peligro,
+      menu: { menuOpacity: alpha(panel.acento, 0.06) },
+      primary: { main: panel.principal, contrastText: textoSobre(panel.principal) },
+      secondary: { ...palette.secondary, main: panel.principal, light: panel.acento },
+      tertiary: { ...palette.tertiary, main: panel.principal },
+      cuarternario: { ...palette.cuarternario, main: panel.encabezado },
+      success: { ...palette.success, main: panel.acento },
+      colorFiltro: panel.acento,
     },
   };
 };
@@ -55,8 +72,9 @@ export const useThemeContext = () => useContext(ThemeContext);
 export const useThemeActionsContext = () => useContext(ThemeActionsContext);
 
 const ThemeContextProvider = ({ children }) => {
+  const { panel } = useApariencia().apariencia;
   const [themeMode, setThemeModeState] = useState(getSavedThemeMode);
-  const [theme, setTheme] = useState(() => getInitialTheme(themeMode));
+  const [theme, setTheme] = useState(() => getInitialTheme(themeMode, panel));
   const [themeStyle, updateThemeStyle] = useState(defaultConfig.themeStyle);
 
   const updateTheme = useCallback((newTheme) => {
@@ -76,24 +94,8 @@ const ThemeContextProvider = ({ children }) => {
     const isDark = themeMode === ThemeMode.DARK;
     document.body.classList.toggle("dark-mode", isDark);
 
-    setTheme((prevTheme) => {
-      if (prevTheme.palette.mode === themeMode) {
-        return prevTheme;
-      }
-      return {
-        ...prevTheme,
-        palette: {
-          ...prevTheme.palette,
-          mode: isDark ? ThemeMode.DARK : ThemeMode.LIGHT,
-          background: isDark ? backgroundDark : backgroundLight,
-          text: isDark ? textDark : textLight,
-          divider: isDark
-            ? "rgba(255, 255, 255, 0.12)"
-            : "rgba(224, 224, 224, 1)",
-        },
-      };
-    });
-  }, [themeMode]);
+    setTheme(getInitialTheme(themeMode, panel));
+  }, [themeMode, panel]);
 
   useEffect(() => {
     if (theme.direction === LayoutDirection.RTL) {

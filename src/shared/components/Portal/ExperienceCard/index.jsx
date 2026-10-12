@@ -3,23 +3,26 @@ import PropTypes from 'prop-types';
 import { urlArchivo } from '../../../functions/Archivos';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Card, CardActionArea, CardContent, Chip, Rating, Stack, Typography } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import PlaceIcon from '@mui/icons-material/Place';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import { esPagoEnLinea, formatoMoneda } from '../../../constants/Turismo';
-import { MARCA } from '../../../constants/Marca';
+import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 import { RUTAS_PORTAL } from '../../../constants/RutasPortal';
 
-export const ImagenExperiencia = ({ src, alt, altura }) =>
-  src ? (
+export const ImagenExperiencia = ({ src, alt, altura }) => {
+  const { logos } = useApariencia().apariencia;
+  return src ? (
     <Box component='img' src={urlArchivo(src)} alt={alt} loading='lazy' sx={{ width: '100%', height: altura, objectFit: 'cover', display: 'block' }} />
   ) : (
     // Sin foto: isotipo de la marca como marcador de posición
-    <Box sx={{ height: altura, display: 'grid', placeItems: 'center', bgcolor: 'rgba(0,161,204,0.08)' }}>
-      <Box component='img' src={MARCA.logos.isotipo} alt='' sx={{ height: altura * 0.55, opacity: 0.8 }} />
+    <Box sx={{ height: altura, display: 'grid', placeItems: 'center', bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08) }}>
+      <Box component='img' src={logos.isotipo} alt='' sx={{ height: altura * 0.55, opacity: 0.8 }} />
     </Box>
   );
+};
 
 ImagenExperiencia.propTypes = {
   src: PropTypes.string,

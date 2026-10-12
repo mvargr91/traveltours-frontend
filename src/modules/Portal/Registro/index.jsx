@@ -32,7 +32,7 @@ import { login } from '@crema/redux/features/auth/authSlice';
 import { useAuthMethod } from '@crema/hooks/AuthHooks';
 import MyTextField from '../../../shared/components/MyTextField';
 import { urlPanelDe } from '../../../shared/components/Portal/PortalHeader';
-import { MARCA } from '../../../shared/constants/Marca';
+import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 
 const esquemaBase = {
   nombre: yup.string().required('Requerido').max(128, 'Máximo 128 caracteres'),
@@ -74,6 +74,7 @@ const valoresIniciales = {
 
 const Registro = () => {
   const dispatch = useDispatch();
+  const { apariencia } = useApariencia();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const tipo = searchParams.get('tipo') === 'proveedor' ? 'proveedor' : 'cliente';
@@ -119,7 +120,7 @@ const Registro = () => {
     <Container maxWidth='md' sx={{ py: 6 }}>
       <Paper sx={{ p: { xs: 3, md: 5 } }}>
         <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Box component='img' src={MARCA.logos.principal} alt={MARCA.nombre} sx={{ height: 80 }} />
+          <Box component='img' src={apariencia.logos.principal} alt={apariencia.marca.nombre} sx={{ height: 80 }} />
           <Typography variant='h2' sx={{ mt: 1 }}>Crea tu cuenta</Typography>
           <Typography color='text.secondary'>
             ¿Ya tienes una? <Link component={RouterLink} to={redirect ? `/signin?redirect=${redirect}` : '/signin'}>Ingresa</Link>

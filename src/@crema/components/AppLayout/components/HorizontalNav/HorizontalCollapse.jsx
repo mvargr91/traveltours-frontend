@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { coloresPanel } from '@crema/constants/defaultConfig';
 import {
   Grow,
   Icon,
@@ -28,7 +27,7 @@ function HorizontalCollapse(props) {
   const location = useLocation();
   const { item, level } = props;
   const active = isUrlInChildren(item, location.pathname);
-  const { sidebarMenuSelectedBgColor, sidebarMenuSelectedTextColor } =
+  const { sidebarTextColor, sidebarMenuSelectedBgColor, sidebarMenuSelectedTextColor } =
     useSidebarContext();
 
   const handleToggle = (open) => {
@@ -75,7 +74,7 @@ function HorizontalCollapse(props) {
               ref={ref}
               button
               sx={{
-                color: '#ffff',
+                color: sidebarTextColor,
                 // color: theme.palette.text.primary,
                 padding: '0px 12px',
                 '&.active, &.active:hover, &.active:focus': {
@@ -163,19 +162,19 @@ function HorizontalCollapse(props) {
                       overflowY: 'auto',
                       scrollbarGutter: 'stable both-edges',
                       scrollbarWidth: 'thin',
-                      scrollbarColor: `${coloresPanel.acento} transparent`,
+                      scrollbarColor: `${sidebarMenuSelectedBgColor} transparent`,
                       '&::-webkit-scrollbar': { width: 1, height: 1 },
                       '&::-webkit-scrollbar-track': {
                         backgroundColor: 'transparent', 
                       },
                       '&::-webkit-scrollbar-thumb': {
                         borderRadius: 8,
-                        backgroundColor: coloresPanel.acento, 
+                        backgroundColor: sidebarMenuSelectedBgColor, 
                         border: '2px solid transparent',
                         backgroundClip: 'padding-box',
                       },
                       '&::-webkit-scrollbar-thumb:hover': {
-                        backgroundColor: coloresPanel.acento, 
+                        backgroundColor: sidebarMenuSelectedBgColor, 
                       },
                      }}
                   >

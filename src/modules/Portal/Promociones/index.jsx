@@ -6,13 +6,14 @@ import { onGetColeccion } from '@crema/redux/features/portalPromociones/portalPr
 import ExperienceCard from '../../../shared/components/Portal/ExperienceCard';
 import { GrillaCargando, TituloSeccion } from '../../../shared/components/Portal/Secciones';
 import { formatoMoneda } from '../../../shared/constants/Turismo';
-import { gradienteArcoiris } from '../../../shared/constants/Marca';
+import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 
 const etiquetaDescuento = (p) =>
   p.tipo_descuento === 'porcentaje' ? `${Number(p.valor_descuento)}% OFF` : `${formatoMoneda(p.valor_descuento)} de descuento`;
 
 const Promociones = () => {
   const dispatch = useDispatch();
+  const { gradienteFranja } = useApariencia().apariencia;
   const { rows: promociones, loading } = useSelector((state) => state.portalPromociones);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ const Promociones = () => {
       <Stack spacing={5}>
         {promociones.map((promo) => (
           <Box key={promo.id}>
-            <Paper sx={{ p: 3, mb: 2.5, borderTop: '4px solid transparent', borderImage: `${gradienteArcoiris} 1` }}>
+            <Paper sx={{ p: 3, mb: 2.5, borderTop: '4px solid transparent', borderImage: `${gradienteFranja} 1` }}>
               <Stack direction='row' spacing={2} alignItems='center' sx={{ flexWrap: 'wrap', gap: 1 }}>
                 <LocalOfferIcon color='secondary' />
                 <Typography variant='h3'>{promo.nombre}</Typography>

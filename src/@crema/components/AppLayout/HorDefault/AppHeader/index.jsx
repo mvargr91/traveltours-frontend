@@ -26,7 +26,8 @@ import { allowMultiLanguage } from "../../../../constants/AppConst";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
-import { TEMA_MARCA_PANEL, gradienteArcoiris } from "../../../../../shared/constants/Marca";
+import { TEMA_MARCA_PANEL } from "../../../../../shared/constants/Marca";
+import { useApariencia } from "@crema/context/AppContextProvider/AparienciaContextProvider";
 import { PORTAL_HABILITADO, RUTAS_PORTAL } from "../../../../../shared/constants/RutasPortal";
 import AppThemeModeSwitcher from "../../../AppThemeModeSwitcher";
 
@@ -34,6 +35,7 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const theme = useTheme();
   const navigate = useNavigate();
+  const { apariencia } = useApariencia();
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -56,7 +58,7 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
       }}
       className="app-bar"
     >
-      {TEMA_MARCA_PANEL && <Box sx={{ height: 4, background: gradienteArcoiris }} />}
+      {TEMA_MARCA_PANEL && apariencia.portal.mostrarFranja && <Box sx={{ height: 4, background: apariencia.gradienteFranja }} />}
       <Toolbar
         sx={{
           boxSizing: "border-box",

@@ -9,6 +9,7 @@ import {
   CardContent,
   Container,
   Grid,
+  Icon,
   MenuItem,
   Paper,
   Stack,
@@ -16,9 +17,6 @@ import {
   Typography,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
-import ReviewsIcon from '@mui/icons-material/Reviews';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import ExploreIcon from '@mui/icons-material/Explore';
 import Chip from '@mui/material/Chip';
@@ -27,15 +25,10 @@ import { onGetColeccion as onGetDestinos } from '@crema/redux/features/portalDes
 import { onGetColeccion as onGetPromociones } from '@crema/redux/features/portalPromociones/portalPromocionesSlice';
 import CategoryBar from '../../../shared/components/Portal/CategoryBar';
 import ExperienceCard, { ImagenExperiencia } from '../../../shared/components/Portal/ExperienceCard';
-import { ARCOIRIS, COLORES_MARCA, MARCA } from '../../../shared/constants/Marca';
+import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
+import { textoSobre } from '../../../shared/constants/Apariencia';
 import { GrillaCargando, TituloSeccion } from '../../../shared/components/Portal/Secciones';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
-
-const PROPUESTAS = [
-  { icono: VerifiedUserIcon, titulo: 'Proveedores verificados', texto: 'Revisamos documentos y registro de turismo de cada proveedor antes de publicar.' },
-  { icono: ReviewsIcon, titulo: 'Reseñas de la comunidad', texto: 'Opiniones reales de viajeros, moderadas por nuestro equipo.' },
-  { icono: EventAvailableIcon, titulo: 'Reserva con confianza', texto: 'Cupos y horarios actualizados por el proveedor, confirmación en tu cuenta.' },
-];
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -44,6 +37,8 @@ const Home = () => {
   const destinos = useSelector((state) => state.portalDestinos.rows);
   const promociones = useSelector((state) => state.portalPromociones.rows);
   const [busqueda, setBusqueda] = useState({ texto: '', destino: '' });
+  // Textos, colores e imagen principal: Parametrización > Apariencia.
+  const { marca, portal, inicio, imagenes } = useApariencia().apariencia;
 
   useEffect(() => {
     dispatch(onGetExperiencias({ rowsPerPage: 8, filtros: { orden: 'relevancia' } }));
@@ -64,12 +59,9 @@ const Home = () => {
         sx={{
           position: 'relative',
           overflow: 'hidden',
-          color: '#fff',
-          background: `url(brand/banner3.png)`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          /*background: `linear-gradient(120deg, ${COLORES_MARCA.azulOscuro} 0%, ${COLORES_MARCA.azul} 55%, ${ARCOIRIS[5]} 100%)`,*/
+          color: inicio.textoHero,
+          // Sombra configurable sobre la imagen; si la imagen no carga queda el degradado de la marca.
+          background: `linear-gradient(rgba(0, 0, 0, ${inicio.oscurecer}), rgba(0, 0, 0, ${inicio.oscurecer})), url("${imagenes.imagen_inicio}") center / cover no-repeat, linear-gradient(120deg, ${portal.primarioOscuro} 0%, ${portal.primario} 100%)`,
           py: { xs: 8, md: 12 },
         }}
       >
@@ -77,10 +69,10 @@ const Home = () => {
           <Grid container spacing={4} alignItems='center'>
             <Grid item xs={12} md={7}>
               <Typography variant='h1' sx={{ fontSize: { xs: '2rem', md: '3rem' } }}>
-                {MARCA.eslogan}
+                {marca.eslogan}
               </Typography>
               <Typography sx={{ mt: 2, mb: 4, fontSize: '1.1rem', opacity: 0.9, maxWidth: 560 }}>
-                Tours, planes y experiencias verificadas por la comunidad LGTBIQ+ en los mejores destinos del país.
+                {marca.descripcion}
               </Typography>
               <Paper component='form' onSubmit={buscar} sx={{ p: 1.5, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1.5 }}>
                 <TextField
@@ -108,11 +100,6 @@ const Home = () => {
                 </Button>
               </Paper>
             </Grid>
-            {/*<Grid item md={5} sx={{ display: { xs: 'none', md: 'block' } }}>
-              <Box sx={{ bgcolor: 'rgba(255,255,255,0.95)', borderRadius: 4, p: 3 }}>
-                <Box component='img' src={MARCA.logos.principal} alt={MARCA.nombre} sx={{ width: '100%' }} />
-              </Box>
-            </Grid>*/}
           </Grid>
         </Container>
       </Box>
@@ -165,19 +152,21 @@ const Home = () => {
         </Box>
       )}
 
-      <Container maxWidth='lg' sx={{ py: 7 }}>
-        <Grid container spacing={3}>
-          {PROPUESTAS.map(({ icono: Icono, titulo, texto }, i) => (
-            <Grid item xs={12} md={4} key={titulo}>
-              <Stack spacing={1.5} sx={{ p: 3, height: '100%', borderRadius: 3, bgcolor: 'background.paper', borderTop: `4px solid ${ARCOIRIS[i * 2]}` }}>
-                <Icono color='primary' sx={{ fontSize: 36 }} />
-                <Typography variant='h4'>{titulo}</Typography>
-                <Typography color='text.secondary'>{texto}</Typography>
-              </Stack>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
+      {inicio.propuestas.length > 0 && (
+        <Container maxWidth='lg' sx={{ py: 7 }}>
+          <Grid container spacing={3} justifyContent='center'>
+            {inicio.propuestas.map(({ icono, titulo, texto }, i) => (
+              <Grid item xs={12} md={4} key={`${titulo}-${i}`}>
+                <Stack spacing={1.5} sx={{ p: 3, height: '100%', borderRadius: 3, bgcolor: 'background.paper', borderTop: `4px solid ${portal.franja[(i * 2) % portal.franja.length]}` }}>
+                  {icono && <Icon color='primary' sx={{ fontSize: 36 }}>{icono}</Icon>}
+                  <Typography variant='h4'>{titulo}</Typography>
+                  <Typography color='text.secondary'>{texto}</Typography>
+                </Stack>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      )}
 
       {/* Banner / Acceso a Mapa de Experiencias */}
       <Container maxWidth='lg' sx={{ pb: 7 }}>
@@ -222,7 +211,7 @@ const Home = () => {
 
       {promociones.length > 0 && (
         <Container maxWidth='lg'>
-          <Paper sx={{ p: { xs: 3, md: 5 }, display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap', background: `linear-gradient(90deg, ${ARCOIRIS[5]}, ${COLORES_MARCA.azul})`, color: '#fff' }}>
+          <Paper sx={{ p: { xs: 3, md: 5 }, display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap', background: `linear-gradient(90deg, ${portal.claro.secundario}, ${portal.primario})`, color: textoSobre(portal.primario) }}>
             <LocalOfferIcon sx={{ fontSize: 48 }} />
             <Box sx={{ flex: 1 }}>
               <Typography variant='h3'>{promociones[0].nombre}</Typography>
@@ -230,7 +219,7 @@ const Home = () => {
                 {promociones.length > 1 ? `y ${promociones.length - 1} promoción(es) más vigentes` : `Válida hasta ${promociones[0].fecha_fin}`}
               </Typography>
             </Box>
-            <Button variant='contained' color='inherit' sx={{ color: COLORES_MARCA.texto }} component={RouterLink} to={RUTAS_PORTAL.promociones}>
+            <Button variant='contained' color='inherit' sx={{ color: portal.claro.texto }} component={RouterLink} to={RUTAS_PORTAL.promociones}>
               Ver promociones
             </Button>
           </Paper>

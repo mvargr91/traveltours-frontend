@@ -5,11 +5,12 @@ import PropTypes from 'prop-types';
 import { Typography } from '@mui/material';
 import { Fonts } from '@crema/constants/AppEnums';
 import AppLogo from '@crema/components/AppLayout/components/AppLogo';
-// TODO:: IMAGEN DE FONDO LOGIN
-import fondo from "../../assets/fondo/247.jpg";
+import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 import { width } from '@mui/system';
 
 const AuthWrapper = ({ children }) => {
+  // Fondo configurable en Parametrización > Apariencia.
+  const fondo = useApariencia().apariencia.imagenes.imagen_login;
   return (
     <Box
       sx={{
@@ -18,7 +19,7 @@ const AuthWrapper = ({ children }) => {
         flexDirection: 'column',
         alignItems: 'flex-start', // Alinea a la izquierda
         justifyContent: 'center',
-        backgroundImage: `url(${fondo})`,
+        backgroundImage: `url("${fondo}")`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         width: '100%',
