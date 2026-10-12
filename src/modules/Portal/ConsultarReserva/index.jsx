@@ -13,7 +13,7 @@ import MyTextField from '../../../shared/components/MyTextField';
 import { TituloSeccion } from '../../../shared/components/Portal/Secciones';
 import { ESTADOS_RESERVA, aHoraCorta, colorDe, formatoMoneda, nombreDe } from '../../../shared/constants/Turismo';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
-import { irAPagarConWompi } from '../../../shared/functions/Pagos';
+import { irAPagar } from '../../../shared/functions/Pagos';
 
 const validacion = yup.object({
   codigo: yup.string().trim().required('Requerido').max(30),
@@ -49,7 +49,7 @@ const ConsultarReserva = () => {
   const pagar = () => {
     setPagando(true);
     setErrorPago('');
-    irAPagarConWompi({ codigo: reserva.codigo_reserva, correo: reserva.correo }).catch((e) => {
+    irAPagar({ codigo: reserva.codigo_reserva, correo: reserva.correo }).catch((e) => {
       setPagando(false);
       setErrorPago(e.message);
     });
@@ -140,7 +140,7 @@ const ConsultarReserva = () => {
                 disabled={pagando}
                 onClick={pagar}
               >
-                {pagando ? 'Te llevamos a Wompi…' : 'Pagar ahora'}
+                {pagando ? 'Te llevamos a la pasarela de pagos…' : 'Pagar ahora'}
               </Button>
               {errorPago && <Alert severity='warning' sx={{ mt: 2 }}>{errorPago}</Alert>}
             </>

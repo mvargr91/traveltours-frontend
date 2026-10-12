@@ -1,16 +1,14 @@
-// Pago en línea con Wompi (Web Checkout).
-// El backend calcula el monto y firma los datos (POST publico/reservas/{codigo}/pago); aquí solo se arma
-// la URL del checkout y se redirige. Wompi devuelve al viajero al backend (publico/pagos/retorno), que lo
-// reenvía a /pago/resultado?id={transacción} (Wompi no acepta redirect-url con localhost).
+// Pago en línea con la pasarela de la instalación (Wompi, Mercado Pago…).
+// El backend calcula el monto y arma la URL del checkout (POST publico/reservas/{codigo}/pago); aquí solo
+// se redirige. La pasarela devuelve al viajero al backend (publico/pagos/{pasarela}/retorno), que lo
+// reenvía a /pago/resultado?id={transacción}&pasarela={pasarela}.
 import jwtAxios from '../../@crema/services/auth/jwt-auth';
 import { extraerMensajeError } from '../../@crema/redux/helpers/createCrudSlice';
 
-export const irAPagarConWompi = async ({ codigo, correo }) => {
+export const irAPagar = async ({ codigo, correo }) => {
   try {
     const { data } = await jwtAxios.post(`publico/reservas/${encodeURIComponent(codigo)}/pago`, { correo });
-    const parametros = new URLSearchParams();
-    Object.entries(data.parametros).forEach(([clave, valor]) => parametros.append(clave, valor));
-    window.location.assign(`${data.url}?${parametros.toString()}`);
+    window.location.assign(data.url);
   } catch (error) {
     throw new Error(extraerMensajeError(error));
   }

@@ -1,5 +1,5 @@
-// Wompi devuelve aquí al viajero después del checkout: /pago/resultado?id={transacción}&env=test.
-// El backend consulta la transacción en Wompi y aplica el pago (no depende de que el webhook llegue primero).
+// La pasarela devuelve aquí al viajero después del checkout: /pago/resultado?id={transacción}&pasarela={pasarela}.
+// El backend consulta la transacción en la pasarela y aplica el pago (no depende de que el webhook llegue primero).
 // Si sigue pendiente (ej. PSE en proceso) se vuelve a consultar unas veces.
 import React, { useEffect, useRef, useState } from 'react';
 import { Link as RouterLink, useSearchParams } from 'react-router-dom';
@@ -18,27 +18,27 @@ const REINTENTOS = 6;
 const ESPERA_MS = 5000;
 
 const RESULTADOS = {
-  APPROVED: {
+  aprobado: {
     icono: <CheckCircleRoundedIcon color='success' sx={{ fontSize: 72 }} />,
     titulo: '¡Pago aprobado!',
     texto: 'Tu reserva quedó confirmada. Te enviamos los detalles por correo.',
   },
-  PENDING: {
+  pendiente: {
     icono: <HourglassTopRoundedIcon color='warning' sx={{ fontSize: 72 }} />,
     titulo: 'Pago en proceso',
     texto: 'Tu banco aún no confirma el pago. Te avisaremos por correo apenas se apruebe.',
   },
-  DECLINED: {
+  rechazado: {
     icono: <CancelRoundedIcon color='error' sx={{ fontSize: 72 }} />,
     titulo: 'Pago rechazado',
     texto: 'El pago no se pudo completar. Tu cupo sigue separado: puedes intentarlo de nuevo.',
   },
-  VOIDED: {
+  anulado: {
     icono: <CancelRoundedIcon color='error' sx={{ fontSize: 72 }} />,
     titulo: 'Pago anulado',
     texto: 'La transacción fue anulada. Puedes intentarlo de nuevo desde tu reserva.',
   },
-  ERROR: {
+  error: {
     icono: <CancelRoundedIcon color='error' sx={{ fontSize: 72 }} />,
     titulo: 'No se pudo procesar el pago',
     texto: 'Hubo un error con el medio de pago. Puedes intentarlo de nuevo desde tu reserva.',
@@ -48,6 +48,7 @@ const RESULTADOS = {
 const ResultadoPago = () => {
   const [searchParams] = useSearchParams();
   const transaccionId = searchParams.get('id');
+  const pasarela = searchParams.get('pasarela');
   const [resultado, setResultado] = useState(null);
   const [error, setError] = useState('');
   const intentos = useRef(0);
@@ -61,10 +62,10 @@ const ResultadoPago = () => {
     const consultar = () => {
       intentos.current += 1;
       jwtAxios
-        .get(`publico/pagos/transaccion/${encodeURIComponent(transaccionId)}`)
+        .get(`publico/pagos/transaccion/${encodeURIComponent(transaccionId)}`, { params: pasarela ? { pasarela } : {} })
         .then(({ data }) => {
           setResultado(data);
-          if (data.estado_pago === 'PENDING' && intentos.current < REINTENTOS) {
+          if (data.estado_pago === 'pendiente' && intentos.current < REINTENTOS) {
             temporizador = setTimeout(consultar, ESPERA_MS);
           }
         })
@@ -72,9 +73,9 @@ const ResultadoPago = () => {
     };
     consultar();
     return () => clearTimeout(temporizador);
-  }, [transaccionId]);
+  }, [transaccionId, pasarela]);
 
-  const info = RESULTADOS[resultado?.estado_pago] ?? RESULTADOS.PENDING;
+  const info = RESULTADOS[resultado?.estado_pago] ?? RESULTADOS.pendiente;
   const reserva = resultado?.reserva;
 
   return (
@@ -84,7 +85,7 @@ const ResultadoPago = () => {
         {!error && !resultado && (
           <Stack alignItems='center' spacing={2} sx={{ py: 4 }}>
             <CircularProgress />
-            <Typography color='text.secondary'>Confirmando tu pago con Wompi…</Typography>
+            <Typography color='text.secondary'>Confirmando tu pago…</Typography>
           </Stack>
         )}
         {resultado && (
@@ -115,7 +116,7 @@ const ResultadoPago = () => {
                   to={`${RUTAS_PORTAL.consultarReserva}?codigo=${reserva.codigo_reserva}`}
                   state={{ correo: reserva.correo }}
                 >
-                  {resultado.estado_pago === 'APPROVED' || resultado.estado_pago === 'PENDING' ? 'Ver mi reserva' : 'Intentar de nuevo'}
+                  {resultado.estado_pago === 'aprobado' || resultado.estado_pago === 'pendiente' ? 'Ver mi reserva' : 'Intentar de nuevo'}
                 </Button>
               )}
               <Button component={RouterLink} to={RUTAS_PORTAL.tours}>Seguir explorando</Button>
