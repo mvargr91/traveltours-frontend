@@ -35,8 +35,10 @@ import { useApariencia } from '@crema/context/AppContextProvider/AparienciaConte
 // Coordenadas centrales de Colombia [longitud, latitud]
 const CENTRO_COLOMBIA = [-74.08175, 4.60971];
 
-// Token de Mapbox configurado en variables de entorno o token por defecto
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+// Token de Mapbox configurado en variables de entorno
+const ENV_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+const TIENE_TOKEN_VALIDO = Boolean(ENV_TOKEN && ENV_TOKEN.startsWith('pk.'));
+mapboxgl.accessToken = ENV_TOKEN;
 // Estilo de mapa base de alta resolución para Mapbox GL (sin restricción de cuota de pago, 100% visible)
 const ESTILO_MAPA_BASE = {
   version: 8,
@@ -269,31 +271,38 @@ const Mapa = () => {
     lugaresFiltrados.forEach((lugar, index) => {
       const colorArcoiris = franja[index % franja.length];
 
-      // Elemento visual personalizado del pin
+      // Contenedor del marcador: Mapbox lo posiciona con transform, no se debe animar
       const el = document.createElement('div');
       el.className = 'custom-mapbox-marker';
       el.style.width = '34px';
       el.style.height = '34px';
-      el.style.borderRadius = '50%';
       el.style.cursor = 'pointer';
-      el.style.display = 'flex';
-      el.style.alignItems = 'center';
-      el.style.justifyContent = 'center';
-      el.style.backgroundColor = colorArcoiris;
-      el.style.border = '3px solid #ffffff';
-      el.style.boxShadow = '0 4px 14px rgba(0,0,0,0.4)';
-      el.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
-      el.innerHTML = `
+
+      // Elemento visual personalizado del pin
+      const pin = document.createElement('div');
+      pin.style.width = '100%';
+      pin.style.height = '100%';
+      pin.style.boxSizing = 'border-box';
+      pin.style.borderRadius = '50%';
+      pin.style.display = 'flex';
+      pin.style.alignItems = 'center';
+      pin.style.justifyContent = 'center';
+      pin.style.backgroundColor = colorArcoiris;
+      pin.style.border = '3px solid #ffffff';
+      pin.style.boxShadow = '0 4px 14px rgba(0,0,0,0.4)';
+      pin.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+      pin.innerHTML = `
         <svg style="width: 18px; height: 18px; fill: white;" viewBox="0 0 24 24">
           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
         </svg>
       `;
+      el.appendChild(pin);
 
       el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.3) translateY(-4px)';
+        pin.style.transform = 'scale(1.3) translateY(-4px)';
       });
       el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1) translateY(0)';
+        pin.style.transform = 'scale(1) translateY(0)';
       });
 
       // Contenido del popup

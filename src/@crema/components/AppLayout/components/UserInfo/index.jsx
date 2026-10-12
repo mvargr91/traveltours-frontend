@@ -62,6 +62,7 @@ const UserInfo = ({ color }) => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [anchorEl, setAnchorEl] = React.useState(null);
   const { themeMode } = useThemeContext();
   const { updateThemeMode } = useThemeActionsContext();
   const theme = useTheme();
