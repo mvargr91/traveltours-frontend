@@ -1,28 +1,30 @@
 // Tema del portal público (soporta modo claro y modo oscuro alineado con la marca).
+// Los colores salen de Parametrización > Apariencia (apariencia.portal).
 import { createTheme } from '@mui/material/styles';
-import { COLORES_MARCA } from '../../constants/Marca';
+import { APARIENCIA_BASE, textoSobre } from '../../constants/Apariencia';
 
-export const getPortalTheme = (mode = 'light') => {
+export const getPortalTheme = (mode = 'light', portal = APARIENCIA_BASE.portal) => {
   const isDark = mode === 'dark';
+  const colores = isDark ? portal.oscuro : portal.claro;
 
   return createTheme({
     palette: {
       mode: isDark ? 'dark' : 'light',
       primary: {
-        main: COLORES_MARCA.azul,
-        dark: COLORES_MARCA.azulOscuro,
-        contrastText: '#fff',
+        main: portal.primario,
+        dark: portal.primarioOscuro,
+        contrastText: textoSobre(portal.primario),
       },
       secondary: {
-        main: isDark ? '#c084fc' : '#732982',
+        main: colores.secundario,
       },
       text: {
-        primary: isDark ? '#F8FAFC' : COLORES_MARCA.texto,
-        secondary: isDark ? '#94A3B8' : '#4B5563',
+        primary: colores.texto,
+        secondary: colores.textoSecundario,
       },
       background: {
-        default: isDark ? '#0f172a' : '#F7F9FB',
-        paper: isDark ? '#1e293b' : '#FFFFFF',
+        default: colores.fondo,
+        paper: colores.superficie,
       },
       divider: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)',
     },

@@ -11,7 +11,7 @@ import { onGetCuenta } from '@crema/redux/features/cuenta/cuentaSlice';
 import AppMessageView from '@crema/components/AppMessageView';
 import { ERROR_TYPE } from '../../../shared/constants/Constantes';
 import { ESTADOS_VERIFICACION, colorDe, nombreDe } from '../../../shared/constants/Turismo';
-import { gradienteArcoiris } from '../../../shared/constants/Marca';
+import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 import DatosPersonales from './DatosPersonales';
 import MiNegocio from './MiNegocio';
 import Seguridad from './Seguridad';
@@ -32,6 +32,7 @@ const avisoClaro = { borderRadius: 0, color: 'text.primary' };
 
 const MiCuenta = () => {
   const dispatch = useDispatch();
+  const { gradienteFranja } = useApariencia().apariencia;
   const { datos: cuenta, loading, error } = useSelector((state) => state.cuenta);
   const { message, messageType } = useSelector(({ common }) => common);
   // Pestaña inicial desde la URL (/mi-cuenta?tab=negocio). Se lee de window.location porque el guard de
@@ -68,7 +69,7 @@ const MiCuenta = () => {
   return (
     <Box sx={{ maxWidth: 960, mx: 'auto' }}>
       <Card sx={{ mb: 6, overflow: 'hidden' }}>
-        <Box sx={{ height: 6, background: gradienteArcoiris }} />
+        <Box sx={{ height: 6, background: gradienteFranja }} />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, p: { xs: 4, md: 6 }, flexWrap: 'wrap' }}>
           <Avatar sx={{ width: 72, height: 72, fontSize: 26, fontWeight: 600, bgcolor: 'primary.main' }}>
             {iniciales(cuenta.nombre)}

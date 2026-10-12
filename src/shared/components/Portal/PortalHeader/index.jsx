@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
@@ -8,12 +8,15 @@ import {
   Container,
   Divider,
   Drawer,
+  Icon,
   IconButton,
   List,
   ListItemButton,
+  ListItemIcon,
   ListItemText,
   Toolbar,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -22,17 +25,28 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import { useAuthMethod } from '@crema/hooks/AuthHooks';
 import { logoutUser } from '@crema/redux/features/auth/authSlice';
 import { useThemeContext } from '@crema/context/AppContextProvider/ThemeContextProvider';
-import { MARCA, gradienteArcoiris } from '../../../constants/Marca';
+import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
+import { RUTAS_MENU_PORTAL } from '../../../constants/Apariencia';
 import { RUTAS_PORTAL, RUTA_MI_CUENTA } from '../../../constants/RutasPortal';
 import AppThemeModeSwitcher from '@crema/components/AppThemeModeSwitcher';
 
-export const ENLACES_PORTAL = [
-  { label: 'Inicio', to: RUTAS_PORTAL.inicio, color: '#ef4444', bgcolor: 'rgba(239, 68, 68, 0.1)' },
-  { label: 'Tours', to: RUTAS_PORTAL.tours, color: '#f97316', bgcolor: 'rgba(249, 115, 22, 0.1)' },
-  { label: 'Destinos', to: RUTAS_PORTAL.destinos, color: '#eab308', bgcolor: 'rgba(234, 179, 8, 0.1)' },
-  { label: 'Promociones', to: RUTAS_PORTAL.promociones, color: '#22c55e', bgcolor: 'rgba(34, 197, 94, 0.1)' },
-  { label: 'Mapa', to: RUTAS_PORTAL.mapa, color: '#06b6d4', bgcolor: 'rgba(6, 182, 212, 0.1)' },
-];
+// Enlaces visibles del menú del portal (etiqueta, color, icono y orden según Apariencia).
+export const useEnlacesPortal = () => {
+  const { menu } = useApariencia().apariencia.portal;
+  return useMemo(
+    () =>
+      menu
+        .filter((enlace) => enlace.visible)
+        .map((enlace) => ({
+          label: enlace.etiqueta,
+          to: RUTAS_MENU_PORTAL[enlace.clave],
+          color: enlace.color,
+          bgcolor: alpha(enlace.color, 0.1),
+          icono: enlace.icono,
+        })),
+    [menu],
+  );
+};
 
 // Primera opción del menú según los permisos del rol (misma regla que usa AppLayout tras el login).
 export const urlPanelDe = (user) => user?.usuario?.permisos?.[0]?.opciones?.[0]?.url ?? '/signin';
@@ -43,9 +57,11 @@ const PortalHeader = () => {
   const { logout } = useAuthMethod();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { themeMode } = useThemeContext();
+  const { apariencia } = useApariencia();
+  const enlaces = useEnlacesPortal();
   const [menuMovil, setMenuMovil] = useState(false);
 
-  const logoSrc = themeMode === 'dark' ? MARCA.logos.oscuro : MARCA.logos.principal;
+  const logoSrc = themeMode === 'dark' ? apariencia.logos.oscuro : apariencia.logos.principal;
 
   const salir = () => {
     dispatch(logoutUser(navigate));
@@ -79,21 +95,22 @@ const PortalHeader = () => {
 
   return (
     <AppBar position='sticky' color='inherit' elevation={0} sx={{ bgcolor: 'background.paper', transition: 'background-color 0.3s ease' }}>
-      <Box sx={{ height: 4, background: gradienteArcoiris }} />
+      {apariencia.portal.mostrarFranja && <Box sx={{ height: 4, background: apariencia.gradienteFranja }} />}
       <Container maxWidth='lg'>
         <Toolbar disableGutters sx={{ gap: 2, minHeight: { xs: 64, md: 76 } }}>
           <Box component={NavLink} to='/' sx={{ display: 'flex', alignItems: 'center', mr: 'auto' }}>
-            <Box component='img' src={logoSrc} alt={MARCA.nombre} sx={{ height: { xs: 44, md: 56 } }} />
+            <Box component='img' src={logoSrc} alt={apariencia.marca.nombre} sx={{ height: { xs: 44, md: 56 } }} />
           </Box>
 
           <Box component='nav' sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5 }}>
-            {ENLACES_PORTAL.map((enlace) => (
+            {enlaces.map((enlace) => (
               <Button
                 key={enlace.to}
                 component={NavLink}
                 to={enlace.to}
                 end={enlace.to === '/'}
                 color='inherit'
+                startIcon={enlace.icono ? <Icon>{enlace.icono}</Icon> : null}
                 sx={{
                   '&.active': { color: enlace.color, bgcolor: enlace.bgcolor },
                   '&:hover': { color: enlace.color, bgcolor: enlace.bgcolor },
@@ -116,10 +133,15 @@ const PortalHeader = () => {
 
       <Drawer anchor='right' open={menuMovil} onClose={() => setMenuMovil(false)}>
         <Box sx={{ width: 280, p: 2 }} role='presentation' onClick={() => setMenuMovil(false)}>
-          <Box component='img' src={logoSrc} alt={MARCA.nombre} sx={{ height: 48, mb: 2 }} />
+          <Box component='img' src={logoSrc} alt={apariencia.marca.nombre} sx={{ height: 48, mb: 2 }} />
           <List>
-            {ENLACES_PORTAL.map((enlace) => (
+            {enlaces.map((enlace) => (
               <ListItemButton key={enlace.to} component={NavLink} to={enlace.to}>
+                {enlace.icono && (
+                  <ListItemIcon sx={{ minWidth: 36, color: enlace.color }}>
+                    <Icon>{enlace.icono}</Icon>
+                  </ListItemIcon>
+                )}
                 <ListItemText primary={enlace.label} />
               </ListItemButton>
             ))}

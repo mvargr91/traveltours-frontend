@@ -8,6 +8,7 @@ import AppSuspense from '@crema/components/AppSuspense';
 import AppErrorBoundary from '@crema/components/AppErrorBoundary';
 import AppMessageView from '@crema/components/AppMessageView';
 import { useThemeContext } from '@crema/context/AppContextProvider/ThemeContextProvider';
+import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 import { getPortalTheme } from '../portalTheme';
 import PortalHeader from '../PortalHeader';
 import PortalFooter from '../PortalFooter';
@@ -16,7 +17,8 @@ import { ERROR_TYPE } from '../../../constants/Constantes';
 const PublicLayout = ({ children }) => {
   const { message, messageType } = useSelector(({ common }) => common);
   const { themeMode } = useThemeContext();
-  const theme = useMemo(() => getPortalTheme(themeMode), [themeMode]);
+  const { portal } = useApariencia().apariencia;
+  const theme = useMemo(() => getPortalTheme(themeMode, portal), [themeMode, portal]);
 
   return (
     <ThemeProvider theme={theme}>

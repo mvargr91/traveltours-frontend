@@ -22,7 +22,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import PlaceIcon from '@mui/icons-material/Place';
 import VerifiedIcon from '@mui/icons-material/Verified';
-import { useTheme } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -30,7 +30,7 @@ import { onGetColeccion as onGetExperiencias } from '@crema/redux/features/porta
 import { onGetColeccion as onGetDestinos } from '@crema/redux/features/portalDestinos/portalDestinosSlice';
 import { onGetColeccion as onGetCategorias } from '@crema/redux/features/portalCategorias/portalCategoriasSlice';
 import { formatoMoneda } from '../../../shared/constants/Turismo';
-import { ARCOIRIS, COLORES_MARCA } from '../../../shared/constants/Marca';
+import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
 
 // Coordenadas centrales de Colombia [longitud, latitud]
 const CENTRO_COLOMBIA = [-74.08175, 4.60971];
@@ -66,6 +66,9 @@ const Mapa = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  // Colores de Parametrización > Apariencia: primario del portal y franja para los marcadores.
+  const colorPrimario = theme.palette.primary.main;
+  const { franja } = useApariencia().apariencia.portal;
 
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -264,7 +267,7 @@ const Mapa = () => {
     const bounds = new mapboxgl.LngLatBounds();
 
     lugaresFiltrados.forEach((lugar, index) => {
-      const colorArcoiris = ARCOIRIS[index % ARCOIRIS.length];
+      const colorArcoiris = franja[index % franja.length];
 
       // Elemento visual personalizado del pin
       const el = document.createElement('div');
@@ -295,15 +298,15 @@ const Mapa = () => {
 
       // Contenido del popup
       const precioHtml = lugar.precio_desde
-        ? `<div style="font-weight: 700; color: ${COLORES_MARCA.azul}; margin-top: 6px; font-size: 13px;">Desde ${formatoMoneda(
+        ? `<div style="font-weight: 700; color: ${colorPrimario}; margin-top: 6px; font-size: 13px;">Desde ${formatoMoneda(
             lugar.precio_desde
           )}</div>`
         : '';
 
       const enlaceHtml =
         lugar.tipo === 'experiencia'
-          ? `<a href="/tours/${lugar.slug}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: ${COLORES_MARCA.azul}; text-decoration: none; font-weight: 700;">Ver experiencia &rarr;</a>`
-          : `<a href="/tours?destino=${lugar.slug}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: ${COLORES_MARCA.azul}; text-decoration: none; font-weight: 700;">Ver tours en destino &rarr;</a>`;
+          ? `<a href="/tours/${lugar.slug}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: ${colorPrimario}; text-decoration: none; font-weight: 700;">Ver experiencia &rarr;</a>`
+          : `<a href="/tours?destino=${lugar.slug}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: ${colorPrimario}; text-decoration: none; font-weight: 700;">Ver tours en destino &rarr;</a>`;
 
       const popup = new mapboxgl.Popup({
         offset: 25,
@@ -350,7 +353,7 @@ const Mapa = () => {
         duration: 800,
       });
     }
-  }, [lugaresFiltrados]);
+  }, [lugaresFiltrados, franja, colorPrimario]);
 
   // Al hacer clic en un lugar de la lista lateral: enfocar y desplegar popup
   const seleccionarLugar = useCallback((lugar) => {
@@ -569,12 +572,10 @@ const Mapa = () => {
                             borderRadius: 2,
                             borderColor: esSeleccionado ? 'primary.main' : 'divider',
                             bgcolor: esSeleccionado
-                              ? isDark
-                                ? 'rgba(0, 161, 204, 0.12)'
-                                : 'rgba(0, 161, 204, 0.05)'
+                              ? alpha(colorPrimario, isDark ? 0.12 : 0.05)
                               : 'background.paper',
                             boxShadow: esSeleccionado
-                              ? `0 0 0 1px ${COLORES_MARCA.azul}`
+                              ? `0 0 0 1px ${colorPrimario}`
                               : 'none',
                             transition: 'all 0.2s ease',
                             '&:hover': {

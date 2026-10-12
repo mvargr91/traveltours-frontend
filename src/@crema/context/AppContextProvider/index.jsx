@@ -4,16 +4,19 @@ import ThemeContextProvider from './ThemeContextProvider';
 import LocaleContextProvider from './LocaleContextProvider';
 import LayoutContextProvider from './LayoutContextProvider';
 import SidebarContextProvider from './SidebarContextProvider';
+import AparienciaContextProvider from './AparienciaContextProvider';
 
 const AppContextProvider = ({ children }) => {
   return (
-    <ThemeContextProvider>
-      <LocaleContextProvider>
-        <LayoutContextProvider>
-          <SidebarContextProvider>{children}</SidebarContextProvider>
-        </LayoutContextProvider>
-      </LocaleContextProvider>
-    </ThemeContextProvider>
+    <AparienciaContextProvider>
+      <ThemeContextProvider>
+        <LocaleContextProvider>
+          <LayoutContextProvider>
+            <SidebarContextProvider>{children}</SidebarContextProvider>
+          </LayoutContextProvider>
+        </LocaleContextProvider>
+      </ThemeContextProvider>
+    </AparienciaContextProvider>
   );
 };
 
