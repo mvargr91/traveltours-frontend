@@ -40,7 +40,7 @@ import { onCreate as onCrearReservaInvitado } from '@crema/redux/features/portal
 import MyTextField from '../../../shared/components/MyTextField';
 import { aHoraCorta, esPagoEnLinea, formatoMoneda } from '../../../shared/constants/Turismo';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
-import { irAPagarConWompi } from '../../../shared/functions/Pagos';
+import { irAPagar } from '../../../shared/functions/Pagos';
 
 const validacionContacto = yup.object({
   nombre: yup.string().required('Requerido').max(150),
@@ -60,7 +60,7 @@ export const calcularTotal = (precio, personas, promocion) => {
 };
 
 // Pantalla final de la reserva: el código es lo único que necesita el viajero para consultarla.
-// Si la experiencia es de pago en línea, lleva de una vez al checkout de Wompi (con reintento manual).
+// Si la experiencia es de pago en línea, lleva de una vez al checkout de la pasarela (con reintento manual).
 const ReservaConfirmada = ({ reserva, onCerrar }) => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ const ReservaConfirmada = ({ reserva, onCerrar }) => {
   const pagar = () => {
     setPagando(true);
     setErrorPago('');
-    irAPagarConWompi({ codigo: reserva.codigo_reserva, correo: reserva.correo }).catch((error) => {
+    irAPagar({ codigo: reserva.codigo_reserva, correo: reserva.correo }).catch((error) => {
       setPagando(false);
       setErrorPago(error.message);
     });
@@ -95,7 +95,7 @@ const ReservaConfirmada = ({ reserva, onCerrar }) => {
             <Typography variant='h3' sx={{ mt: 1 }}>¡Cupo separado!</Typography>
             <Typography color='text.secondary' sx={{ mt: 1 }}>
               {pagando
-                ? 'Te estamos llevando a Wompi para pagar de forma segura…'
+                ? 'Te estamos llevando a la pasarela de pagos para pagar de forma segura…'
                 : 'Paga en línea para confirmar tu reserva.'}
             </Typography>
             {pagando && <LinearProgress sx={{ mt: 2 }} />}
@@ -193,7 +193,7 @@ const ReservaWidget = ({ experiencia }) => {
     setReservaConfirmada(null);
   };
 
-  // Con sesión: va a "Mis reservas", salvo pago en línea, que muestra la confirmación y lleva a Wompi.
+  // Con sesión: va a "Mis reservas", salvo pago en línea, que muestra la confirmación y lleva al checkout.
   const enviarCliente = (contacto) => {
     dispatch(
       onCrearReserva({
