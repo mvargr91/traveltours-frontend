@@ -18,6 +18,13 @@ import { creadorPropTypes } from '../../propTypes';
 
 const validationSchema = yup.object({
   fecha: yup.string().required('Requerido').nullable(),
+  fecha_fin: yup
+    .string()
+    .nullable()
+    .test('fecha-fin', 'Debe ser igual o posterior a la fecha de salida', function (valor) {
+      const { fecha } = this.parent;
+      return !valor || !fecha || valor >= fecha;
+    }),
   hora_inicio: yup.string().required('Requerido'),
   hora_fin: yup
     .string()
@@ -43,6 +50,7 @@ const ExperienciaDisponibilidadCreador = (props) => {
     id: registro?.id ?? '',
     experiencia_id: registro?.experiencia_id ?? Number(experienciaId),
     fecha: registro?.fecha ?? '',
+    fecha_fin: registro?.fecha_fin ?? '',
     hora_inicio: aHoraCorta(registro?.hora_inicio),
     hora_fin: aHoraCorta(registro?.hora_fin),
     capacidad: registro?.capacidad ?? '',
@@ -66,8 +74,9 @@ const ExperienciaDisponibilidadCreador = (props) => {
     >
       {({ saving }) => (
         <AppCrudForm titulo={titulo} accion={accion} handleOnClose={handleOnClose} saving={saving}>
-          <MyDatePicker label='Fecha *' name='fecha' disabled={disabled} />
-          <MySelectField fullWidth variant='standard' label='Estado' name='estado' options={ESTADOS_DISPONIBILIDAD} disabled={disabled} />
+          <MyDatePicker label='Fecha de salida *' name='fecha' disabled={disabled} />
+          <MyTextField fullWidth label='Fecha de regreso' name='fecha_fin' type='date' InputLabelProps={{ shrink: true }} helperText='Solo salidas de varios días. Vacío: la duración del tour.' disabled={disabled} />
+          <MySelectField className='campo-completo' fullWidth variant='standard' label='Estado' name='estado' options={ESTADOS_DISPONIBILIDAD} disabled={disabled} />
           <MyTextField fullWidth label='Hora Inicio' name='hora_inicio' type='time' InputLabelProps={{ shrink: true }} disabled={disabled} required />
           <MyTextField fullWidth label='Hora Fin' name='hora_fin' type='time' InputLabelProps={{ shrink: true }} disabled={disabled} />
           <MyTextField fullWidth label='Capacidad' name='capacidad' type='number' disabled={disabled} required />

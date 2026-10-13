@@ -4,6 +4,7 @@ import { RoutePermittedRole } from '@crema/constants/AppEnums';
 
 const ParametroConstante = React.lazy(() => import('../../../modules/Parametrizacion/ParametroConstante')); 
 const Apariencia = React.lazy(() => import('../../../modules/Parametrizacion/Apariencia'));
+const GenerarFechas = React.lazy(() => import('../../../modules/Parametrizacion/GenerarFechas'));
 const ParametroCorreo = React.lazy(() => import('../../../modules/Parametrizacion/ParametroCorreo')); 
 const Ciudad = React.lazy(() => import('../../../modules/Parametrizacion/Ciudad')); 
 const TipoProyecto = React.lazy(() => import('../../../modules/Parametrizacion/TipoProyecto')); 
@@ -37,6 +38,11 @@ export const parametrizacionConfigs = [
     permittedRole: RoutePermittedRole.User,
     path: '/apariencia',
     element: <Apariencia route={{auth: authRole, path: '/apariencia'}}/>,
+  },
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/generar-fechas',
+    element: <GenerarFechas route={{auth: authRole, path: '/generar-fechas'}}/>,
   },
   {
     permittedRole: RoutePermittedRole.User,

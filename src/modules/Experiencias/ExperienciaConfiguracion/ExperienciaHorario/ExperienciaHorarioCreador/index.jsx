@@ -32,6 +32,13 @@ const validationSchema = yup.object({
       return !valor || !inicio || valor > inicio;
     }),
   capacidad: enteroOpcional().min(1, 'Mínimo 1'),
+  vigente_hasta: yup
+    .string()
+    .nullable()
+    .test('temporada', 'Debe ser igual o posterior al inicio de la temporada', function (valor) {
+      const { vigente_desde: desde } = this.parent;
+      return !valor || !desde || valor >= desde;
+    }),
 });
 
 const ExperienciaHorarioCreador = (props) => {
@@ -46,6 +53,8 @@ const ExperienciaHorarioCreador = (props) => {
     hora_inicio: aHoraCorta(registro?.hora_inicio),
     hora_fin: aHoraCorta(registro?.hora_fin),
     capacidad: registro?.capacidad ?? '',
+    vigente_desde: registro?.vigente_desde ?? '',
+    vigente_hasta: registro?.vigente_hasta ?? '',
     estado: aRadio(registro?.estado),
   });
 
@@ -69,6 +78,8 @@ const ExperienciaHorarioCreador = (props) => {
           <MyTextField fullWidth label='Capacidad' name='capacidad' type='number' disabled={disabled} />
           <MyTextField fullWidth label='Hora Inicio' name='hora_inicio' type='time' InputLabelProps={{ shrink: true }} disabled={disabled} required />
           <MyTextField fullWidth label='Hora Fin' name='hora_fin' type='time' InputLabelProps={{ shrink: true }} disabled={disabled} required />
+          <MyTextField fullWidth label='Temporada desde' name='vigente_desde' type='date' InputLabelProps={{ shrink: true }} helperText='Vacío: todo el año' disabled={disabled} />
+          <MyTextField fullWidth label='Temporada hasta' name='vigente_hasta' type='date' InputLabelProps={{ shrink: true }} helperText='Con fecha final se crean todas las fechas de la temporada' disabled={disabled} />
           <MyRadioField label='Estado' name='estado' disabled={disabled} options={OPCIONES_ESTADO} />
         </AppCrudForm>
       )}

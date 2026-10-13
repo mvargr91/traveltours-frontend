@@ -12,6 +12,7 @@ import { useApariencia } from '@crema/context/AppContextProvider/AparienciaConte
 import { getPortalTheme } from '../portalTheme';
 import PortalHeader from '../PortalHeader';
 import PortalFooter from '../PortalFooter';
+import { BotonWhatsAppFlotante } from '../BotonWhatsApp';
 import { ERROR_TYPE } from '../../../constants/Constantes';
 
 const PublicLayout = ({ children }) => {
@@ -39,6 +40,7 @@ const PublicLayout = ({ children }) => {
           </AppSuspense>
         </Box>
         <PortalFooter />
+        <BotonWhatsAppFlotante />
         <AppMessageView variant={messageType === ERROR_TYPE ? 'error' : 'success'} message={message || ''} />
       </Box>
     </ThemeProvider>

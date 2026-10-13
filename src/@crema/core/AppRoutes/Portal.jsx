@@ -9,6 +9,7 @@ const Mapa = React.lazy(() => import('../../../modules/Portal/Mapa'));
 const Experiencias = React.lazy(() => import('../../../modules/Portal/Experiencias'));
 const ExperienciaDetalle = React.lazy(() => import('../../../modules/Portal/ExperienciaDetalle'));
 const Destinos = React.lazy(() => import('../../../modules/Portal/Destinos'));
+const ProveedorPerfil = React.lazy(() => import('../../../modules/Portal/ProveedorPerfil'));
 const Promociones = React.lazy(() => import('../../../modules/Portal/Promociones'));
 const Registro = React.lazy(() => import('../../../modules/Portal/Registro'));
 const ConsultarReserva = React.lazy(() => import('../../../modules/Portal/ConsultarReserva'));
@@ -25,6 +26,7 @@ export const portalRoutes = PORTAL_HABILITADO
       { path: RUTAS_PORTAL.tours, element: <Experiencias /> },
       { path: RUTAS_PORTAL.tour(':slug'), element: <ExperienciaDetalle /> },
       { path: RUTAS_PORTAL.destinos, element: <Destinos /> },
+      { path: RUTAS_PORTAL.proveedor(':id'), element: <ProveedorPerfil /> },
       { path: RUTAS_PORTAL.promociones, element: <Promociones /> },
       { path: RUTAS_PORTAL.registro, element: <Registro /> },
       { path: RUTAS_PORTAL.consultarReserva, element: <ConsultarReserva /> },

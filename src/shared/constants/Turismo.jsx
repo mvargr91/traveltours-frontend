@@ -57,6 +57,26 @@ export const ESTADOS_DISPONIBILIDAD = [
   { id: 'cancelado', nombre: 'Cancelado', color: 'red' },
 ];
 
+// Medios de un pago registrado a mano (pagos.metodo_pago con pasarela "manual"). Ids = PagoService::MEDIOS_MANUALES.
+export const MEDIOS_PAGO_MANUAL = [
+  { id: 'efectivo', nombre: 'Efectivo' },
+  { id: 'transferencia', nombre: 'Transferencia' },
+  { id: 'datafono', nombre: 'Datáfono' },
+  { id: 'otro', nombre: 'Otro' },
+];
+
+export const CONCEPTOS_PAGO = [
+  { id: 'abono', nombre: 'Abono' },
+  { id: 'saldo', nombre: 'Saldo' },
+  { id: 'total', nombre: 'Pago total' },
+];
+
+// "Efectivo", "Transferencia"… o, en un pago en línea, el nombre de la pasarela.
+export const medioDePago = (pago) =>
+  pago.pasarela === 'manual'
+    ? nombreDe(MEDIOS_PAGO_MANUAL, pago.metodo_pago)
+    : `En línea (${{ wompi: 'Wompi', mercadopago: 'Mercado Pago' }[pago.pasarela] ?? pago.pasarela})`;
+
 export const TIPOS_DESCUENTO = [
   { id: 'porcentaje', nombre: 'Porcentaje' },
   { id: 'valor_fijo', nombre: 'Valor fijo' },
@@ -68,6 +88,15 @@ export const TIPOS_MULTIMEDIA = [
 ];
 
 // Un precio es de adulto o de niño; una experiencia puede tener varios de cada tipo.
+// Tipo de experiencia (experiencias.tipo): cómo se vive, aparte de la categoría.
+// Los ids deben coincidir con Experiencia::TIPOS en el backend.
+export const TIPOS_EXPERIENCIA = [
+  { id: 'grupal', nombre: 'Grupal (compartida)' },
+  { id: 'privada', nombre: 'Privada' },
+  { id: 'personalizada', nombre: 'Personalizada (a la medida)' },
+  { id: 'autoguiada', nombre: 'Autoguiada' },
+];
+
 // Cómo se reserva una experiencia (experiencias.modalidad_pago).
 export const MODALIDADES_PAGO = [
   { id: 'reserva', nombre: 'Reserva', color: '#00A1CC', descripcion: 'El viajero solicita el cupo y paga directamente con el proveedor.' },
@@ -128,6 +157,28 @@ export const aRadio = (valor, porDefecto = '1') =>
 
 // El backend valida horas con date_format:H:i; MySQL devuelve HH:mm:ss.
 export const aHoraCorta = (hora) => (hora ? String(hora).substring(0, 5) : '');
+
+// Regreso de una salida de varios días: el de la salida (fechaFin) o, si no lo tiene, la duración del tour
+// (experiencias.duracion_dias) contada desde la fecha de salida. Null si es de un día.
+export const fechaRegreso = (fecha, dias, fechaFin) => {
+  if (fecha && fechaFin && String(fechaFin).substring(0, 10) > String(fecha).substring(0, 10)) return String(fechaFin).substring(0, 10);
+  if (!fecha || !(Number(dias) > 1)) return null;
+  const regreso = new Date(`${String(fecha).substring(0, 10)}T00:00:00Z`);
+  regreso.setUTCDate(regreso.getUTCDate() + Number(dias) - 1);
+  return Number.isNaN(regreso.getTime()) ? null : regreso.toISOString().slice(0, 10);
+};
+
+// "2026-11-14 → 2026-11-17" en tours de varios días; la fecha sola en los demás.
+export const rangoFechas = (fecha, dias, fechaFin) => {
+  const regreso = fechaRegreso(fecha, dias, fechaFin);
+  return regreso ? `${fecha} → ${regreso}` : fecha ?? '';
+};
+
+// Fecha de hoy (hora local) en AAAA-MM-DD, para el mínimo de los campos de fecha.
+export const hoy = () => {
+  const fecha = new Date();
+  return new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+};
 
 export const formatoMoneda = (valor) =>
   valor === null || valor === undefined || valor === ''

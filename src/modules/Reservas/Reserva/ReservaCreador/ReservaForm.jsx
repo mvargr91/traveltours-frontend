@@ -2,13 +2,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
-import { Alert } from '@mui/material';
+import { Alert, Box } from '@mui/material';
 import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
 import MySelectField from '../../../../shared/components/MySelectField';
 import MyCurrencyField from '../../../../shared/components/MyCurrencyField';
 import MyDatePicker from '../../../../shared/components/MyDatePicker';
 import FormikAutocomplete from '../../../../shared/components/FormikAutocomplete';
+import HistorialReserva from '../../../../shared/components/HistorialReserva';
+import PagosReserva from './PagosReserva';
 import { onShow as onShowExperiencia } from '../../../../@crema/redux/features/experiencias/experienciasSlice';
 import { onGetColeccion as onGetDisponibilidad } from '../../../../@crema/redux/features/experienciaDisponibilidad/experienciaDisponibilidadSlice';
 import {
@@ -145,6 +147,24 @@ const ReservaForm = (props) => {
       <SeccionForm titulo='Observaciones' />
       <MyTextField fullWidth multiline minRows={3} label='Observaciones del Cliente' name='observaciones' disabled={disabled} />
       <MyTextField fullWidth multiline minRows={3} label='Notas Internas' name='notas' disabled={disabled} />
+
+      {registro && (
+        <>
+          <SeccionForm titulo='Pagos' />
+          <Box className='campo-completo'>
+            <PagosReserva reserva={registro} soloLectura={disabled} />
+          </Box>
+        </>
+      )}
+
+      {registro?.historial?.length > 0 && (
+        <>
+          <SeccionForm titulo='Historial de estados' />
+          <Box className='campo-completo'>
+            <HistorialReserva historial={registro.historial} />
+          </Box>
+        </>
+      )}
     </AppCrudForm>
   );
 };

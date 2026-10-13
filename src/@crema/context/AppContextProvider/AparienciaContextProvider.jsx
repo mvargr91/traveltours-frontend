@@ -32,12 +32,14 @@ const guardarCache = (datos) => {
   }
 };
 
-const construir = (configuracion, rutas) => {
+const construir = (configuracion, rutas, contacto) => {
   const apariencia = combinarApariencia(configuracion);
   const imagenes = resolverImagenes(rutas);
   return {
     ...apariencia,
     imagenes,
+    // Contacto del pie + número de WhatsApp del portal (parámetro WHATSAPP_NUMERO); vacío = sin botón.
+    contacto: { ...apariencia.contacto, whatsapp: String(contacto?.whatsapp ?? '').replace(/\D/g, '') },
     logos: { principal: imagenes.logo_principal, oscuro: imagenes.logo_oscuro, isotipo: imagenes.isotipo },
     gradienteFranja: gradienteFranja(apariencia.portal.franja),
   };
@@ -45,7 +47,7 @@ const construir = (configuracion, rutas) => {
 
 const AparienciaContext = createContext({
   apariencia: construir(APARIENCIA_BASE, {}),
-  guardada: { configuracion: {}, imagenes: {} },
+  guardada: { configuracion: {}, imagenes: {}, contacto: {} },
   cargada: false,
 });
 const AparienciaActionsContext = createContext({});
@@ -65,17 +67,17 @@ export const useTextos = (grupo) => {
 export const useAparienciaActions = () => useContext(AparienciaActionsContext);
 
 const AparienciaContextProvider = ({ children }) => {
-  // Lo que está guardado en el backend: { configuracion, imagenes (rutas) }.
+  // Lo que está guardado en el backend: { configuracion, imagenes (rutas), contacto }.
   const [guardada, setGuardada] = useState(() => {
     const cache = leerCache();
-    return { configuracion: cache.configuracion ?? {}, imagenes: cache.imagenes ?? {} };
+    return { configuracion: cache.configuracion ?? {}, imagenes: cache.imagenes ?? {}, contacto: cache.contacto ?? {} };
   });
   const [cargada, setCargada] = useState(false);
   // Cambios sin guardar que el editor quiere ver aplicados en vivo.
   const [borrador, setBorrador] = useState(null);
 
   const aplicar = useCallback((datos) => {
-    const nueva = { configuracion: datos?.configuracion ?? {}, imagenes: datos?.imagenes ?? {} };
+    const nueva = { configuracion: datos?.configuracion ?? {}, imagenes: datos?.imagenes ?? {}, contacto: datos?.contacto ?? {} };
     setGuardada(nueva);
     guardarCache(nueva);
     return nueva;
@@ -115,7 +117,7 @@ const AparienciaContextProvider = ({ children }) => {
   const previsualizar = useCallback((configuracion) => setBorrador(configuracion ?? null), []);
 
   const apariencia = useMemo(
-    () => construir(borrador ?? guardada.configuracion, guardada.imagenes),
+    () => construir(borrador ?? guardada.configuracion, guardada.imagenes, guardada.contacto),
     [borrador, guardada],
   );
 

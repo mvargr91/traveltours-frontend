@@ -19,12 +19,13 @@ import { extraerMensajeError } from '@crema/redux/helpers/createCrudSlice';
 import usePermisosOpcion from '../../../shared/hooks/usePermisosOpcion';
 import HelpButton from '../../../shared/components/HelpButton';
 import { urlArchivo } from '../../../shared/functions/Archivos';
-import { IMAGENES_APARIENCIA, combinarApariencia } from '../../../shared/constants/Apariencia';
-import { SeccionInicio, SeccionMarca, SeccionMenu, SeccionPanel, SeccionPortal, SeccionTextos } from './Secciones';
+import { ES_ENLACE, IMAGENES_APARIENCIA, REDES_SOCIALES, combinarApariencia } from '../../../shared/constants/Apariencia';
+import { SeccionContacto, SeccionInicio, SeccionMarca, SeccionMenu, SeccionPanel, SeccionPortal, SeccionTextos } from './Secciones';
 import VistaPrevia from './VistaPrevia';
 
 const PESTANAS = [
   ['Marca y logos', SeccionMarca],
+  ['Contacto y redes', SeccionContacto],
   ['Colores del portal', SeccionPortal],
   ['Menú del portal', SeccionMenu],
   ['Página de inicio', SeccionInicio],
@@ -125,6 +126,10 @@ const Apariencia = ({ route }) => {
     if (config.portal.menu.some((enlace) => !enlace.etiqueta.trim())) return 'Todas las opciones del menú del portal deben tener nombre.';
     if (!config.portal.menu.some((enlace) => enlace.visible)) return 'Deja visible al menos una opción del menú del portal.';
     if (config.inicio.propuestas.some((propuesta) => !propuesta.titulo.trim())) return 'Todas las tarjetas del inicio deben tener título.';
+    if (config.contacto.correo && !/^\S+@\S+\.\S+$/.test(config.contacto.correo)) return 'El correo de contacto no es válido.';
+    const enlaces = [...REDES_SOCIALES.map(([red, nombre]) => [nombre, config.contacto[red]]), ['El video del inicio', config.inicio.video]];
+    const malo = enlaces.find(([, valor]) => valor && !ES_ENLACE.test(valor));
+    if (malo) return `${malo[0]}: el enlace debe empezar por https://`;
     return '';
   };
 

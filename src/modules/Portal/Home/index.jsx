@@ -29,6 +29,7 @@ import { useApariencia, useTextos } from '@crema/context/AppContextProvider/Apar
 import { textoSobre } from '../../../shared/constants/Apariencia';
 import { GrillaCargando, TituloSeccion } from '../../../shared/components/Portal/Secciones';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
+import { hoy } from '../../../shared/constants/Turismo';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -36,7 +37,7 @@ const Home = () => {
   const experiencias = useSelector((state) => state.portalExperiencias);
   const destinos = useSelector((state) => state.portalDestinos.rows);
   const promociones = useSelector((state) => state.portalPromociones.rows);
-  const [busqueda, setBusqueda] = useState({ texto: '', destino: '' });
+  const [busqueda, setBusqueda] = useState({ texto: '', destino: '', fecha: '' });
   // Textos, colores e imagen principal: Parametrización > Apariencia.
   const { marca, portal, inicio, imagenes } = useApariencia().apariencia;
   const t = useTextos('inicio');
@@ -66,9 +67,26 @@ const Home = () => {
           py: { xs: 8, md: 12 },
         }}
       >
+        {inicio.video && (
+          <>
+            {/* Video de fondo: la imagen queda de portada mientras carga o si no se puede reproducir. */}
+            <Box
+              component='video'
+              src={inicio.video}
+              poster={imagenes.imagen_inicio}
+              autoPlay
+              muted
+              loop
+              playsInline
+              aria-hidden
+              sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+            <Box sx={{ position: 'absolute', inset: 0, bgcolor: `rgba(0, 0, 0, ${inicio.oscurecer})` }} />
+          </>
+        )}
         <Container maxWidth='lg' sx={{ position: 'relative' }}>
           <Grid container spacing={4} alignItems='center'>
-            <Grid item xs={12} md={7}>
+            <Grid item xs={12} md={9}>
               <Typography variant='h1' sx={{ fontSize: { xs: '2rem', md: '3rem' } }}>
                 {marca.eslogan}
               </Typography>
@@ -96,6 +114,16 @@ const Home = () => {
                     <MenuItem key={d.id} value={d.slug}>{d.nombre}</MenuItem>
                   ))}
                 </TextField>
+                <TextField
+                  type='date'
+                  size='small'
+                  sx={{ minWidth: 160 }}
+                  label={t('fecha')}
+                  value={busqueda.fecha}
+                  InputLabelProps={{ shrink: true }}
+                  inputProps={{ min: hoy() }}
+                  onChange={(e) => setBusqueda({ ...busqueda, fecha: e.target.value })}
+                />
                 <Button type='submit' variant='contained' startIcon={<SearchIcon />} sx={{ px: 4 }}>
                   {t('buscar')}
                 </Button>

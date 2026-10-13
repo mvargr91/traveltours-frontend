@@ -78,6 +78,7 @@ import promocionExperienciasReducer from './features/promocionExperiencias/promo
 import portalExperienciasReducer from './features/portalExperiencias/portalExperienciasSlice';
 import portalDestinosReducer from './features/portalDestinos/portalDestinosSlice';
 import portalCategoriasReducer from './features/portalCategorias/portalCategoriasSlice';
+import portalCaracteristicasReducer from './features/portalCaracteristicas/portalCaracteristicasSlice';
 import portalPromocionesReducer from './features/portalPromociones/portalPromocionesSlice';
 import portalRegistroReducer from './features/portalRegistro/portalRegistroSlice';
 import portalReservasReducer from './features/portalReservas/portalReservasSlice';
@@ -164,6 +165,7 @@ export const store = configureStore({
     portalExperiencias: portalExperienciasReducer,
     portalDestinos: portalDestinosReducer,
     portalCategorias: portalCategoriasReducer,
+    portalCaracteristicas: portalCaracteristicasReducer,
     portalPromociones: portalPromocionesReducer,
     portalRegistro: portalRegistroReducer,
     portalReservas: portalReservasReducer,
