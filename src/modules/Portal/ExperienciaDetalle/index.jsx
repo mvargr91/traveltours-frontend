@@ -34,11 +34,13 @@ import TranslateIcon from '@mui/icons-material/Translate';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 import { onShow, resetActual } from '@crema/redux/features/portalExperiencias/portalExperienciasSlice';
 import { onCreate as onCrearFavorito } from '@crema/redux/features/favoritos/favoritosSlice';
-import { DIAS_SEMANA, TIPOS_PRECIO, aHoraCorta, formatoMoneda, nombreDe, textoCantidad } from '../../../shared/constants/Turismo';
+import { DIAS_SEMANA, TIPOS_EXPERIENCIA, TIPOS_PRECIO, aHoraCorta, formatoMoneda, nombreDe, textoCantidad } from '../../../shared/constants/Turismo';
 import { ImagenExperiencia } from '../../../shared/components/Portal/ExperienceCard';
 import ReservaWidget from './ReservaWidget';
+import ContactoProveedor from '../../../shared/components/Portal/ContactoProveedor';
 import { urlArchivo } from '../../../shared/functions/Archivos';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
 import { useTextos } from '@crema/context/AppContextProvider/AparienciaContextProvider';
@@ -153,6 +155,7 @@ const ExperienciaDetalle = () => {
             {exp.categorias.map((c) => (
               <Chip key={c.id} label={c.nombre} size='small' component={RouterLink} to={`${RUTAS_PORTAL.tours}?categoria=${c.slug}`} clickable />
             ))}
+            {exp.tipo && <Chip label={nombreDe(TIPOS_EXPERIENCIA, exp.tipo)} size='small' variant='outlined' />}
             {verificada && <Chip icon={<VerifiedIcon />} label={t('verificada')} color='primary' size='small' />}
           </Stack>
           <Typography variant='h1' sx={{ fontSize: { xs: '1.8rem', md: '2.3rem' } }}>{exp.nombre}</Typography>
@@ -253,6 +256,17 @@ const ExperienciaDetalle = () => {
               {exp.proveedor_verificacion === 'aprobado' && <VerifiedIcon color='primary' />}
             </Stack>
             {exp.proveedor_descripcion && <Typography color='text.secondary' sx={{ mt: 1 }}>{exp.proveedor_descripcion}</Typography>}
+            <ContactoProveedor
+              telefono={exp.proveedor_telefono}
+              correo={exp.proveedor_correo}
+              sitioWeb={exp.proveedor_sitio_web}
+              instagram={exp.proveedor_instagram}
+              facebook={exp.proveedor_facebook}
+              sx={{ mt: 1.5 }}
+            />
+            <Button size='small' sx={{ mt: 1 }} startIcon={<StorefrontIcon />} component={RouterLink} to={RUTAS_PORTAL.proveedor(exp.proveedor_id)}>
+              {t('verPerfil')}
+            </Button>
           </Paper>
 
           <Typography variant='h3' sx={{ mb: 2 }}>{t('resenas')}</Typography>

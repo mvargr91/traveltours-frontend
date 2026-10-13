@@ -5,6 +5,7 @@ export const RUTAS_PORTAL = {
   tours: '/tours',
   tour: (slug) => `/tours/${slug}`,
   destinos: '/lugares',
+  proveedor: (id) => `/proveedor/${id}`,
   promociones: '/ofertas',
   mapa: '/mapa',
   registro: '/registro',

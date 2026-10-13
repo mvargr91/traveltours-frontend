@@ -29,7 +29,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RestoreIcon from '@mui/icons-material/Restore';
 import SearchIcon from '@mui/icons-material/Search';
-import { MAX_COLORES_FRANJA, MAX_PROPUESTAS, RUTAS_MENU_PORTAL } from '../../../shared/constants/Apariencia';
+import { ES_ENLACE, MAX_COLORES_FRANJA, MAX_PROPUESTAS, REDES_SOCIALES, RUTAS_MENU_PORTAL } from '../../../shared/constants/Apariencia';
 import { MAX_TEXTO, TEXTOS_PORTAL, variablesDe } from '../../../shared/constants/TextosPortal';
 import { CampoColor, CampoIcono, CampoImagen, Grupo, Rejilla } from './Campos';
 
@@ -90,6 +90,74 @@ export const SeccionMarca = ({ config, cambiar, imagen, disabled }) => {
   );
 };
 SeccionMarca.propTypes = propTypes;
+
+// Campo de enlace (red social, video): debe empezar por http(s)://.
+const CampoEnlace = ({ label, value, onChange, disabled, ayuda }) => {
+  const invalido = Boolean(value) && !ES_ENLACE.test(value);
+  return (
+    <TextField
+      fullWidth
+      size='small'
+      type='url'
+      label={label}
+      value={value}
+      disabled={disabled}
+      placeholder='https://'
+      error={invalido}
+      helperText={invalido ? 'Debe ser un enlace completo que empiece por https://' : ayuda}
+      onChange={(e) => onChange(e.target.value.trim().slice(0, 300))}
+      inputProps={{ maxLength: 300 }}
+    />
+  );
+};
+CampoEnlace.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+  ayuda: PropTypes.string,
+};
+
+export const SeccionContacto = ({ config, cambiar, disabled }) => {
+  const { contacto } = config;
+  const campo = (clave, label, max, props = {}) => (
+    <TextField
+      fullWidth
+      size='small'
+      label={label}
+      value={contacto[clave]}
+      disabled={disabled}
+      onChange={(e) => cambiar(`contacto.${clave}`, e.target.value.slice(0, max))}
+      inputProps={{ maxLength: max }}
+      {...props}
+    />
+  );
+
+  return (
+    <>
+      <Grupo titulo='Datos de contacto' ayuda='Se muestran en el pie de página del portal. Lo que quede vacío no aparece.'>
+        <Rejilla>
+          {campo('correo', 'Correo de contacto', 120, { type: 'email' })}
+          {campo('telefono', 'Teléfono', 30)}
+          {campo('direccion', 'Dirección o ciudad', 150)}
+        </Rejilla>
+        <Alert severity='info' sx={{ mt: 4 }}>
+          El número de WhatsApp (botón flotante y botón de contacto del pie) se define en Parametrización › Parámetros,
+          parámetro WHATSAPP_NUMERO. Sin WhatsApp, el botón de contacto abre el correo.
+        </Alert>
+      </Grupo>
+
+      <Grupo titulo='Redes sociales' ayuda='Pega el enlace completo del perfil. Cada red con enlace aparece como icono en el pie de página.'>
+        <Rejilla>
+          {REDES_SOCIALES.map(([red, nombre]) => (
+            <CampoEnlace key={red} label={nombre} value={contacto[red]} disabled={disabled} onChange={(v) => cambiar(`contacto.${red}`, v)} />
+          ))}
+        </Rejilla>
+      </Grupo>
+    </>
+  );
+};
+SeccionContacto.propTypes = propTypes;
 
 const COLORES_MODO_PORTAL = [
   ['fondo', 'Fondo de la página'],
@@ -235,6 +303,15 @@ export const SeccionInicio = ({ config, cambiar, imagen, disabled }) => {
     <>
       <Grupo titulo='Encabezado del inicio' ayuda='Imagen de fondo del primer bloque de la página de inicio, con el eslogan y el buscador encima.'>
         <CampoImagen {...imagen('imagen_inicio')} alto={180} />
+        <Box sx={{ mt: 5 }}>
+          <CampoEnlace
+            label='Video de fondo (opcional)'
+            value={inicio.video}
+            disabled={disabled}
+            ayuda='Enlace directo a un archivo .mp4 o .webm (no sirve un enlace de YouTube). Se reproduce en silencio y en bucle sobre la imagen, que queda de portada mientras carga.'
+            onChange={(v) => cambiar('inicio.video', v)}
+          />
+        </Box>
         <Box sx={{ mt: 5 }}>
           <Rejilla columnas={2}>
             <CampoColor label='Color del texto sobre la imagen' value={inicio.textoHero} disabled={disabled} onChange={(v) => cambiar('inicio.textoHero', v)} />

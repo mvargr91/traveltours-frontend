@@ -13,6 +13,7 @@ import {
   MODALIDADES_PAGO,
   OPCIONES_MODALIDAD_PAGO,
   OPCIONES_SI_NO,
+  TIPOS_EXPERIENCIA,
   formatoMoneda,
   nombreDe,
 } from '../../../../shared/constants/Turismo';
@@ -39,8 +40,10 @@ const ExperienciaForm = (props) => {
       <FormikAutocomplete name='destino_id' label='Destino *' options={destinos} disabled={disabled} textFieldProps={{ variant: 'standard' }} />
       <MyTextField autoFocus fullWidth label='Nombre' name='nombre' disabled={disabled} required />
       <MyTextField fullWidth label='Slug' name='slug' disabled={disabled} required />
-      <MySelectField className='campo-tercio' fullWidth variant='standard' label='Idioma' name='idioma' options={IDIOMAS} disabled={disabled} ninguno />
-      <MyTextField className='campo-tercio' fullWidth label='Duración' name='duracion' placeholder='Ej: 4 horas, 2 días' disabled={disabled} />
+      <MySelectField fullWidth variant='standard' label='Tipo de Experiencia' name='tipo' options={TIPOS_EXPERIENCIA} disabled={disabled} ninguno />
+      <MySelectField fullWidth variant='standard' label='Idioma' name='idioma' options={IDIOMAS} disabled={disabled} ninguno />
+      <MyTextField className='campo-tercio' fullWidth label='Duración' name='duracion' placeholder='Ej: 4 horas, 4 días / 3 noches' disabled={disabled} />
+      <MyTextField className='campo-tercio' fullWidth label='Duración en Días' name='duracion_dias' type='number' helperText='Solo tours de varios días: muestra la fecha de regreso' disabled={disabled} />
       <MyTextField className='campo-tercio' fullWidth label='Capacidad Máxima' name='capacidad_maxima' type='number' disabled={disabled} />
 
       <SeccionForm titulo='Precios' />
@@ -57,6 +60,16 @@ const ExperienciaForm = (props) => {
         <strong>{nombreDe(MODALIDADES_PAGO, values.modalidad_pago)}:</strong>{' '}
         {MODALIDADES_PAGO.find((m) => m.id === values.modalidad_pago)?.descripcion}
       </Alert>
+      {values.modalidad_pago === 'pago_en_linea' && (
+        <MyTextField
+          fullWidth
+          label='Abono para separar el cupo (%)'
+          name='porcentaje_abono'
+          type='number'
+          helperText='Opcional. Ej: 30 = el viajero puede pagar el 30% para confirmar y el saldo después. Vacío = solo pago total.'
+          disabled={disabled}
+        />
+      )}
 
       <SeccionForm titulo='Ubicación' />
       <MyTextField fullWidth label='Punto de Encuentro' name='punto_encuentro' disabled={disabled} />

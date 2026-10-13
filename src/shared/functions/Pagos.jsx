@@ -5,9 +5,10 @@
 import jwtAxios from '../../@crema/services/auth/jwt-auth';
 import { extraerMensajeError } from '../../@crema/redux/helpers/createCrudSlice';
 
-export const irAPagar = async ({ codigo, correo }) => {
+// concepto: 'total' | 'abono' | 'saldo'. Sin concepto se paga todo lo pendiente.
+export const irAPagar = async ({ codigo, correo, concepto }) => {
   try {
-    const { data } = await jwtAxios.post(`publico/reservas/${encodeURIComponent(codigo)}/pago`, { correo });
+    const { data } = await jwtAxios.post(`publico/reservas/${encodeURIComponent(codigo)}/pago`, { correo, concepto });
     window.location.assign(data.url);
   } catch (error) {
     throw new Error(extraerMensajeError(error));

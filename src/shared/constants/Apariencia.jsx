@@ -28,6 +28,17 @@ export const APARIENCIA_BASE = {
     descripcion: 'Tours, planes y experiencias verificadas por la comunidad LGTBIQ+ en los mejores destinos del país.',
     pie: 'Experiencias verificadas y seguras para toda la comunidad.',
   },
+  // Contacto y redes sociales del pie de página (vacío = no se muestra). El WhatsApp es el parámetro WHATSAPP_NUMERO.
+  contacto: {
+    correo: '',
+    telefono: '',
+    direccion: '',
+    facebook: '',
+    instagram: '',
+    tiktok: '',
+    youtube: '',
+    x: '',
+  },
   portal: {
     primario: COLORES_MARCA.azul,
     primarioOscuro: COLORES_MARCA.azulOscuro,
@@ -61,6 +72,8 @@ export const APARIENCIA_BASE = {
     textoHero: '#FFFFFF',
     // Sombra sobre la imagen principal para que el texto se lea (0 = sin sombra).
     oscurecer: 0,
+    // Video de fondo del encabezado: enlace directo a un .mp4 o .webm (vacío = solo la imagen).
+    video: '',
     propuestas: [
       { icono: 'verified_user', titulo: 'Proveedores verificados', texto: 'Revisamos documentos y registro de turismo de cada proveedor antes de publicar.' },
       { icono: 'reviews', titulo: 'Reseñas de la comunidad', texto: 'Opiniones reales de viajeros, moderadas por nuestro equipo.' },
@@ -119,9 +132,21 @@ export const ICONOS_SUGERIDOS = [
 
 export const ES_COLOR = /^#[0-9a-f]{6}$/i;
 export const ES_ICONO = /^[a-z0-9_]{1,40}$/;
+// Enlaces que el portal pinta como href/src: solo http(s).
+export const ES_ENLACE = /^https?:\/\/\S+$/i;
+
+// Redes sociales del pie: [clave en contacto, nombre].
+export const REDES_SOCIALES = [
+  ['facebook', 'Facebook'],
+  ['instagram', 'Instagram'],
+  ['tiktok', 'TikTok'],
+  ['youtube', 'YouTube'],
+  ['x', 'X (Twitter)'],
+];
 
 const texto = (valor, base, max) => (typeof valor === 'string' ? valor.slice(0, max) : base);
 const color = (valor, base) => (typeof valor === 'string' && ES_COLOR.test(valor) ? valor : base);
+const enlace = (valor) => (typeof valor === 'string' && ES_ENLACE.test(valor.trim()) ? valor.trim().slice(0, 300) : '');
 const icono = (valor, base = '') => (typeof valor === 'string' && (valor === '' || ES_ICONO.test(valor)) ? valor : base);
 
 // Combina un nodo guardado sobre el base respetando el tipo de cada valor. Lo que no cumple
@@ -175,6 +200,10 @@ export const combinarApariencia = (guardada) => {
   resultado.portal.menu = combinarMenu(APARIENCIA_BASE.portal.menu, origen.portal?.menu);
   resultado.inicio.propuestas = combinarPropuestas(APARIENCIA_BASE.inicio.propuestas, origen.inicio?.propuestas);
   resultado.textos = combinarTextos(origen.textos);
+  REDES_SOCIALES.forEach(([red]) => {
+    resultado.contacto[red] = enlace(resultado.contacto[red]);
+  });
+  resultado.inicio.video = enlace(resultado.inicio.video);
   resultado.inicio.oscurecer = Math.min(0.9, Math.max(0, resultado.inicio.oscurecer));
   return resultado;
 };
