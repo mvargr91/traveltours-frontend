@@ -98,3 +98,13 @@ ul.MuiList-root.MuiList-padding.MuiMenu-list {
 .MuiInputAdornment-root .MuiSvgIcon-root {
   color: #999999 !important;
 }
+
+/* Ocultar barra superior de Google Translate */
+.goog-te-banner-frame,
+iframe.skiptranslate {
+  display: none !important;
+}
+
+body {
+  top: 0px !important;
+}
