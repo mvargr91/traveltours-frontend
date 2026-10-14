@@ -54,3 +54,5 @@ export * from '../AppTooltip';
 export * from '../ChartTooltip';
 export * from '../AuthRoutes';
 export { default as AppThemeModeSwitcher } from '../AppThemeModeSwitcher';
+export { default as AppGoogleTranslate } from '../AppGoogleTranslate';
+

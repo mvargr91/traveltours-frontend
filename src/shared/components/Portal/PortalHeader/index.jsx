@@ -29,6 +29,7 @@ import { useApariencia, useTextos } from '@crema/context/AppContextProvider/Apar
 import { RUTAS_MENU_PORTAL } from '../../../constants/Apariencia';
 import { RUTAS_PORTAL, RUTA_MI_CUENTA } from '../../../constants/RutasPortal';
 import AppThemeModeSwitcher from '@crema/components/AppThemeModeSwitcher';
+import GoogleTranslate from '../GoogleTranslate';
 
 // Enlaces visibles del menú del portal (etiqueta, color, icono y orden según Apariencia).
 export const useEnlacesPortal = () => {
@@ -77,6 +78,7 @@ const PortalHeader = () => {
       <IconButton onClick={() => navigate(RUTA_MI_CUENTA)} title={t('miCuenta')} aria-label={t('miCuenta')}>
         <ManageAccountsIcon />
       </IconButton>
+      <GoogleTranslate />
       <AppThemeModeSwitcher />
       <IconButton onClick={salir} title={t('cerrarSesion')}>
         <LogoutIcon />
@@ -90,6 +92,7 @@ const PortalHeader = () => {
       <Button variant='contained' startIcon={<LoginIcon />} onClick={() => navigate('/signin')}>
         {t('ingresar')}
       </Button>
+      <GoogleTranslate />
       <AppThemeModeSwitcher />
     </>
   );
@@ -124,6 +127,7 @@ const PortalHeader = () => {
           <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>{acciones}</Box>
 
           <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 0.5 }}>
+            <GoogleTranslate size='small' />
             <AppThemeModeSwitcher size='small' />
             <IconButton onClick={() => setMenuMovil(true)} aria-label={t('abrirMenu')}>
               <MenuIcon />
@@ -149,7 +153,44 @@ const PortalHeader = () => {
           </List>
           <Divider sx={{ my: 2 }} />
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {acciones}
+            {isAuthenticated ? (
+              <>
+                <Button variant='outlined' startIcon={<DashboardIcon />} onClick={() => navigate(urlPanelDe(user))}>
+                  {t('miPanel')}
+                </Button>
+                <Button
+                  variant='outlined'
+                  color='inherit'
+                  startIcon={<ManageAccountsIcon />}
+                  onClick={() => navigate(RUTA_MI_CUENTA)}
+                  sx={{ justifyContent: 'flex-start' }}
+                >
+                  {t('miCuenta')}
+                </Button>
+                <GoogleTranslate showLabel />
+                <AppThemeModeSwitcher showLabel />
+                <Button
+                  variant='outlined'
+                  color='error'
+                  startIcon={<LogoutIcon />}
+                  onClick={salir}
+                  sx={{ justifyContent: 'flex-start' }}
+                >
+                  {t('cerrarSesion')}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button color='inherit' onClick={() => navigate(RUTAS_PORTAL.registro)}>
+                  {t('crearCuenta')}
+                </Button>
+                <Button variant='contained' startIcon={<LoginIcon />} onClick={() => navigate('/signin')}>
+                  {t('ingresar')}
+                </Button>
+                <GoogleTranslate showLabel />
+                <AppThemeModeSwitcher showLabel />
+              </>
+            )}
           </Box>
         </Box>
       </Drawer>
