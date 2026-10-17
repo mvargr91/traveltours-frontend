@@ -25,6 +25,8 @@ import ExperienceCard from '../../../shared/components/Portal/ExperienceCard';
 import ContactoProveedor from '../../../shared/components/Portal/ContactoProveedor';
 import { GrillaCargando, TituloSeccion } from '../../../shared/components/Portal/Secciones';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
+import { TIPOS_SERVICIO, nombreDe } from '../../../shared/constants/Turismo';
+import { urlArchivo } from '../../../shared/functions/Archivos';
 
 const ProveedorPerfil = () => {
   const dispatch = useDispatch();
@@ -73,7 +75,11 @@ const ProveedorPerfil = () => {
     <Container maxWidth='lg' sx={{ py: 5 }}>
       <Paper sx={{ p: { xs: 3, md: 4 }, mb: 5 }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ sm: 'center' }}>
-          <Avatar sx={{ width: 88, height: 88, fontSize: '2.2rem', bgcolor: 'primary.main' }}>
+          <Avatar
+            src={proveedor.logo ? urlArchivo(proveedor.logo) : undefined}
+            alt={proveedor.nombre_comercial}
+            sx={{ width: 88, height: 88, fontSize: '2.2rem', bgcolor: 'primary.main' }}
+          >
             {proveedor.nombre_comercial.trim().charAt(0).toUpperCase()}
           </Avatar>
           <Box sx={{ flex: 1 }}>
@@ -81,6 +87,22 @@ const ProveedorPerfil = () => {
               <Typography variant='h1' sx={{ fontSize: { xs: '1.6rem', md: '2rem' } }}>{proveedor.nombre_comercial}</Typography>
               {verificado && <Chip icon={<VerifiedIcon />} label={t('verificado')} color='primary' size='small' />}
             </Stack>
+            {(proveedor.tipo_servicio || proveedor.categorias?.length > 0) && (
+              <Stack direction='row' sx={{ mt: 1, flexWrap: 'wrap', gap: 1 }}>
+                {proveedor.tipo_servicio && <Chip size='small' label={nombreDe(TIPOS_SERVICIO, proveedor.tipo_servicio)} />}
+                {proveedor.categorias?.map((categoria) => (
+                  <Chip
+                    key={categoria.id}
+                    size='small'
+                    variant='outlined'
+                    label={categoria.nombre}
+                    component={RouterLink}
+                    to={`${RUTAS_PORTAL.tours}?categoria=${categoria.slug}`}
+                    clickable
+                  />
+                ))}
+              </Stack>
+            )}
             <Stack direction='row' spacing={2} alignItems='center' sx={{ mt: 1, flexWrap: 'wrap', gap: 1, color: 'text.secondary' }}>
               {proveedor.destino_nombre && (
                 <Stack direction='row' spacing={0.5} alignItems='center'>
@@ -112,6 +134,32 @@ const ProveedorPerfil = () => {
           <Typography sx={{ mt: 3, whiteSpace: 'pre-line' }}>{proveedor.descripcion}</Typography>
         )}
       </Paper>
+
+      {proveedor.fotos?.length > 0 && (
+        <Box sx={{ mb: 5 }}>
+          <TituloSeccion titulo={t('fotos', { proveedor: proveedor.nombre_comercial })} />
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 2 }}>
+            {proveedor.fotos.map((ruta) => (
+              <Box
+                key={ruta}
+                component='a'
+                href={urlArchivo(ruta)}
+                target='_blank'
+                rel='noopener noreferrer'
+                sx={{ position: 'relative', pt: '70%', borderRadius: 2, overflow: 'hidden', display: 'block', bgcolor: 'action.hover' }}
+              >
+                <Box
+                  component='img'
+                  src={urlArchivo(ruta)}
+                  alt={proveedor.nombre_comercial}
+                  loading='lazy'
+                  sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .3s', '&:hover': { transform: 'scale(1.04)' } }}
+                />
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      )}
 
       <TituloSeccion titulo={t('susExperiencias', { proveedor: proveedor.nombre_comercial })} />
       {loading ? (

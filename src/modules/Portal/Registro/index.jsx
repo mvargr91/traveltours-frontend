@@ -28,6 +28,9 @@ import LuggageIcon from '@mui/icons-material/Luggage';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import { onCreate } from '@crema/redux/features/portalRegistro/portalRegistroSlice';
 import { onGetColeccion as onGetDestinos } from '@crema/redux/features/portalDestinos/portalDestinosSlice';
+import { onGetColeccion as onGetCategorias } from '@crema/redux/features/portalCategorias/portalCategoriasSlice';
+import SelectorCategorias from '../../../shared/components/SelectorCategorias';
+import { TIPOS_SERVICIO } from '../../../shared/constants/Turismo';
 import { login } from '@crema/redux/features/auth/authSlice';
 import { useAuthMethod } from '@crema/hooks/AuthHooks';
 import MyTextField from '../../../shared/components/MyTextField';
@@ -58,6 +61,7 @@ const crearEsquemas = (t, c) => {
     proveedor: yup.object({
       ...esquemaBase,
       nombre_comercial: yup.string().required(c('requerido')).max(150, c('maximo', { n: 150 })),
+      tipo_servicio: yup.string().required(c('requerido')),
       telefono: yup.string().max(30).matches(/^[+]?[0-9\s-]*$/, c('telefonoInvalido')).nullable(),
     }),
   };
@@ -74,6 +78,8 @@ const valoresIniciales = {
   nit: '',
   telefono: '',
   destino_id: '',
+  tipo_servicio: '',
+  categorias: [],
 };
 
 const Registro = () => {
@@ -88,11 +94,13 @@ const Registro = () => {
   const redirect = searchParams.get('redirect');
   const { saving } = useSelector((state) => state.portalRegistro);
   const destinos = useSelector((state) => state.portalDestinos.rows);
+  const categorias = useSelector((state) => state.portalCategorias.rows);
   const [ingresando, setIngresando] = useState(false);
   const { signInUser } = useAuthMethod();
 
   useEffect(() => {
     if (destinos.length === 0) dispatch(onGetDestinos());
+    if (categorias.length === 0) dispatch(onGetCategorias());
   }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const cambiarTipo = (nuevo) => {
@@ -116,7 +124,7 @@ const Registro = () => {
   const enviar = (valores) => {
     const params = { ...valores, tipo };
     if (tipo === 'cliente') {
-      ['nombre_comercial', 'nit', 'telefono', 'destino_id'].forEach((campo) => delete params[campo]);
+      ['nombre_comercial', 'nit', 'telefono', 'destino_id', 'tipo_servicio', 'categorias'].forEach((campo) => delete params[campo]);
     }
     dispatch(onCreate({ params, handleOnClose: () => ingresar(valores) }));
   };
@@ -174,6 +182,32 @@ const Registro = () => {
                         <MenuItem value=''>{t('sinDefinir')}</MenuItem>
                         {destinos.map((d) => <MenuItem key={d.id} value={d.id}>{d.nombre}</MenuItem>)}
                       </TextField>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        select
+                        required
+                        name='tipo_servicio'
+                        label={t('tipoServicio')}
+                        fullWidth
+                        value={values.tipo_servicio}
+                        onChange={handleChange}
+                        error={Boolean(touched.tipo_servicio && errors.tipo_servicio)}
+                        helperText={touched.tipo_servicio && errors.tipo_servicio}
+                      >
+                        {TIPOS_SERVICIO.map((tipoServicio) => (
+                          <MenuItem key={tipoServicio.id} value={tipoServicio.id}>{tipoServicio.nombre}</MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <SelectorCategorias
+                        categorias={categorias}
+                        value={values.categorias}
+                        onChange={(ids) => setFieldValue('categorias', ids)}
+                        label={t('categorias')}
+                        helperText={t('categoriasAyuda')}
+                      />
                     </Grid>
                     <Grid item xs={12}>
                       <Divider textAlign='left'>{t('datosAcceso')}</Divider>

@@ -14,6 +14,7 @@ import {
 } from '../../../@crema/redux/features/proveedoresTuristicos/proveedoresTuristicosSlice';
 import {
   ESTADOS_VERIFICACION,
+  TIPOS_SERVICIO,
   colorActivo,
   colorDe,
   nombreDe,
@@ -23,6 +24,7 @@ import {
 const cells = [
   { id: 'nombre_comercial', typeHead: 'string', label: 'Nombre Comercial', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'nit', typeHead: 'string', label: 'NIT', value: (v) => v, align: 'left', mostrarInicio: true },
+  { id: 'tipo_servicio', typeHead: 'string', label: 'Tipo de Servicio', value: (v) => (v ? nombreDe(TIPOS_SERVICIO, v) : ''), align: 'left', mostrarInicio: true, ordenable: false },
   { id: 'destino_nombre', typeHead: 'string', label: 'Destino', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'telefono', typeHead: 'string', label: 'Teléfono', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
   { id: 'correo', typeHead: 'string', label: 'Correo', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },

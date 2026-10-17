@@ -11,6 +11,7 @@ import {
 } from '../../../../@crema/redux/features/proveedoresTuristicos/proveedoresTuristicosSlice';
 import { onGetColeccionLigera as onGetDestinos } from '../../../../@crema/redux/features/destinos/destinosSlice';
 import { onGetColeccionLigera as onGetUsuariosProveedor } from '../../../../@crema/redux/features/usuariosProveedor/usuariosProveedorSlice';
+import { onGetColeccion as onGetCategorias } from '../../../../@crema/redux/features/portalCategorias/portalCategoriasSlice';
 import { aRadio } from '../../../../shared/constants/Turismo';
 import ProveedorTuristicoForm from './ProveedorTuristicoForm';
 
@@ -21,6 +22,7 @@ const validationSchema = yup.object({
   telefono: yup.string().max(30, 'Máximo 30 caracteres').matches(/^[+]?[0-9\s-]*$/, 'Teléfono inválido').nullable(),
   correo: yup.string().email('Correo inválido').max(150, 'Máximo 150 caracteres').nullable(),
   sitio_web: yup.string().url('Debe ser una URL válida').nullable(),
+  numero_cuenta: yup.string().max(40, 'Máximo 40 caracteres').matches(/^[0-9-]*$/, 'Solo números y guiones').nullable(),
 });
 
 const initialValues = (registro) => ({
@@ -39,6 +41,13 @@ const initialValues = (registro) => ({
   instagram: registro?.instagram ?? '',
   facebook: registro?.facebook ?? '',
   descripcion: registro?.descripcion ?? '',
+  tipo_servicio: registro?.tipo_servicio ?? '',
+  categorias: registro?.categorias ?? [],
+  banco: registro?.banco ?? '',
+  tipo_cuenta: registro?.tipo_cuenta ?? '',
+  numero_cuenta: registro?.numero_cuenta ?? '',
+  titular_cuenta: registro?.titular_cuenta ?? '',
+  documento_titular: registro?.documento_titular ?? '',
   estado: aRadio(registro?.estado),
 });
 
@@ -46,9 +55,11 @@ const ProveedorTuristicoCreador = ({ proveedor, accion, handleOnClose, updateCol
   const dispatch = useDispatch();
   const { coleccionLigera: destinos } = useSelector((state) => state.destinos);
   const { coleccionLigera: usuariosProveedor } = useSelector((state) => state.usuariosProveedor);
+  const categorias = useSelector((state) => state.portalCategorias.rows);
 
   useEffect(() => {
     dispatch(onGetDestinos());
+    if (!categorias.length) dispatch(onGetCategorias());
     dispatch(onGetUsuariosProveedor({ rol: 'Proveedor' }));
   }, [dispatch]);
 
@@ -68,8 +79,11 @@ const ProveedorTuristicoCreador = ({ proveedor, accion, handleOnClose, updateCol
       maxWidth='md'
       enPagina={enPagina}
     >
-      {({ registro, saving }) => (
+      {({ values, setFieldValue, registro, saving }) => (
         <ProveedorTuristicoForm
+          values={values}
+          setFieldValue={setFieldValue}
+          categorias={categorias}
           registro={registro}
           accion={accion}
           titulo={titulo}

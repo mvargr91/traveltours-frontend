@@ -17,6 +17,8 @@ const ResultadoPago = React.lazy(() => import('../../../modules/Portal/Resultado
 const MisReservas = React.lazy(() => import('../../../modules/Cuenta/MisReservas'));
 const MisFavoritos = React.lazy(() => import('../../../modules/Cuenta/MisFavoritos'));
 const MiCuenta = React.lazy(() => import('../../../modules/Cuenta/MiCuenta'));
+const MisResenas = React.lazy(() => import('../../../modules/Cuenta/MisResenas'));
+const DocumentoProveedor = React.lazy(() => import('../../../modules/Proveedores/DocumentoProveedor'));
 
 // Rutas anónimas: visibles con o sin sesión, se pintan dentro de PublicLayout.
 export const portalRoutes = PORTAL_HABILITADO
@@ -54,5 +56,16 @@ export const cuentaConfigs = [
     permittedRole: RoutePermittedRole.User,
     path: '/mis-favoritos',
     element: <MisFavoritos route={{ auth: authRole, path: '/mis-favoritos' }} />,
+  },
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/mis-resenas',
+    element: <MisResenas route={{ auth: authRole, path: '/mis-resenas' }} />,
+  },
+  // Proveedor: sus documentos de verificación (misma pantalla que usa el administrador, en modo propio).
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/mis-documentos',
+    element: <DocumentoProveedor propio route={{ auth: authRole, path: '/mis-documentos' }} />,
   },
 ];

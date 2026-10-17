@@ -25,7 +25,7 @@ const validationSchema = yup.object({
 });
 
 const DocumentoProveedorCreador = (props) => {
-  const { documento, proveedorId, accion, handleOnClose, updateColeccion, titulo } = props;
+  const { documento, proveedorId, propio, accion, handleOnClose, updateColeccion, titulo } = props;
 
   const initialValues = (registro) => ({
     id: registro?.id ?? '',
@@ -56,6 +56,7 @@ const DocumentoProveedorCreador = (props) => {
       {({ values, saving }) => (
         <DocumentoProveedorForm
           values={values}
+          propio={propio}
           accion={accion}
           titulo={titulo}
           handleOnClose={handleOnClose}
@@ -69,6 +70,7 @@ const DocumentoProveedorCreador = (props) => {
 DocumentoProveedorCreador.propTypes = {
   documento: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   proveedorId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  propio: PropTypes.bool,
   accion: PropTypes.string.isRequired,
   handleOnClose: PropTypes.func.isRequired,
   updateColeccion: PropTypes.func.isRequired,
