@@ -12,6 +12,7 @@ import AppMessageView from '@crema/components/AppMessageView';
 import { ERROR_TYPE } from '../../../shared/constants/Constantes';
 import { ESTADOS_VERIFICACION, colorDe, nombreDe } from '../../../shared/constants/Turismo';
 import { useApariencia } from '@crema/context/AppContextProvider/AparienciaContextProvider';
+import { urlArchivo } from '../../../shared/functions/Archivos';
 import DatosPersonales from './DatosPersonales';
 import MiNegocio from './MiNegocio';
 import Seguridad from './Seguridad';
@@ -71,7 +72,7 @@ const MiCuenta = () => {
       <Card sx={{ mb: 6, overflow: 'hidden' }}>
         <Box sx={{ height: 6, background: gradienteFranja }} />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, p: { xs: 4, md: 6 }, flexWrap: 'wrap' }}>
-          <Avatar sx={{ width: 72, height: 72, fontSize: 26, fontWeight: 600, bgcolor: 'primary.main' }}>
+          <Avatar src={proveedor?.logo ? urlArchivo(proveedor.logo) : undefined} sx={{ width: 72, height: 72, fontSize: 26, fontWeight: 600, bgcolor: 'primary.main' }}>
             {iniciales(cuenta.nombre)}
           </Avatar>
           <Box sx={{ flex: 1, minWidth: 200 }}>

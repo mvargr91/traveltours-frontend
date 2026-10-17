@@ -12,6 +12,8 @@ import {
   onDelete,
 } from '../../../@crema/redux/features/documentosProveedorTuristico/documentosProveedorTuristicoSlice';
 import { onShow as onShowProveedor } from '../../../@crema/redux/features/proveedoresTuristicos/proveedoresTuristicosSlice';
+import { onGetCuenta } from '../../../@crema/redux/features/cuenta/cuentaSlice';
+import { Alert } from '@mui/material';
 import {
   ESTADOS_DOCUMENTO,
   TIPOS_DOCUMENTO_PROVEEDOR,
@@ -38,18 +40,31 @@ const cells = [
   ...auditCells,
 ];
 
-const DocumentoProveedor = ({ route }) => {
+// propio: Mi Cuenta > Mis Documentos. El proveedor gestiona los de su negocio (el backend lo fuerza) y lo
+// que sube queda pendiente: el estado y el motivo de rechazo los pone el administrador.
+const DocumentoProveedor = ({ route, propio }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { proveedor_id: proveedorId } = useParams();
-  const { urlAyuda, permisos } = usePermisosOpcion(route.path);
-  const proveedor = useSelector((state) => state.proveedoresTuristicos.actual);
+  const { proveedor_id: proveedorRuta } = useParams();
+  const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
+  const proveedorActual = useSelector((state) => state.proveedoresTuristicos.actual);
+  const cuenta = useSelector((state) => state.cuenta.datos);
+  const proveedorId = propio ? cuenta?.proveedor?.id : proveedorRuta;
+  const proveedor = propio ? cuenta?.proveedor : proveedorActual;
   const { formulario, abrirCrear, abrirEditar, abrirVer, cerrar, refreshKey, updateColeccion } =
     useCrudModulo();
 
   useEffect(() => {
-    dispatch(onShowProveedor(proveedorId));
-  }, [dispatch, proveedorId]);
+    if (propio) {
+      if (!cuenta) dispatch(onGetCuenta());
+    } else {
+      dispatch(onShowProveedor(proveedorRuta));
+    }
+  }, [dispatch, proveedorRuta, propio]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (propio && !proveedorId) {
+    return cuenta ? <Alert severity='info'>Tu cuenta no tiene un negocio vinculado.</Alert> : null;
+  }
 
   const accionesExtra = [
     {
@@ -69,8 +84,12 @@ const DocumentoProveedor = ({ route }) => {
         onDelete={onDelete}
         cells={cells}
         filtrosFijos={{ proveedor_id: proveedorId }}
-        titulo='Documentos del Proveedor'
-        subtitulo={proveedor?.nombre_comercial}
+        titulo={propio ? titulo || 'Mis Documentos' : 'Documentos del Proveedor'}
+        subtitulo={
+          propio
+            ? 'Sube RUT, cámara de comercio, RNT, póliza y cédula del representante. Nuestro equipo los revisa para verificar tu negocio.'
+            : proveedor?.nombre_comercial
+        }
         urlAyuda={urlAyuda}
         permisos={permisos}
         entidadNombre='Documento'
@@ -79,12 +98,13 @@ const DocumentoProveedor = ({ route }) => {
         onEditar={abrirEditar}
         onVer={abrirVer}
         accionesExtra={accionesExtra}
-        onVolver={() => navigate('/proveedores-turisticos')}
+        onVolver={propio ? undefined : () => navigate('/proveedores-turisticos')}
       />
       {formulario && (
         <DocumentoProveedorCreador
           documento={formulario.id}
           proveedorId={proveedorId}
+          propio={propio}
           accion={formulario.accion}
           handleOnClose={cerrar}
           updateColeccion={updateColeccion}
@@ -97,6 +117,7 @@ const DocumentoProveedor = ({ route }) => {
 
 DocumentoProveedor.propTypes = {
   route: PropTypes.shape({ path: PropTypes.string.isRequired }).isRequired,
+  propio: PropTypes.bool,
 };
 
 export default DocumentoProveedor;

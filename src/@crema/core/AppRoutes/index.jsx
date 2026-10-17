@@ -17,12 +17,14 @@ import { reservasConfigs } from './Reservas';
 import { resenasConfigs } from './Resenas';
 import { promocionesConfigs } from './Promociones';
 import { portalRoutes, cuentaConfigs } from './Portal';
+import { inicioConfigs } from './Inicio';
 
 export const authorizedStructure = (loginUrl) => {
   return {
     fallbackPath: loginUrl,
     unAuthorizedComponent: <Error403 />,
     routes: [
+      ...inicioConfigs,
       ...accountPagesConfigs,
       ...seguridadConfigs,
       ...parametrizacionConfigs,

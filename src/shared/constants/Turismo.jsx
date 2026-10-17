@@ -69,6 +69,33 @@ export const CONCEPTOS_PAGO = [
   { id: 'abono', nombre: 'Abono' },
   { id: 'saldo', nombre: 'Saldo' },
   { id: 'total', nombre: 'Pago total' },
+  // Dinero devuelto al viajero (PagoService::REEMBOLSO): no suma a lo pagado.
+  { id: 'reembolso', nombre: 'Reembolso' },
+];
+
+// Tipo de servicio del proveedor. Ids = ProveedorTuristico::TIPOS_SERVICIO en el backend.
+export const TIPOS_SERVICIO = [
+  { id: 'operador_turistico', nombre: 'Operador turístico' },
+  { id: 'guia_turistico', nombre: 'Guía turístico' },
+  { id: 'agencia_viajes', nombre: 'Agencia de viajes' },
+  { id: 'alojamiento', nombre: 'Alojamiento' },
+  { id: 'transporte', nombre: 'Transporte turístico' },
+  { id: 'actividades_aventura', nombre: 'Actividades y aventura' },
+  { id: 'restaurante', nombre: 'Restaurante / gastronomía' },
+  { id: 'otro', nombre: 'Otro' },
+];
+
+// Cuenta donde el proveedor recibe sus pagos. Ids = ProveedorTuristico::TIPOS_CUENTA.
+export const TIPOS_CUENTA = [
+  { id: 'ahorros', nombre: 'Ahorros' },
+  { id: 'corriente', nombre: 'Corriente' },
+];
+
+// Periodos de "Mis Reservas" (filtro periodo del backend).
+export const PERIODOS_RESERVA = [
+  { id: 'proximas', nombre: 'Próximas' },
+  { id: 'pasadas', nombre: 'Pasadas' },
+  { id: '', nombre: 'Todas' },
 ];
 
 // "Efectivo", "Transferencia"… o, en un pago en línea, el nombre de la pasarela.

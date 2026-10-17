@@ -15,6 +15,8 @@ const truncar = (texto, max = 60) =>
 
 const cells = [
   { id: 'experiencia_nombre', typeHead: 'string', label: 'Experiencia', value: (v) => v, align: 'left', mostrarInicio: true, ordenable: false },
+  { id: 'usuario_nombre', typeHead: 'string', label: 'Viajero', value: (v) => v ?? '', align: 'left', mostrarInicio: true, ordenable: false },
+  { id: 'codigo_reserva', typeHead: 'string', label: 'Reserva', value: (v) => v ?? '', align: 'left', mostrarInicio: false, ordenable: false },
   {
     id: 'calificacion',
     typeHead: 'string',
@@ -36,7 +38,8 @@ const cells = [
   ...auditCells,
 ];
 
-// Las reseñas las crean los clientes desde el portal; aquí solo se moderan.
+// Las reseñas las crean los viajeros desde Mis Reservas; aquí se moderan. El proveedor (solo permiso Listar)
+// consulta las de sus experiencias: el backend las filtra por su negocio.
 const Resena = ({ route }) => {
   const dispatch = useDispatch();
   const { titulo, urlAyuda, permisos } = usePermisosOpcion(route.path);
@@ -50,6 +53,7 @@ const Resena = ({ route }) => {
   const filtrosConfig = [
     { name: 'estado', label: 'Estado', type: 'select', options: ESTADOS_RESENA },
     { name: 'experiencia_id', label: 'Experiencia', type: 'select', options: experiencias },
+    { name: 'calificacion', label: 'Calificación', type: 'select', options: [5, 4, 3, 2, 1].map((n) => ({ id: n, nombre: `${n} estrella(s)` })) },
   ];
 
   return (
