@@ -57,6 +57,7 @@ import destinosReducer from './features/destinos/destinosSlice';
 import categoriasReducer from './features/categorias/categoriasSlice';
 import caracteristicasReducer from './features/caracteristicas/caracteristicasSlice';
 import cuponesReducer from './features/cupones/cuponesSlice';
+import enviosCorreoReducer from './features/enviosCorreo/enviosCorreoSlice';
 import favoritosReducer from './features/favoritos/favoritosSlice';
 import notificacionesReducer from './features/notificaciones/notificacionesSlice';
 import proveedoresTuristicosReducer from './features/proveedoresTuristicos/proveedoresTuristicosSlice';
@@ -144,6 +145,7 @@ export const store = configureStore({
     categorias: categoriasReducer,
     caracteristicas: caracteristicasReducer,
     cupones: cuponesReducer,
+    enviosCorreo: enviosCorreoReducer,
     favoritos: favoritosReducer,
     notificaciones: notificacionesReducer,
     proveedoresTuristicos: proveedoresTuristicosReducer,
