@@ -7,6 +7,9 @@ const DestinoPagina = React.lazy(() => import('../../../modules/Turismo/Destino/
 const Categoria = React.lazy(() => import('../../../modules/Turismo/Categoria'));
 const Caracteristica = React.lazy(() => import('../../../modules/Turismo/Caracteristica'));
 const Cupon = React.lazy(() => import('../../../modules/Turismo/Cupon'));
+const EnvioCorreo = React.lazy(() => import('../../../modules/Turismo/EnvioCorreo'));
+const NuevoEnvio = React.lazy(() => import('../../../modules/Turismo/EnvioCorreo/NuevoEnvio'));
+const DetalleEnvio = React.lazy(() => import('../../../modules/Turismo/EnvioCorreo/DetalleEnvio'));
 
 export const turismoConfigs = [
   {
@@ -45,4 +48,12 @@ export const turismoConfigs = [
     path: '/cupones',
     element: <Cupon route={{ auth: authRole, path: '/cupones' }} />,
   },
+  // Envíos de correo: lista, nuevo envío y detalle (el backend exige ListarEnvioCorreo / CrearEnvioCorreo).
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/envios-correo',
+    element: <EnvioCorreo route={{ auth: authRole, path: '/envios-correo' }} />,
+  },
+  { permittedRole: RoutePermittedRole.User, path: '/envios-correo/crear', element: <NuevoEnvio /> },
+  { permittedRole: RoutePermittedRole.User, path: '/envios-correo/:id/ver', element: <DetalleEnvio /> },
 ];
