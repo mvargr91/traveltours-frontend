@@ -40,6 +40,7 @@ import {
   medioDePago,
   nombreDe,
 } from '../../../shared/constants/Turismo';
+import useProveedorSesion from '../../../shared/hooks/useProveedorSesion';
 
 const inicioDeAnio = () => `${hoy().slice(0, 4)}-01-01`;
 
@@ -127,6 +128,7 @@ const TablaDatos = ({ columnas, filas, primera, archivo, vacio = 'Sin datos en e
 
 const Reportes = () => {
   const theme = useTheme();
+  const { proveedor } = useProveedorSesion();
   const [filtros, setFiltros] = useState({ desde: inicioDeAnio(), hasta: hoy(), fecha_base: 'creacion', proveedor_id: '', destino_id: '' });
   const [datos, setDatos] = useState(null);
   const [cargando, setCargando] = useState(false);
@@ -194,7 +196,12 @@ const Reportes = () => {
               <MenuItem value='servicio'>Cuando se realiza el tour</MenuItem>
             </TextField>
           </Grid>
-          {proveedores.length > 1 && (
+          {proveedor ? (
+            // El proveedor solo ve su negocio (el backend lo fuerza): se muestra fijo.
+            <Grid item xs={12} md={3}>
+              <TextField label='Proveedor' fullWidth size='small' value={proveedor.nombre} disabled />
+            </Grid>
+          ) : proveedores.length > 1 && (
             <Grid item xs={12} md={3}>
               <TextField select label='Proveedor' fullWidth size='small' value={filtros.proveedor_id} onChange={cambiar('proveedor_id')}>
                 <MenuItem value=''>Todos</MenuItem>
