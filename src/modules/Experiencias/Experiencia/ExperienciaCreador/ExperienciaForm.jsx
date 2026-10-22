@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Alert, Chip } from '@mui/material';
 import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
@@ -20,9 +20,16 @@ import {
 import { useSlugAutomatico } from '../../../../shared/functions/ValidacionesYup';
 
 const ExperienciaForm = (props) => {
-  const { values, setFieldValue, registro, accion, titulo, handleOnClose, saving, destinos, proveedores } = props;
+  const { values, setFieldValue, registro, accion, titulo, handleOnClose, saving, destinos, proveedores, proveedorPropio } = props;
   const disabled = accion === 'ver';
   useSlugAutomatico({ accion, nombre: values.nombre, setFieldValue });
+
+  // El proveedor logueado solo crea experiencias de su propio negocio.
+  useEffect(() => {
+    if (proveedorPropio && accion === 'crear' && String(values.proveedor_id) !== String(proveedorPropio.id)) {
+      setFieldValue('proveedor_id', proveedorPropio.id);
+    }
+  }, [proveedorPropio, accion, values.proveedor_id, setFieldValue]);
 
   return (
     <AppCrudForm titulo={titulo} accion={accion} handleOnClose={handleOnClose} saving={saving}>
@@ -36,7 +43,7 @@ const ExperienciaForm = (props) => {
       )}
 
       <SeccionForm titulo='Información general' />
-      <FormikAutocomplete name='proveedor_id' label='Proveedor *' options={proveedores} disabled={disabled} textFieldProps={{ variant: 'standard' }} />
+      <FormikAutocomplete name='proveedor_id' label='Proveedor *' options={proveedores} disabled={disabled || !!proveedorPropio} textFieldProps={{ variant: 'standard' }} />
       <FormikAutocomplete name='destino_id' label='Destino *' options={destinos} disabled={disabled} textFieldProps={{ variant: 'standard' }} />
       <MyTextField autoFocus fullWidth label='Nombre' name='nombre' disabled={disabled} required />
       <MyTextField fullWidth label='Slug' name='slug' disabled={disabled} required />
@@ -99,6 +106,7 @@ ExperienciaForm.propTypes = {
   saving: PropTypes.bool,
   destinos: PropTypes.array.isRequired,
   proveedores: PropTypes.array.isRequired,
+  proveedorPropio: PropTypes.shape({ id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]), nombre: PropTypes.string }),
 };
 
 export default ExperienciaForm;

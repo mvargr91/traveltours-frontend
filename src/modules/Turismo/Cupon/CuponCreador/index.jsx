@@ -17,6 +17,12 @@ import {
 import CuponForm from './CuponForm';
 
 const validationSchema = yup.object({
+  codigo: yup
+    .string()
+    .required('Requerido')
+    .min(3, 'Mínimo 3 caracteres')
+    .max(40, 'Máximo 40 caracteres')
+    .matches(/^[A-Za-z0-9_-]+$/, 'Solo letras, números, - y _ (sin espacios)'),
   tipo: yup.string().required('Requerido'),
   nombre: yup.string().required('Requerido').max(150, 'Máximo 150 caracteres'),
   cantidad: enteroOpcional().min(1, 'Mínimo 1'),
@@ -34,6 +40,9 @@ const validationSchema = yup.object({
 
 const initialValues = (registro) => ({
   id: registro?.id ?? '',
+  codigo: registro?.codigo ?? '',
+  proveedor_id: registro?.proveedor_id ?? '',
+  experiencias: registro?.experiencias ?? [],
   tipo: registro?.tipo ?? 'porcentaje',
   nombre: registro?.nombre ?? '',
   descripcion: registro?.descripcion ?? '',
@@ -48,11 +57,13 @@ const initialValues = (registro) => ({
 // Solo se envía el campo que corresponde al tipo de descuento.
 const transformarAntesDeEnviar = (data) => ({
   ...data,
+  codigo: data.codigo.trim().toUpperCase(),
+  proveedor_id: data.proveedor_id || null,
   descuento: data.tipo === 'porcentaje' ? data.descuento : null,
   valor: data.tipo === 'valor_fijo' ? data.valor : null,
 });
 
-const CuponCreador = ({ cupon, accion, handleOnClose, updateColeccion, titulo }) => (
+const CuponCreador = ({ cupon, accion, handleOnClose, updateColeccion, titulo, proveedores, proveedorPropio }) => (
   <AppCrudDialog
     stateKey='cupones'
     registroId={cupon}
@@ -63,13 +74,21 @@ const CuponCreador = ({ cupon, accion, handleOnClose, updateColeccion, titulo })
     onCreate={onCreate}
     onUpdate={onUpdate}
     resetActual={resetActual}
-    initialValues={initialValues}
+    // El proveedor logueado crea cupones de su negocio (el backend también lo fuerza).
+    initialValues={(registro) => ({
+      ...initialValues(registro),
+      ...(proveedorPropio && !registro ? { proveedor_id: proveedorPropio.id } : {}),
+    })}
     validationSchema={validationSchema}
     transformarAntesDeEnviar={transformarAntesDeEnviar}
   >
-    {({ values, saving }) => (
+    {({ values, setFieldValue, registro, saving }) => (
       <CuponForm
         values={values}
+        setFieldValue={setFieldValue}
+        registro={registro}
+        proveedores={proveedores}
+        proveedorPropio={proveedorPropio}
         accion={accion}
         titulo={titulo}
         handleOnClose={handleOnClose}
@@ -85,6 +104,8 @@ CuponCreador.propTypes = {
   handleOnClose: PropTypes.func.isRequired,
   updateColeccion: PropTypes.func.isRequired,
   titulo: PropTypes.string,
+  proveedores: PropTypes.array.isRequired,
+  proveedorPropio: PropTypes.object,
 };
 
 export default CuponCreador;

@@ -10,7 +10,6 @@ import {
   resetActual,
 } from '../../../../@crema/redux/features/reservas/reservasSlice';
 import { onGetColeccionLigera as onGetExperiencias } from '../../../../@crema/redux/features/experiencias/experienciasSlice';
-import { onGetColeccionLigera as onGetCupones } from '../../../../@crema/redux/features/cupones/cuponesSlice';
 import { onGetColeccionLigera as onGetUsuarios } from '../../../../@crema/redux/features/usuarios/usuariosSlice';
 import { aHoraCorta } from '../../../../shared/constants/Turismo';
 import {
@@ -63,7 +62,6 @@ const ReservaCreador = ({ reserva, accion, handleOnClose, updateColeccion, titul
 
   useEffect(() => {
     dispatch(onGetExperiencias());
-    dispatch(onGetCupones());
     dispatch(onGetUsuarios());
   }, [dispatch]);
 

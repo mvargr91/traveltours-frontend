@@ -138,7 +138,7 @@ const Dashboard = () => {
           <Indicador
             titulo='Experiencias publicadas'
             valor={ind.experiencias_publicadas}
-            detalle={`${ind.experiencias_en_revision} en revisión · ${ind.experiencias_borrador} en borrador`}
+            detalle={`${ind.experiencias_borrador} en borrador · ${ind.experiencias_suspendidas} suspendidas`}
             icono={TourIcon}
             onClick={() => navigate('/experiencias')}
           />

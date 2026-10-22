@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
-import { Alert, Box } from '@mui/material';
+import { Alert, Box, TextField } from '@mui/material';
 import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
 import MySelectField from '../../../../shared/components/MySelectField';
@@ -12,6 +12,7 @@ import FormikAutocomplete from '../../../../shared/components/FormikAutocomplete
 import HistorialReserva from '../../../../shared/components/HistorialReserva';
 import PagosReserva from './PagosReserva';
 import { onShow as onShowExperiencia } from '../../../../@crema/redux/features/experiencias/experienciasSlice';
+import { onGetColeccionLigera as onGetCupones } from '../../../../@crema/redux/features/cupones/cuponesSlice';
 import { onGetColeccion as onGetDisponibilidad } from '../../../../@crema/redux/features/experienciaDisponibilidad/experienciaDisponibilidadSlice';
 import {
   ESTADOS_RESERVA,
@@ -19,6 +20,8 @@ import {
   aHoraCorta,
   formatoMoneda,
   nombreDe,
+  descuentoCupon,
+  valorPorPersona,
 } from '../../../../shared/constants/Turismo';
 
 const RESIDENCIAS = [
@@ -42,7 +45,7 @@ const ReservaForm = (props) => {
   const dispatch = useDispatch();
   const disabled = accion === 'ver';
   const esCreacion = accion === 'crear';
-  const [precioBase, setPrecioBase] = useState(null);
+  const [experienciaElegida, setExperienciaElegida] = useState(null);
   const disponibilidades = useSelector((state) => state.experienciaDisponibilidad.rows);
 
   // La colección ligera solo trae experiencias publicadas; al editar se conserva la de la reserva.
@@ -62,13 +65,16 @@ const ReservaForm = (props) => {
       .unwrap()
       .then((experiencia) => {
         setFieldValue('proveedor_id', experiencia.proveedor_id);
-        setPrecioBase(Number(experiencia.precio_desde) || null);
+        setExperienciaElegida(experiencia);
         if (experiencia.idioma && !values.idioma) {
           setFieldValue('idioma', experiencia.idioma);
         }
       })
       .catch(() => setFieldValue('proveedor_id', ''));
     setFieldValue('disponibilidad_id', '');
+    // Solo los cupones vigentes que aplican a esta experiencia.
+    setFieldValue('cupon_id', '');
+    dispatch(onGetCupones({ experiencia_id: values.experiencia_id }));
     dispatch(
       onGetDisponibilidad({
         filtros: { experiencia_id: values.experiencia_id, fecha_desde: moment().format('YYYY-MM-DD') },
@@ -76,12 +82,17 @@ const ReservaForm = (props) => {
     );
   }, [values.experiencia_id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Valor sugerido = precio desde × personas (el usuario puede ajustarlo).
+  // Valor sugerido = valor por persona según el tamaño del grupo × personas, menos el cupón
+  // (el usuario puede ajustarlo; el descuento del cupón que queda en la reserva lo calcula el backend).
+  const personas = Number(values.cantidad_personas) || 0;
+  const valorPersona = experienciaElegida && personas
+    ? valorPorPersona(experienciaElegida.precios, personas, experienciaElegida.precio_desde)
+    : 0;
+  const cuponElegido = cupones.find((c) => String(c.id) === String(values.cupon_id));
+  const descuento = descuentoCupon(cuponElegido, valorPersona * personas);
   useEffect(() => {
-    if (esCreacion && precioBase && values.cantidad_personas) {
-      setFieldValue('valor_total', precioBase * Number(values.cantidad_personas));
-    }
-  }, [precioBase, values.cantidad_personas]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (esCreacion && valorPersona) setFieldValue('valor_total', valorPersona * personas - descuento);
+  }, [valorPersona, personas, descuento]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const opcionesDisponibilidad = disponibilidades
     .filter((d) => d.estado === 'disponible' && d.cupos_disponibles > 0)
@@ -136,11 +147,30 @@ const ReservaForm = (props) => {
       <MyTextField fullWidth label='De los cuales niños' name='cantidad_chicos' type='number' disabled={disabled} />
 
       <SeccionForm titulo='Valor' />
-      <MySelectField fullWidth variant='standard' label='Cupón' name='cupon_id' options={cupones} disabled={!esCreacion} ninguno />
+      {esCreacion ? (
+        <MySelectField
+          fullWidth
+          variant='standard'
+          label={values.experiencia_id && !cupones.length ? 'Cupón (ninguno vigente para esta experiencia)' : 'Cupón'}
+          name='cupon_id'
+          options={cupones}
+          disabled={!values.experiencia_id}
+          ninguno
+        />
+      ) : (
+        <TextField
+          fullWidth
+          variant='standard'
+          label='Cupón'
+          value={registro?.cupon_codigo ? `${registro.cupon_codigo} (−${formatoMoneda(registro.valor_descuento_cupon)})` : 'Sin cupón'}
+          disabled
+        />
+      )}
       <MyCurrencyField fullWidth label='Valor Total' name='valor_total' disabled={disabled} required />
-      {esCreacion && precioBase && (
+      {esCreacion && valorPersona > 0 && (
         <Alert className='campo-completo' severity='success' sx={{ py: 0 }}>
-          Valor sugerido: {formatoMoneda(precioBase)} × {values.cantidad_personas || 0} persona(s)
+          Valor sugerido: {formatoMoneda(valorPersona)} × {personas} persona(s)
+          {descuento > 0 && ` − cupón ${cuponElegido.codigo} ${formatoMoneda(descuento)}`}
         </Alert>
       )}
 

@@ -21,6 +21,7 @@ import {
   formatoMoneda,
   nombreDe,
 } from '../../../shared/constants/Turismo';
+import useProveedorSesion, { conProveedorPropio } from '../../../shared/hooks/useProveedorSesion';
 
 const cells = [
   { id: 'codigo_reserva', typeHead: 'string', label: 'Código', value: (v) => v, align: 'left', mostrarInicio: true },
@@ -59,6 +60,7 @@ const Reserva = ({ route }) => {
   const { refreshKey, updateColeccion } = useCrudModulo();
   const [reservaEstado, setReservaEstado] = useState(null);
   const proveedores = useSelector((state) => state.proveedoresTuristicos.coleccionLigera);
+  const { proveedor } = useProveedorSesion();
 
   useEffect(() => {
     dispatch(onGetProveedores());
@@ -72,7 +74,8 @@ const Reserva = ({ route }) => {
       name: 'proveedor_id',
       label: 'Proveedor',
       type: 'select',
-      options: proveedores.map((p) => ({ id: p.id, nombre: p.nombre_comercial })),
+      options: conProveedorPropio(proveedores.map((p) => ({ id: p.id, nombre: p.nombre_comercial })), proveedor),
+      fijo: proveedor?.id,
     },
   ];
 

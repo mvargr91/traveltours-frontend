@@ -235,7 +235,11 @@ const AppCrudTable = (props) => {
   const [popoverTarget, setPopoverTarget] = useState(null);
 
   const classes = useStyles({ vp: '0px', numFiltros: Math.max(filtrosConfig.length, 1) });
-  const filtrosFijosKey = JSON.stringify(filtrosFijos);
+  // Un filtro con `fijo` se muestra deshabilitado con ese valor y siempre se envía (ej: el proveedor logueado).
+  const filtrosConfigFijos = Object.fromEntries(
+    filtrosConfig.filter((f) => f.fijo !== undefined && f.fijo !== null).map((f) => [f.name, f.fijo]),
+  );
+  const filtrosFijosKey = JSON.stringify({ ...filtrosConfigFijos, ...filtrosFijos });
 
   const puede = (permiso) => permisos.indexOf(permiso) >= 0;
 
@@ -245,7 +249,7 @@ const AppCrudTable = (props) => {
         page: pagina,
         rowsPerPage,
         orderByToSend,
-        filtros: { ...debouncedFiltros, ...filtrosFijos },
+        filtros: { ...debouncedFiltros, ...filtrosConfigFijos, ...filtrosFijos },
       }),
     );
   };
@@ -460,7 +464,8 @@ const AppCrudTable = (props) => {
                     label={filtro.label}
                     name={filtro.name}
                     onChange={onChangeFiltro}
-                    value={filtros[filtro.name]}
+                    value={filtrosConfigFijos[filtro.name] ?? filtros[filtro.name]}
+                    disabled={filtro.name in filtrosConfigFijos}
                     variant='standard'
                     select={filtro.type === 'select'}
                     type={filtro.type === 'date' ? 'date' : 'text'}
@@ -657,6 +662,7 @@ AppCrudTable.propTypes = {
   permisos: PropTypes.arrayOf(PropTypes.string).isRequired,
   entidadNombre: PropTypes.string,
   // [{ name, label, type: 'text' | 'select' | 'date', options: [{ id, nombre }] }]
+  // [{ name, label, type: 'text' | 'select' | 'date', options?, fijo? }]
   filtrosConfig: PropTypes.array,
   // Filtros que siempre se envían (ej: { experiencia_id }).
   filtrosFijos: PropTypes.object,

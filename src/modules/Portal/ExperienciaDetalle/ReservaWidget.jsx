@@ -38,7 +38,9 @@ import { onCreate as onCrearReserva } from '@crema/redux/features/reservas/reser
 import { onCreate as onCrearReservaInvitado } from '@crema/redux/features/portalReservas/portalReservasSlice';
 import MyTextField from '../../../shared/components/MyTextField';
 import BotonWhatsApp from '../../../shared/components/Portal/BotonWhatsApp';
-import { aHoraCorta, esPagoEnLinea, formatoMoneda, rangoFechas } from '../../../shared/constants/Turismo';
+import { aHoraCorta, descuentoCupon, esPagoEnLinea, formatoMoneda, rangoFechas, valorPorPersona } from '../../../shared/constants/Turismo';
+import jwtAxios from '@crema/services/auth/jwt-auth';
+import { extraerMensajeError } from '@crema/redux/helpers/createCrudSlice';
 import CalendarioFechas from './CalendarioFechas';
 import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
 import { irAPagar } from '../../../shared/functions/Pagos';
@@ -200,16 +202,51 @@ const ReservaWidget = ({ experiencia }) => {
   const [personas, setPersonas] = useState(1);
   const [confirmando, setConfirmando] = useState(false);
   const [reservaConfirmada, setReservaConfirmada] = useState(null);
+  const [mostrarCupon, setMostrarCupon] = useState(false);
+  const [codigoCupon, setCodigoCupon] = useState('');
+  const [cupon, setCupon] = useState(null);
+  const [errorCupon, setErrorCupon] = useState('');
+  const [validandoCupon, setValidandoCupon] = useState(false);
 
   const pagoEnLinea = esPagoEnLinea(experiencia);
   const dias = Number(experiencia.duracion_dias) || undefined;
   const porcentajeAbono = (pagoEnLinea && Number(experiencia.porcentaje_abono)) || undefined;
   const disponibilidad = experiencia.disponibilidad.find((d) => d.id === disponibilidadId);
   const maxPersonas = disponibilidad?.cupos_disponibles ?? experiencia.capacidad_maxima ?? 20;
-  const { subtotal, descuento, total } = useMemo(
-    () => calcularTotal(experiencia.precio_desde, personas, experiencia.promocion),
+  // El valor por persona depende del tamaño del grupo (1 persona puede pagar más que un grupo).
+  const valorPersona = useMemo(
+    () => valorPorPersona(experiencia.precios, personas, experiencia.precio_desde),
     [experiencia, personas],
   );
+  const { subtotal, descuento, total: totalConPromocion } = useMemo(
+    () => calcularTotal(valorPersona, personas, experiencia.promocion),
+    [valorPersona, personas, experiencia.promocion],
+  );
+  // El cupón se aplica sobre lo que queda después de la promoción (igual que el backend, que es quien
+  // vuelve a validar el cupón y fija el valor al crear la reserva).
+  const descuentoDelCupon = descuentoCupon(cupon, totalConPromocion);
+  const total = totalConPromocion - descuentoDelCupon;
+
+  const aplicarCupon = () => {
+    const codigo = codigoCupon.trim();
+    if (!codigo) return;
+    setValidandoCupon(true);
+    setErrorCupon('');
+    jwtAxios
+      .get('publico/cupones/validar', { params: { codigo, experiencia_id: experiencia.id, personas } })
+      .then(({ data }) => setCupon(data.datos.cupon))
+      .catch((e) => {
+        setCupon(null);
+        setErrorCupon(extraerMensajeError(e));
+      })
+      .finally(() => setValidandoCupon(false));
+  };
+
+  const quitarCupon = () => {
+    setCupon(null);
+    setCodigoCupon('');
+    setErrorCupon('');
+  };
 
   const cerrar = () => {
     setConfirmando(false);
@@ -232,6 +269,7 @@ const ReservaWidget = ({ experiencia }) => {
           cantidad_chicos: 0,
           idioma: experiencia.idioma,
           valor_total: total,
+          codigo_cupon: cupon?.codigo ?? null,
         },
       }),
     )
@@ -255,6 +293,7 @@ const ReservaWidget = ({ experiencia }) => {
           experiencia_id: experiencia.id,
           disponibilidad_id: disponibilidad?.id,
           cantidad_personas: personas,
+          codigo_cupon: cupon?.codigo ?? null,
         },
       }),
     )
@@ -308,7 +347,7 @@ const ReservaWidget = ({ experiencia }) => {
 
       <Box sx={{ mt: 2.5 }}>
         <Stack direction='row' justifyContent='space-between'>
-          <Typography color='text.secondary'>{formatoMoneda(experiencia.precio_desde)} × {personas}</Typography>
+          <Typography color='text.secondary'>{formatoMoneda(valorPersona)} × {personas}</Typography>
           <Typography>{formatoMoneda(subtotal)}</Typography>
         </Stack>
         {descuento > 0 && (
@@ -317,11 +356,47 @@ const ReservaWidget = ({ experiencia }) => {
             <Typography>- {formatoMoneda(descuento)}</Typography>
           </Stack>
         )}
+        {descuentoDelCupon > 0 && (
+          <Stack direction='row' justifyContent='space-between' sx={{ color: 'success.main' }}>
+            <Typography>{t('cuponResumen', { codigo: cupon.codigo })}</Typography>
+            <Typography>- {formatoMoneda(descuentoDelCupon)}</Typography>
+          </Stack>
+        )}
         <Divider sx={{ my: 1 }} />
         <Stack direction='row' justifyContent='space-between'>
           <Typography fontWeight={700}>{t('totalEstimado')}</Typography>
           <Typography fontWeight={700}>{formatoMoneda(total)}</Typography>
         </Stack>
+      </Box>
+
+      <Box sx={{ mt: 2 }}>
+        {cupon ? (
+          <Stack direction='row' alignItems='center' spacing={1}>
+            <Chip color='success' label={cupon.codigo} onDelete={quitarCupon} />
+            <Button size='small' onClick={quitarCupon}>{t('cuponQuitar')}</Button>
+          </Stack>
+        ) : mostrarCupon ? (
+          <Stack direction='row' spacing={1} alignItems='flex-start'>
+            <TextField
+              size='small'
+              fullWidth
+              label={t('cuponCampo')}
+              value={codigoCupon}
+              onChange={(e) => setCodigoCupon(e.target.value.toUpperCase())}
+              onKeyDown={(e) => e.key === 'Enter' && aplicarCupon()}
+              error={Boolean(errorCupon)}
+              helperText={errorCupon || ' '}
+              inputProps={{ maxLength: 40 }}
+            />
+            <Button variant='outlined' onClick={aplicarCupon} disabled={validandoCupon || !codigoCupon.trim()} sx={{ height: 40 }}>
+              {t('cuponAplicar')}
+            </Button>
+          </Stack>
+        ) : (
+          <Link component='button' variant='body2' onClick={() => setMostrarCupon(true)}>
+            {t('cuponPregunta')}
+          </Link>
+        )}
       </Box>
 
       <Button

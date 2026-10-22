@@ -12,12 +12,11 @@ export const OPCIONES_SI_NO = [
   { value: '0', label: 'No' },
 ];
 
+// Sin flujo de aprobación: cada proveedor o administrador publica directamente.
+// Solo el administrador suspende (y reactiva) una experiencia.
 export const ESTADOS_EXPERIENCIA = [
   { id: 'borrador', nombre: 'Borrador', color: '#9e9e9e' },
-  { id: 'en_revision', nombre: 'En revisión', color: '#FE8500' },
-  { id: 'aprobada', nombre: 'Aprobada', color: '#2E75B6' },
   { id: 'publicada', nombre: 'Publicada', color: 'green' },
-  { id: 'rechazada', nombre: 'Rechazada', color: 'red' },
   { id: 'suspendida', nombre: 'Suspendida', color: '#B80001' },
   { id: 'archivada', nombre: 'Archivada', color: '#3B3838' },
 ];
@@ -233,3 +232,31 @@ export const textoCantidad = (cantidad) =>
 
 export const resumenCantidades = (cantidades = []) =>
   cantidades.map((c) => `${textoCantidad(c.cantidad)}: ${formatoMoneda(c.valor)}`).join(' · ');
+
+// Descuento de un cupón sobre un valor (mismo cálculo que Cupon::descuentoSobre en el backend).
+export const descuentoCupon = (cupon, valor) => {
+  if (!cupon) return 0;
+  const descuento = cupon.tipo === 'porcentaje'
+    ? Math.round((Number(valor) * Number(cupon.descuento)) / 100)
+    : Number(cupon.valor);
+  return Math.min(Math.max(descuento || 0, 0), Number(valor) || 0);
+};
+
+// Valor por persona para un grupo (mismo cálculo que ExperienciaPrecio::valorPorPersona en el backend):
+// en cada precio aplica la cantidad más alta que no supere las personas (o la primera si el grupo es menor).
+// Se usan los precios de adulto activos (si no hay, de cualquier tipo) y entre ellos el menor valor.
+// `respaldo` (el precio desde) aplica si la experiencia no tiene precios.
+export const valorPorPersona = (precios = [], personas = 1, respaldo = 0) => {
+  const conCantidades = precios.filter((p) => esActivo(p.estado) && p.cantidades?.length);
+  const adultos = conCantidades.filter((p) => p.tipo === 'adulto');
+  const aplicables = adultos.length ? adultos : conCantidades;
+  if (!aplicables.length) return Number(respaldo) || 0;
+
+  return Math.min(
+    ...aplicables.map((precio) => {
+      const ordenadas = [...precio.cantidades].sort((a, b) => Number(a.cantidad) - Number(b.cantidad));
+      const tramo = ordenadas.filter((c) => Number(c.cantidad) <= Number(personas)).pop() ?? ordenadas[0];
+      return Number(tramo.valor);
+    }),
+  );
+};

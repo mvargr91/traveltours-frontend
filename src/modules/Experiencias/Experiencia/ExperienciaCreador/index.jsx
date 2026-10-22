@@ -69,7 +69,7 @@ const transformarAntesDeEnviar = ({ precios, ...valores }) => ({
 });
 
 const ExperienciaCreador = (props) => {
-  const { experiencia, accion, handleOnClose, updateColeccion, titulo, destinos, proveedores, enPagina } = props;
+  const { experiencia, accion, handleOnClose, updateColeccion, titulo, destinos, proveedores, proveedorPropio, enPagina } = props;
 
   return (
     <AppCrudDialog
@@ -99,6 +99,7 @@ const ExperienciaCreador = (props) => {
           saving={saving}
           destinos={destinos}
           proveedores={proveedores}
+          proveedorPropio={proveedorPropio}
         />
       )}
     </AppCrudDialog>
@@ -113,6 +114,7 @@ ExperienciaCreador.propTypes = {
   titulo: PropTypes.string,
   destinos: PropTypes.array.isRequired,
   proveedores: PropTypes.array.isRequired,
+  proveedorPropio: PropTypes.shape({ id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]), nombre: PropTypes.string }),
   enPagina: PropTypes.bool,
 };
 

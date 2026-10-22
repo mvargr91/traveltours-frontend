@@ -15,6 +15,7 @@ import {
 } from '../../../@crema/redux/features/experiencias/experienciasSlice';
 import { onGetColeccionLigera as onGetDestinos } from '../../../@crema/redux/features/destinos/destinosSlice';
 import { onGetColeccionLigera as onGetProveedores } from '../../../@crema/redux/features/proveedoresTuristicos/proveedoresTuristicosSlice';
+import useProveedorSesion, { conProveedorPropio } from '../../../shared/hooks/useProveedorSesion';
 import {
   ESTADOS_EXPERIENCIA,
   MODALIDADES_PAGO,
@@ -64,18 +65,25 @@ const Experiencia = ({ route }) => {
   const [experienciaEstado, setExperienciaEstado] = useState(null);
   const destinos = useSelector((state) => state.destinos.coleccionLigera);
   const proveedores = useSelector((state) => state.proveedoresTuristicos.coleccionLigera);
+  const { esProveedor, proveedor } = useProveedorSesion();
 
   useEffect(() => {
     dispatch(onGetDestinos());
     dispatch(onGetProveedores());
   }, [dispatch]);
 
-  const proveedoresOpciones = proveedores.map((p) => ({ id: p.id, nombre: p.nombre_comercial ?? p.nombre }));
+  // El proveedor publica sus experiencias sin aprobación, pero suspender es solo del administrador.
+  const estadosPermitidos = esProveedor ? ESTADOS_EXPERIENCIA.filter((e) => e.id !== 'suspendida') : ESTADOS_EXPERIENCIA;
+
+  const proveedoresOpciones = conProveedorPropio(
+    proveedores.map((p) => ({ id: p.id, nombre: p.nombre_comercial ?? p.nombre })),
+    proveedor,
+  );
 
   const filtrosConfig = [
     { name: 'nombre', label: 'Nombre', type: 'text' },
     { name: 'destino_id', label: 'Destino', type: 'select', options: destinos },
-    { name: 'proveedor_id', label: 'Proveedor', type: 'select', options: proveedoresOpciones },
+    { name: 'proveedor_id', label: 'Proveedor', type: 'select', options: proveedoresOpciones, fijo: proveedor?.id },
     { name: 'estado', label: 'Estado', type: 'select', options: ESTADOS_EXPERIENCIA },
   ];
 
@@ -85,6 +93,7 @@ const Experiencia = ({ route }) => {
       icono: PublishedWithChangesIcon,
       permiso: 'Modificar',
       onClick: setExperienciaEstado,
+      ...(esProveedor ? { visible: (row) => row.estado !== 'suspendida' } : {}),
     },
     {
       titulo: 'Configurar (precios, horarios, multimedia...)',
@@ -117,7 +126,7 @@ const Experiencia = ({ route }) => {
           stateKey='experiencias'
           titulo={`Cambiar Estado: ${experienciaEstado.nombre}`}
           registro={experienciaEstado}
-          opciones={ESTADOS_EXPERIENCIA}
+          opciones={estadosPermitidos}
           thunk={onCambiarEstado}
           handleOnClose={() => setExperienciaEstado(null)}
           updateColeccion={updateColeccion}
