@@ -32,6 +32,8 @@ const ResultadoPago = () => {
   const t = useTextos('pago');
   const transaccionId = searchParams.get('id');
   const pasarela = searchParams.get('pasarela');
+  // Cuenta de la pasarela del proveedor con la que se pagó (sin ella, el backend usa la de la plataforma).
+  const cuenta = searchParams.get('cuenta');
   const [resultado, setResultado] = useState(null);
   const [errorConsulta, setError] = useState('');
   const intentos = useRef(0);
@@ -43,7 +45,9 @@ const ResultadoPago = () => {
     const consultar = () => {
       intentos.current += 1;
       jwtAxios
-        .get(`publico/pagos/transaccion/${encodeURIComponent(transaccionId)}`, { params: pasarela ? { pasarela } : {} })
+        .get(`publico/pagos/transaccion/${encodeURIComponent(transaccionId)}`, {
+          params: { ...(pasarela ? { pasarela } : {}), ...(cuenta ? { cuenta } : {}) },
+        })
         .then(({ data }) => {
           setResultado(data);
           if (data.estado_pago === 'pendiente' && intentos.current < REINTENTOS) {
@@ -54,7 +58,7 @@ const ResultadoPago = () => {
     };
     consultar();
     return () => clearTimeout(temporizador);
-  }, [transaccionId, pasarela]);
+  }, [transaccionId, pasarela, cuenta]);
 
   const estado = ICONOS[resultado?.estado_pago] ? resultado.estado_pago : 'pendiente';
   const reserva = resultado?.reserva;

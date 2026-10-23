@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Alert, Chip } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
+import { Alert, Button, Chip } from '@mui/material';
+import jwtAxios from '@crema/services/auth/jwt-auth';
 import AppCrudForm, { SeccionForm } from '../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../shared/components/MyTextField';
 import MyRadioField from '../../../../shared/components/MyRadioField';
@@ -30,6 +32,20 @@ const ExperienciaForm = (props) => {
       setFieldValue('proveedor_id', proveedorPropio.id);
     }
   }, [proveedorPropio, accion, values.proveedor_id, setFieldValue]);
+
+  // ¿El proveedor tiene una pasarela de pago activa? Sin ella el pago en línea no se puede ofrecer (null = no se sabe).
+  const [pasarelaActiva, setPasarelaActiva] = useState(registro?.pasarela_activa ?? null);
+  useEffect(() => {
+    if (!values.proveedor_id) return undefined;
+    let vigente = true;
+    jwtAxios
+      .get('pasarelas-pago', { params: { proveedor_id: values.proveedor_id, estado: 'activa' } })
+      .then(({ data }) => vigente && setPasarelaActiva((data?.total ?? 0) > 0))
+      .catch(() => vigente && setPasarelaActiva(null));
+    return () => {
+      vigente = false;
+    };
+  }, [values.proveedor_id]);
 
   return (
     <AppCrudForm titulo={titulo} accion={accion} handleOnClose={handleOnClose} saving={saving}>
@@ -67,6 +83,20 @@ const ExperienciaForm = (props) => {
         <strong>{nombreDe(MODALIDADES_PAGO, values.modalidad_pago)}:</strong>{' '}
         {MODALIDADES_PAGO.find((m) => m.id === values.modalidad_pago)?.descripcion}
       </Alert>
+      {values.modalidad_pago === 'pago_en_linea' && pasarelaActiva === false && (
+        <Alert
+          className='campo-completo'
+          severity='warning'
+          action={
+            <Button color='inherit' size='small' component={RouterLink} to='/pasarelas-pago'>
+              Configurar
+            </Button>
+          }
+        >
+          Este proveedor no tiene una pasarela de pago activa. Configúrala en <strong>Finanzas &gt; Pasarelas de pago</strong>: mientras
+          tanto, el portal ofrece esta experiencia como reserva.
+        </Alert>
+      )}
       {values.modalidad_pago === 'pago_en_linea' && (
         <MyTextField
           fullWidth

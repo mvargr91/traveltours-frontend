@@ -39,7 +39,8 @@ const MyTextField = (props) => {
       variant='standard'
       {...props}
       {...field}
-      helperText={errorText}
+      // El error manda; sin error se muestra la ayuda del campo (si tiene).
+      helperText={errorText || props.helperText}
       error={!!errorText}
       onBlur={onBlur}
     />
