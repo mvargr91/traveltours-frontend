@@ -20,8 +20,6 @@ import { alpha } from "@mui/material/styles";
 import NotificationBar from "../NotificationBar";
 import AppLogo from "../../components/AppLogo";
 import UserInfo from "../../components/UserInfo";
-import HeaderNavWrapper from "./HeaderNavWrapper";
-import HorizontalNav from "../../components/HorizontalNav";
 import { allowMultiLanguage } from "../../../../constants/AppConst";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +29,8 @@ import { useApariencia } from "@crema/context/AppContextProvider/AparienciaConte
 import { PORTAL_HABILITADO, RUTAS_PORTAL } from "../../../../../shared/constants/RutasPortal";
 import AppThemeModeSwitcher from "../../../AppThemeModeSwitcher";
 
-const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
+// La cabecera ya no lleva el menú: los módulos van en el menú lateral (MenuLateral) o, en móvil, en el cajón.
+const AppHeader = ({ toggleNavCollapsed, menuLateralVisible }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const theme = useTheme();
   const navigate = useNavigate();
@@ -77,7 +76,7 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
             alignItems: "center",
           }}
         >
-          <Hidden lgUp>
+          <AppTooltip title={menuLateralVisible ? "Ocultar menú" : "Mostrar menú"}>
             <IconButton
               sx={{
                 marginRight: (theme) => theme.spacing(2),
@@ -86,7 +85,7 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
               edge="start"
               className="menu-btn"
               color="inherit"
-              aria-label="open drawer"
+              aria-label="Mostrar u ocultar el menú"
               onClick={toggleNavCollapsed}
               size="large"
             >
@@ -97,19 +96,22 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
                 }}
               />
             </IconButton>
-          </Hidden>
-          <Box
-            sx={{
-              "& .app-logo": {
-                pl: 0,
-              },
-              "& .logo-text": {
-                display: { xs: "none", sm: "block" },
-              },
-            }}
-          >
-            <AppLogo />
-          </Box>
+          </AppTooltip>
+          {/* Con el menú lateral visible el logo va arriba del menú. */}
+          {!menuLateralVisible && (
+            <Box
+              sx={{
+                "& .app-logo": {
+                  pl: 0,
+                },
+                "& .logo-text": {
+                  display: { xs: "none", sm: "block" },
+                },
+              }}
+            >
+              <AppLogo />
+            </Box>
+          )}
           <Hidden smDown>
             {!TEMA_MARCA_PANEL && (
             <Box
@@ -230,20 +232,6 @@ const AppHeader = ({ toggleNavCollapsed, routesConfig }) => {
           </Box>
         </Box>
       </Toolbar>
-      <Hidden lgDown>
-        <HeaderNavWrapper>
-          <Box
-            sx={{
-              width: "100%",
-              maxWidth: { lg: 1140, xl: 1436 },
-              mx: "auto",
-              px: 5,
-            }}
-          >
-            <HorizontalNav routesConfig={routesConfig} />
-          </Box>
-        </HeaderNavWrapper>
-      </Hidden>
     </AppBar>
   );
 };
@@ -251,5 +239,6 @@ export default AppHeader;
 
 AppHeader.propTypes = {
   toggleNavCollapsed: PropTypes.func,
-  routesConfig: PropsTypes.array.isRequired,
+  routesConfig: PropsTypes.array,
+  menuLateralVisible: PropTypes.bool,
 };

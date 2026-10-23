@@ -15,30 +15,18 @@ const needsToBeOpened = (pathname, item) => {
   return pathname && isUrlInChildren(item, pathname);
 };
 
+// ¿La página actual es una opción del módulo (o una ruta hija, ej. /liquidaciones/5/ver)? Los permisos del
+// usuario traen las opciones en `opciones`; `children` queda por compatibilidad con la plantilla.
 const isUrlInChildren = (parent, url) => {
-  // Verificar si el parent y sus hijos existen
-  if (!parent || !parent.children) {
+  const hijos = parent?.opciones ?? parent?.children;
+  if (!hijos) {
     return false;
   }
-
-  for (let i = 0; i < parent.children.length; i++) {
-    // Si los hijos del parent tienen más hijos, repetir el chequeo
-    if (parent.children[i].children) {
-      if (isUrlInChildren(parent.children[i], url)) {
-        return true;
-      }
-    }
-
-    // Comprobar si la URL coincide
-    if (
-      parent.children[i].url === url ||
-      url.includes(parent.children[i].url)
-    ) {
-      return true;
-    }
-  }
-
-  return false;
+  return hijos.some(
+    (hijo) =>
+      isUrlInChildren(hijo, url) ||
+      (hijo.url && (url === hijo.url || url.startsWith(`${hijo.url}/`))),
+  );
 };
 
 
