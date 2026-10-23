@@ -18,6 +18,7 @@ import { resenasConfigs } from './Resenas';
 import { promocionesConfigs } from './Promociones';
 import { portalRoutes, cuentaConfigs } from './Portal';
 import { inicioConfigs } from './Inicio';
+import { finanzasConfigs } from './Finanzas';
 
 export const authorizedStructure = (loginUrl) => {
   return {
@@ -37,6 +38,7 @@ export const authorizedStructure = (loginUrl) => {
       ...reservasConfigs,
       ...resenasConfigs,
       ...promocionesConfigs,
+      ...finanzasConfigs,
       ...cuentaConfigs,
     ],
   };

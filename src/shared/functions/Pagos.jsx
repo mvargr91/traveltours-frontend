@@ -1,7 +1,7 @@
-// Pago en línea con la pasarela de la instalación (Wompi, Mercado Pago…).
+// Pago en línea con la pasarela del proveedor de la experiencia (Wompi, Mercado Pago…).
 // El backend calcula el monto y arma la URL del checkout (POST publico/reservas/{codigo}/pago); aquí solo
-// se redirige. La pasarela devuelve al viajero al backend (publico/pagos/{pasarela}/retorno), que lo
-// reenvía a /pago/resultado?id={transacción}&pasarela={pasarela}.
+// se redirige. La pasarela devuelve al viajero al backend (publico/pagos/{pasarela}/retorno/{cuenta}), que lo
+// reenvía a /pago/resultado?id={transacción}&pasarela={pasarela}&cuenta={cuenta}.
 import jwtAxios from '../../@crema/services/auth/jwt-auth';
 import { extraerMensajeError } from '../../@crema/redux/helpers/createCrudSlice';
 
