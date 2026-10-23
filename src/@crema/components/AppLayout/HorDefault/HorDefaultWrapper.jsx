@@ -7,6 +7,8 @@ const HorDefaultWrapper = ({ children, ...rest }) => {
     <Box
       sx={{
         flex: 1,
+        // Sin minWidth 0 una tabla ancha estira la fila (menú + contenido) más allá de la pantalla.
+        minWidth: 0,
         display: 'flex',
         flexDirection: 'row',
         position: 'relative',

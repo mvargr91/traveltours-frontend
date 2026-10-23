@@ -8,9 +8,11 @@ const MainContent = ({ children, ...rest }) => {
       sx={{
         flex: 1,
         display: 'flex',
-        width: '100%',
+        width: { xs: '100%', lg: 'auto' },
         flexDirection: 'column',
-        position: 'absolute',
+        // En escritorio va al lado del menú lateral (en la misma fila); minWidth evita que las tablas anchas lo empujen.
+        position: { xs: 'absolute', lg: 'relative' },
+        minWidth: 0,
         transition: 'all 0.5s ease',
         '& .app-content, & .footerContainer': {
           px: 5,
