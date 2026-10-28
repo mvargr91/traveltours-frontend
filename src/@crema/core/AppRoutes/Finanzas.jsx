@@ -8,6 +8,7 @@ const DetalleModelo = React.lazy(() => import('../../../modules/Finanzas/ModeloC
 const Liquidacion = React.lazy(() => import('../../../modules/Finanzas/Liquidacion'));
 const DetalleLiquidacion = React.lazy(() => import('../../../modules/Finanzas/Liquidacion/DetalleLiquidacion'));
 const ResultadoPagoLiquidacion = React.lazy(() => import('../../../modules/Finanzas/Liquidacion/ResultadoPagoLiquidacion'));
+const ControlProveedores = React.lazy(() => import('../../../modules/Finanzas/ControlProveedores'));
 
 // Finanzas: pasarela de pago de cada proveedor y cobro de la plataforma (modelos de cobro y liquidaciones).
 // Los detalles heredan los permisos de la opción padre (el backend los exige en cada endpoint).
@@ -29,6 +30,11 @@ export const finanzasConfigs = [
     element: <Liquidacion route={{ auth: authRole, path: '/liquidaciones' }} />,
   },
   { permittedRole: RoutePermittedRole.User, path: '/liquidaciones/:id/ver', element: <DetalleLiquidacion /> },
+  {
+    permittedRole: RoutePermittedRole.User,
+    path: '/control-proveedores',
+    element: <ControlProveedores route={{ auth: authRole, path: '/control-proveedores' }} />,
+  },
   // Vuelta del checkout de la pasarela de la plataforma al pagar una liquidación.
   { permittedRole: RoutePermittedRole.User, path: '/liquidaciones/pago', element: <ResultadoPagoLiquidacion /> },
 ];
