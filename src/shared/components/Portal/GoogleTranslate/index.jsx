@@ -136,6 +136,8 @@ const GoogleTranslate = ({ showLabel = false, size = 'medium', sx = {}, ...rest 
     <>
       {showLabel ? (
         <Box
+          className='notranslate'
+          translate='no'
           onClick={handleClick}
           sx={{
             display: 'flex',
@@ -177,6 +179,8 @@ const GoogleTranslate = ({ showLabel = false, size = 'medium', sx = {}, ...rest 
       ) : (
         <Tooltip title={tituloTooltip} arrow>
           <IconButton
+            className='notranslate'
+            translate='no'
             onClick={handleClick}
             size={size}
             aria-label={tituloTooltip}
@@ -233,6 +237,8 @@ const GoogleTranslate = ({ showLabel = false, size = 'medium', sx = {}, ...rest 
 
       {/* Menú de selección de idiomas */}
       <Menu
+        className='notranslate'
+        translate='no'
         anchorEl={anchorEl}
         open={menuAbierto}
         onClose={handleClose}
@@ -240,6 +246,8 @@ const GoogleTranslate = ({ showLabel = false, size = 'medium', sx = {}, ...rest 
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         PaperProps={{
           elevation: 4,
+          className: 'notranslate',
+          translate: 'no',
           sx: {
             borderRadius: 3,
             minWidth: 230,
