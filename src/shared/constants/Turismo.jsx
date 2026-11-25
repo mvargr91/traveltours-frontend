@@ -108,9 +108,18 @@ export const TIPOS_DESCUENTO = [
   { id: 'valor_fijo', nombre: 'Valor fijo' },
 ];
 
+// "documento" es un PDF (itinerario, políticas…): el portal lo muestra como un botón con el título como texto.
 export const TIPOS_MULTIMEDIA = [
   { id: 'foto', nombre: 'Foto' },
   { id: 'video', nombre: 'Video' },
+  { id: 'documento', nombre: 'Documento PDF' },
+];
+
+// Moneda de los precios de una experiencia (experiencias.moneda). Las pasarelas cobran solo en pesos:
+// una experiencia en dólares se ofrece como reserva.
+export const MONEDAS = [
+  { id: 'COP', nombre: 'Pesos colombianos (COP)' },
+  { id: 'USD', nombre: 'Dólares (USD)' },
 ];
 
 // Un precio es de adulto o de niño; una experiencia puede tener varios de cada tipo.
@@ -206,14 +215,23 @@ export const hoy = () => {
   return new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 };
 
-export const formatoMoneda = (valor) =>
-  valor === null || valor === undefined || valor === ''
-    ? ''
-    : new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP',
-        maximumFractionDigits: 0,
-      }).format(Number(valor));
+// Pesos sin decimales ("$ 150.000"); dólares con centavos solo si los tiene ("US$ 45" o "US$ 45,50").
+export const formatoMoneda = (valor, moneda = 'COP') => {
+  if (valor === null || valor === undefined || valor === '') return '';
+  const numero = Number(valor);
+  if (moneda === 'USD') {
+    const cifra = new Intl.NumberFormat('es-CO', {
+      minimumFractionDigits: Number.isInteger(numero) ? 0 : 2,
+      maximumFractionDigits: 2,
+    }).format(numero);
+    return `US$ ${cifra}`;
+  }
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0,
+  }).format(numero);
+};
 
 export const slugify = (texto = '') =>
   texto
@@ -230,8 +248,8 @@ export const slugify = (texto = '') =>
 export const textoCantidad = (cantidad) =>
   Number(cantidad) > 1 ? `Desde ${cantidad} personas` : '1 persona';
 
-export const resumenCantidades = (cantidades = []) =>
-  cantidades.map((c) => `${textoCantidad(c.cantidad)}: ${formatoMoneda(c.valor)}`).join(' · ');
+export const resumenCantidades = (cantidades = [], moneda = 'COP') =>
+  cantidades.map((c) => `${textoCantidad(c.cantidad)}: ${formatoMoneda(c.valor, moneda)}`).join(' · ');
 
 // Descuento de un cupón sobre un valor (mismo cálculo que Cupon::descuentoSobre en el backend).
 export const descuentoCupon = (cupon, valor) => {

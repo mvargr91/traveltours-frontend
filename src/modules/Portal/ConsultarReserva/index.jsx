@@ -144,12 +144,12 @@ const ConsultarReserva = () => {
           <Divider sx={{ my: 2 }} />
           <Stack direction='row' justifyContent='space-between'>
             <Typography fontWeight={700}>{t('total')}</Typography>
-            <Typography fontWeight={700}>{formatoMoneda(reserva.valor_total)}</Typography>
+            <Typography fontWeight={700}>{formatoMoneda(reserva.valor_total, reserva.moneda)}</Typography>
           </Stack>
           {Number(reserva.valor_pagado) > 0 && (
             <Stack spacing={0.5} sx={{ mt: 1 }}>
-              <Fila etiqueta={t('pagado')} valor={formatoMoneda(reserva.valor_pagado)} />
-              <Fila etiqueta={t('saldo')} valor={formatoMoneda(reserva.saldo)} />
+              <Fila etiqueta={t('pagado')} valor={formatoMoneda(reserva.valor_pagado, reserva.moneda)} />
+              <Fila etiqueta={t('saldo')} valor={formatoMoneda(reserva.saldo, reserva.moneda)} />
             </Stack>
           )}
           {opcionesPago.length > 0 && (
@@ -165,7 +165,7 @@ const ConsultarReserva = () => {
                     disabled={pagando}
                     onClick={() => pagar(concepto)}
                   >
-                    {pagando ? t('llevandoPasarela') : t(TEXTO_PAGO[opcionesPago.length > 1 || concepto === 'saldo' ? concepto : 'unico'], { valor: formatoMoneda(valor) })}
+                    {pagando ? t('llevandoPasarela') : t(TEXTO_PAGO[opcionesPago.length > 1 || concepto === 'saldo' ? concepto : 'unico'], { valor: formatoMoneda(valor, reserva.moneda) })}
                   </Button>
                 ))}
               </Stack>
@@ -179,7 +179,7 @@ const ConsultarReserva = () => {
               <Typography fontWeight={700} sx={{ mb: 1 }}>{t('pagos')}</Typography>
               <Stack spacing={0.5}>
                 {reserva.pagos.map((pago, i) => (
-                  <Fila key={`${pago.fecha}-${i}`} etiqueta={`${pago.fecha} · ${medioDePago(pago)}`} valor={formatoMoneda(pago.valor)} />
+                  <Fila key={`${pago.fecha}-${i}`} etiqueta={`${pago.fecha} · ${medioDePago(pago)}`} valor={formatoMoneda(pago.valor, reserva.moneda)} />
                 ))}
               </Stack>
             </>

@@ -33,7 +33,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 
 // Componente personalizado para el formato numérico
 const NumberFormatCustom = React.forwardRef(function NumberFormatCustom(props, ref) {
-  const { onChange, maxDigits, ...other } = props;
+  const { onChange, maxDigits, decimales = 0, ...other } = props;
 
   return (
     <NumericFormat
@@ -51,14 +51,14 @@ const NumberFormatCustom = React.forwardRef(function NumberFormatCustom(props, r
       }}
       isAllowed={(values) => values.value.length <= maxDigits}
       allowNegative={false} 
-      decimalScale={0} 
+      decimalScale={decimales}
       isNumericString
     />
   );
 });
 
 // Componente para el campo de moneda personalizado
-const MyCurrencyField = ({ maxDigits = 10, ...props }) => {
+const MyCurrencyField = ({ maxDigits = 10, decimales = 0, ...props }) => {
   const [field, meta] = useField(props);
   const errorText = meta.error && meta.touched ? meta.error : '';
 
@@ -68,7 +68,7 @@ const MyCurrencyField = ({ maxDigits = 10, ...props }) => {
       {...field}
       InputProps={{
         inputComponent: NumberFormatCustom,
-        inputProps: { maxDigits },
+        inputProps: { maxDigits, decimales },
       }}
       helperText={errorText}
       error={!!errorText}

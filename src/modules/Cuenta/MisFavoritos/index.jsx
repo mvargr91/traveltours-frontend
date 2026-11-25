@@ -11,7 +11,7 @@ import { RUTAS_PORTAL } from '../../../shared/constants/RutasPortal';
 
 const cells = [
   { id: 'experiencia_nombre', typeHead: 'string', label: 'Experiencia', value: (v) => v, align: 'left', mostrarInicio: true },
-  { id: 'precio_desde', typeHead: 'numeric', label: 'Precio Desde', value: formatoMoneda, align: 'right', mostrarInicio: true },
+  { id: 'precio_desde', typeHead: 'numeric', label: 'Precio Desde', value: (v, row) => formatoMoneda(v, row.moneda), align: 'right', mostrarInicio: true },
   { id: 'fecha_creacion', typeHead: 'string', label: 'Guardado', value: (v) => (v ? moment(v).format('YYYY-MM-DD') : ''), align: 'left', mostrarInicio: true },
 ];
 

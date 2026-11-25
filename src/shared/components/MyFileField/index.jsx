@@ -15,6 +15,8 @@ export const TIPOS_ARCHIVO = {
   imagen: { accept: 'image/jpeg,image/png,image/webp', extensiones: ['jpg', 'jpeg', 'png', 'webp'], maxMB: 5 },
   video: { accept: 'video/mp4,video/webm', extensiones: ['mp4', 'webm'], maxMB: 50 },
   documento: { accept: 'application/pdf,image/jpeg,image/png', extensiones: ['pdf', 'jpg', 'jpeg', 'png'], maxMB: 10 },
+  // PDF público (itinerario de una experiencia): a diferencia de "documento", se abre con su enlace.
+  pdf: { accept: 'application/pdf', extensiones: ['pdf'], maxMB: 10 },
 };
 
 const extensionDe = (nombre = '') => nombre.split('.').pop().toLowerCase();

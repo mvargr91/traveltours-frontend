@@ -130,6 +130,7 @@ const Mapa = () => {
           destino_nombre: exp.destino_nombre,
           direccion: exp.direccion || exp.punto_encuentro,
           precio_desde: exp.precio_desde,
+          moneda: exp.moneda,
           duracion: exp.duracion,
           calificacion: exp.calificacion_promedio,
           verificada: exp.verificada,
@@ -314,7 +315,7 @@ const Mapa = () => {
       // Contenido del popup
       const precioHtml = lugar.precio_desde
         ? `<div style="font-weight: 700; color: ${colorPrimario}; margin-top: 6px; font-size: 13px;">${escapar(
-            t('popupDesde', { precio: formatoMoneda(lugar.precio_desde) })
+            t('popupDesde', { precio: formatoMoneda(lugar.precio_desde, lugar.moneda) })
           )}</div>`
         : '';
 
@@ -688,7 +689,7 @@ const Mapa = () => {
                                   fontWeight={700}
                                   color='primary.main'
                                 >
-                                  {formatoMoneda(lugar.precio_desde)}
+                                  {formatoMoneda(lugar.precio_desde, lugar.moneda)}
                                 </Typography>
                               ) : lugar.tipo === 'destino' ? (
                                 <Typography

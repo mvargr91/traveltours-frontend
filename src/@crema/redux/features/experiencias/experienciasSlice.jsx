@@ -5,7 +5,7 @@ import { createCrudSlice } from '../../helpers/createCrudSlice';
 const { slice, thunks } = createCrudSlice({
   name: 'experiencias',
   endpoint: 'experiencias',
-  acciones: { onCambiarEstado: 'estado' },
+  acciones: { onCambiarEstado: 'estado', onCambiarMoneda: 'moneda' },
 });
 
 export const {
@@ -16,6 +16,7 @@ export const {
   onUpdate,
   onDelete,
   onCambiarEstado,
+  onCambiarMoneda,
 } = thunks;
 
 export const { resetError, resetActual, resetColeccion } = slice.actions;

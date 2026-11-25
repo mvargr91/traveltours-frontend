@@ -64,6 +64,7 @@ const FORMULARIOS = {
 const extraer = (r) => ({ pagos: r.pagos ?? [], valor_pagado: r.valor_pagado, valor_reembolsado: r.valor_reembolsado, estado: r.estado });
 
 const PagosReserva = ({ reserva, soloLectura }) => {
+  const moneda = reserva.moneda ?? 'COP';
   const theme = useTheme();
   // Lo que cambia con cada pago; arranca con lo que trae la reserva y se actualiza con cada respuesta.
   const { permisos } = usePermisosOpcion('/reservas');
@@ -104,8 +105,8 @@ const PagosReserva = ({ reserva, soloLectura }) => {
     const { isConfirmed } = await Swal.fire({
       title: pago.concepto === 'reembolso' ? 'Anular reembolso' : 'Anular pago',
       text: pago.concepto === 'reembolso'
-        ? `¿Anular el reembolso de ${formatoMoneda(pago.valor)} del ${pago.fecha}? Dejará de contar en lo reembolsado.`
-        : `¿Anular el pago de ${formatoMoneda(pago.valor)} del ${pago.fecha}? Dejará de contar en lo pagado.`,
+        ? `¿Anular el reembolso de ${formatoMoneda(pago.valor, moneda)} del ${pago.fecha}? Dejará de contar en lo reembolsado.`
+        : `¿Anular el pago de ${formatoMoneda(pago.valor, moneda)} del ${pago.fecha}? Dejará de contar en lo pagado.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -133,10 +134,10 @@ const PagosReserva = ({ reserva, soloLectura }) => {
   return (
     <Box>
       <Stack direction='row' alignItems='center' sx={{ flexWrap: 'wrap', gap: 3, mb: 2 }}>
-        <Typography>Total: <strong>{formatoMoneda(total)}</strong></Typography>
-        <Typography>Pagado: <strong>{formatoMoneda(pagado)}</strong></Typography>
-        <Typography color={saldo > 0 ? 'error.main' : 'success.main'}>Saldo: <strong>{formatoMoneda(saldo)}</strong></Typography>
-        {reembolsado > 0 && <Typography color='warning.main'>Reembolsado: <strong>{formatoMoneda(reembolsado)}</strong></Typography>}
+        <Typography>Total: <strong>{formatoMoneda(total, moneda)}</strong></Typography>
+        <Typography>Pagado: <strong>{formatoMoneda(pagado, moneda)}</strong></Typography>
+        <Typography color={saldo > 0 ? 'error.main' : 'success.main'}>Saldo: <strong>{formatoMoneda(saldo, moneda)}</strong></Typography>
+        {reembolsado > 0 && <Typography color='warning.main'>Reembolsado: <strong>{formatoMoneda(reembolsado, moneda)}</strong></Typography>}
         <Stack direction='row' spacing={1} sx={{ ml: 'auto' }}>
           {puedeRegistrarReembolso && (
             <Button variant='outlined' size='small' color='warning' startIcon={<CurrencyExchangeIcon />} onClick={() => abrir('reembolso', reembolsable)}>
@@ -179,7 +180,7 @@ const PagosReserva = ({ reserva, soloLectura }) => {
                   <TableCell>{medioDePago(pago)}</TableCell>
                   <TableCell>{nombreDe(CONCEPTOS_PAGO, pago.concepto)}</TableCell>
                   <TableCell align='right' sx={{ textDecoration: anulado ? 'line-through' : 'none', color: esReembolso ? 'warning.main' : undefined }}>
-                    {esReembolso ? `− ${formatoMoneda(pago.valor)}` : formatoMoneda(pago.valor)}
+                    {esReembolso ? `− ${formatoMoneda(pago.valor, moneda)}` : formatoMoneda(pago.valor, moneda)}
                   </TableCell>
                   <TableCell>{pago.registrado_por ?? 'Pago en línea'}</TableCell>
                   <TableCell>{pago.nota}</TableCell>
@@ -219,7 +220,7 @@ const PagosReserva = ({ reserva, soloLectura }) => {
                   value={formulario.valor}
                   onChange={cambiar('valor')}
                   error={valorInvalido}
-                  helperText={formulario.tipo === 'reembolso' ? `Máximo a reembolsar: ${formatoMoneda(reembolsable)}` : `Saldo de la reserva: ${formatoMoneda(saldo)}`}
+                  helperText={formulario.tipo === 'reembolso' ? `Máximo a reembolsar: ${formatoMoneda(reembolsable, moneda)}` : `Saldo de la reserva: ${formatoMoneda(saldo, moneda)}`}
                 />
                 <TextField
                   label={textos.fecha}

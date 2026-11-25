@@ -32,8 +32,8 @@ const cells = [
   { id: 'experiencia_nombre', typeHead: 'string', label: 'Experiencia', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'fecha', typeHead: 'string', label: 'Fecha', value: (v, row) => `${v ?? ''} ${aHoraCorta(row.hora_inicio)}`.trim(), align: 'left', mostrarInicio: true },
   { id: 'cantidad_personas', typeHead: 'numeric', label: 'Personas', value: (v) => v, align: 'right', mostrarInicio: true, ordenable: false },
-  { id: 'valor_total', typeHead: 'numeric', label: 'Valor', value: formatoMoneda, align: 'right', mostrarInicio: true },
-  { id: 'valor_pagado', typeHead: 'numeric', label: 'Pagado', value: formatoMoneda, align: 'right', mostrarInicio: false, ordenable: false },
+  { id: 'valor_total', typeHead: 'numeric', label: 'Valor', value: (v, row) => formatoMoneda(v, row.moneda), align: 'right', mostrarInicio: true },
+  { id: 'valor_pagado', typeHead: 'numeric', label: 'Pagado', value: (v, row) => formatoMoneda(v, row.moneda), align: 'right', mostrarInicio: false, ordenable: false },
   {
     id: 'estado',
     typeHead: 'string',

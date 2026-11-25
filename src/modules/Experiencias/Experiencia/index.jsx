@@ -29,7 +29,7 @@ const cells = [
   { id: 'nombre', typeHead: 'string', label: 'Nombre', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'destino_nombre', typeHead: 'string', label: 'Destino', value: (v) => v, align: 'left', mostrarInicio: true },
   { id: 'proveedor_nombre', typeHead: 'string', label: 'Proveedor', value: (v) => v, align: 'left', mostrarInicio: true },
-  { id: 'precio_desde', typeHead: 'numeric', label: 'Precio Desde', value: formatoMoneda, align: 'right', mostrarInicio: true },
+  { id: 'precio_desde', typeHead: 'numeric', label: 'Precio Desde', value: (v, row) => formatoMoneda(v, row.moneda), align: 'right', mostrarInicio: true },
   { id: 'duracion', typeHead: 'string', label: 'Duración', value: (v) => v, align: 'left', mostrarInicio: false, ordenable: false },
   { id: 'capacidad_maxima', typeHead: 'numeric', label: 'Capacidad', value: (v) => v, align: 'right', mostrarInicio: false, ordenable: false },
   {

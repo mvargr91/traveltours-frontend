@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as yup from 'yup';
+import { Alert } from '@mui/material';
 import AppCrudDialog from '../../../../../shared/components/AppCrudDialog';
 import AppCrudForm from '../../../../../shared/components/AppCrudForm';
 import MyTextField from '../../../../../shared/components/MyTextField';
@@ -18,14 +19,23 @@ import { OPCIONES_ESTADO, TIPOS_MULTIMEDIA, aRadio } from '../../../../../shared
 import { enteroOpcional } from '../../../../../shared/functions/ValidacionesYup';
 import { creadorPropTypes } from '../../propTypes';
 
+// Tipo de archivo de MyFileField según el tipo de multimedia.
+const TIPO_ARCHIVO = { foto: 'imagen', video: 'video', documento: 'pdf' };
+const tipoArchivo = (tipo) => TIPO_ARCHIVO[tipo] ?? 'imagen';
+
 const validationSchema = yup.object({
   tipo: yup.string().required('Requerido'),
   // Se sube un archivo o, para videos, se pega un enlace (YouTube, Vimeo...).
   ruta_archivo: yup.string().max(255, 'Máximo 255 caracteres').nullable(),
   enlace: yup.string().url('Debe ser una URL válida (https://...)').nullable(),
-  archivo: yup.mixed().when('tipo', ([tipo], esquema) =>
-    validarArchivo(tipo === 'video' ? 'video' : 'imagen', (valores) => !valores.ruta_archivo && !valores.enlace)),
-  titulo: yup.string().max(150, 'Máximo 150 caracteres').nullable(),
+  archivo: yup.mixed().when('tipo', ([tipo]) =>
+    validarArchivo(tipoArchivo(tipo), (valores) => !valores.ruta_archivo && !valores.enlace)),
+  // En un documento el título es el texto del botón del portal: es obligatorio.
+  titulo: yup
+    .string()
+    .max(150, 'Máximo 150 caracteres')
+    .nullable()
+    .when('tipo', ([tipo], esquema) => (tipo === 'documento' ? esquema.required('Escribe el texto del botón (ej. Itinerario)') : esquema)),
   texto_alternativo: yup.string().max(255, 'Máximo 255 caracteres').nullable(),
   orden: enteroOpcional(),
 });
@@ -75,16 +85,36 @@ const ExperienciaMultimediaCreador = (props) => {
           <MyTextField fullWidth label='Orden' name='orden' type='number' disabled={disabled} />
           <MyFileField
             className='campo-completo'
-            label={values.tipo === 'video' ? 'Archivo de video' : 'Foto'}
-            tipo={values.tipo === 'video' ? 'video' : 'imagen'}
+            label={{ video: 'Archivo de video', documento: 'Documento PDF' }[values.tipo] ?? 'Foto'}
+            tipo={tipoArchivo(values.tipo)}
             rutaActual={values.ruta_archivo}
             disabled={disabled}
           />
           {values.tipo === 'video' && (
             <MyTextField className='campo-completo' fullWidth label='O pega el enlace del video (YouTube, Vimeo...)' name='enlace' placeholder='https://' disabled={disabled} />
           )}
-          <MyTextField fullWidth label='Título' name='titulo' disabled={disabled} />
-          <MyTextField fullWidth label='Texto Alternativo (accesibilidad/SEO)' name='texto_alternativo' disabled={disabled} />
+          {values.tipo === 'documento' ? (
+            <>
+              <MyTextField
+                className='campo-completo'
+                fullWidth
+                label='Texto del botón'
+                name='titulo'
+                placeholder='Ej: Itinerario, Políticas de cancelación'
+                helperText='En la página de la experiencia aparece un botón con este texto que abre el PDF.'
+                disabled={disabled}
+                required
+              />
+              <Alert className='campo-completo' severity='info'>
+                El PDF es público: cualquier visitante del portal puede abrirlo. Si hay varios, se muestran en el orden indicado.
+              </Alert>
+            </>
+          ) : (
+            <>
+              <MyTextField fullWidth label='Título' name='titulo' disabled={disabled} />
+              <MyTextField fullWidth label='Texto Alternativo (accesibilidad/SEO)' name='texto_alternativo' disabled={disabled} />
+            </>
+          )}
           <MyRadioField label='Estado' name='estado' disabled={disabled} options={OPCIONES_ESTADO} />
         </AppCrudForm>
       )}

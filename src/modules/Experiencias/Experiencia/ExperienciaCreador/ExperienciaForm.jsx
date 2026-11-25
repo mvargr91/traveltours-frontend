@@ -12,6 +12,7 @@ import FormikAutocomplete from '../../../../shared/components/FormikAutocomplete
 import {
   ESTADOS_EXPERIENCIA,
   IDIOMAS,
+  MONEDAS,
   MODALIDADES_PAGO,
   OPCIONES_MODALIDAD_PAGO,
   OPCIONES_SI_NO,
@@ -32,6 +33,13 @@ const ExperienciaForm = (props) => {
       setFieldValue('proveedor_id', proveedorPropio.id);
     }
   }, [proveedorPropio, accion, values.proveedor_id, setFieldValue]);
+
+  // En dólares no hay pago en línea (las pasarelas cobran solo en pesos): la modalidad vuelve a "reserva".
+  useEffect(() => {
+    if (!disabled && values.moneda === 'USD' && values.modalidad_pago === 'pago_en_linea') {
+      setFieldValue('modalidad_pago', 'reserva');
+    }
+  }, [disabled, values.moneda, values.modalidad_pago, setFieldValue]);
 
   // ¿El proveedor tiene una pasarela de pago activa? Sin ella el pago en línea no se puede ofrecer (null = no se sabe).
   const [pasarelaActiva, setPasarelaActiva] = useState(registro?.pasarela_activa ?? null);
@@ -72,13 +80,33 @@ const ExperienciaForm = (props) => {
       <SeccionForm titulo='Precios' />
       {registro?.precio_desde && (
         <Alert className='campo-completo' severity='success' sx={{ bgcolor: 'rgba(0,161,204,0.08)', color: 'text.primary' }}>
-          Precio desde actual (el menor valor de adulto activo): <strong>{formatoMoneda(registro.precio_desde)}</strong>
+          Precio desde actual (el menor valor de adulto activo): <strong>{formatoMoneda(registro.precio_desde, registro.moneda)}</strong>
+        </Alert>
+      )}
+      <MySelectField
+        fullWidth
+        variant='standard'
+        label='Moneda de los precios'
+        name='moneda'
+        options={MONEDAS}
+        disabled={disabled}
+        required
+      />
+      {values.moneda === 'USD' && (
+        <Alert severity='info'>
+          En dólares la experiencia se ofrece como <strong>reserva</strong>: las pasarelas cobran solo en pesos.
         </Alert>
       )}
       <PreciosExperiencia disabled={disabled} />
 
       <SeccionForm titulo='Modalidad de pago' />
-      <MyRadioField label='¿Cómo se reserva?' name='modalidad_pago' disabled={disabled} required options={OPCIONES_MODALIDAD_PAGO} />
+      <MyRadioField
+        label='¿Cómo se reserva?'
+        name='modalidad_pago'
+        disabled={disabled}
+        required
+        options={values.moneda === 'USD' ? OPCIONES_MODALIDAD_PAGO.filter((o) => o.value !== 'pago_en_linea') : OPCIONES_MODALIDAD_PAGO}
+      />
       <Alert className='campo-completo' severity='info'>
         <strong>{nombreDe(MODALIDADES_PAGO, values.modalidad_pago)}:</strong>{' '}
         {MODALIDADES_PAGO.find((m) => m.id === values.modalidad_pago)?.descripcion}

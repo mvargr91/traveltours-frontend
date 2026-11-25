@@ -29,6 +29,10 @@ export const extraerMensajeError = (error) => {
   if (error?.response?.status === 429) {
     return 'Demasiados intentos. Espera un minuto e inténtalo de nuevo.';
   }
+  // El servidor (post_max_size de PHP) rechazó la petición completa: el archivo es más pesado de lo que admite.
+  if (error?.response?.status === 413) {
+    return 'El archivo es más pesado de lo que permite el servidor. Prueba con un archivo más liviano o pide que se aumente el límite de subida.';
+  }
   const mensajes = error?.response?.data?.mensajes;
   if (Array.isArray(mensajes) && mensajes.length > 0) {
     return mensajes[0];

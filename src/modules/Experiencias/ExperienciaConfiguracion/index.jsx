@@ -69,7 +69,7 @@ const ExperienciaConfiguracion = ({ route }) => {
             {experiencia && (
               <Typography variant='subtitle1' color='text.secondary'>
                 {experiencia.duracion ? `${experiencia.duracion} · ` : ''}
-                Desde {formatoMoneda(experiencia.precio_desde)}
+                Desde {formatoMoneda(experiencia.precio_desde, experiencia.moneda)} {experiencia.moneda === 'USD' ? '(USD)' : ''}
                 {experiencia.capacidad_maxima ? ` · Capacidad ${experiencia.capacidad_maxima}` : ''}
               </Typography>
             )}

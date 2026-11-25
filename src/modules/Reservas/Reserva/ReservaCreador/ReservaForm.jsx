@@ -46,6 +46,8 @@ const ReservaForm = (props) => {
   const disabled = accion === 'ver';
   const esCreacion = accion === 'crear';
   const [experienciaElegida, setExperienciaElegida] = useState(null);
+  // La reserva conserva su moneda; al crearla, es la de la experiencia elegida.
+  const moneda = registro?.moneda ?? experienciaElegida?.moneda ?? 'COP';
   const disponibilidades = useSelector((state) => state.experienciaDisponibilidad.rows);
 
   // La colección ligera solo trae experiencias publicadas; al editar se conserva la de la reserva.
@@ -162,15 +164,15 @@ const ReservaForm = (props) => {
           fullWidth
           variant='standard'
           label='Cupón'
-          value={registro?.cupon_codigo ? `${registro.cupon_codigo} (−${formatoMoneda(registro.valor_descuento_cupon)})` : 'Sin cupón'}
+          value={registro?.cupon_codigo ? `${registro.cupon_codigo} (−${formatoMoneda(registro.valor_descuento_cupon, moneda)})` : 'Sin cupón'}
           disabled
         />
       )}
-      <MyCurrencyField fullWidth label='Valor Total' name='valor_total' disabled={disabled} required />
+      <MyCurrencyField fullWidth label={`Valor Total (${moneda})`} name='valor_total' decimales={moneda === 'USD' ? 2 : 0} disabled={disabled} required />
       {esCreacion && valorPersona > 0 && (
         <Alert className='campo-completo' severity='success' sx={{ py: 0 }}>
-          Valor sugerido: {formatoMoneda(valorPersona)} × {personas} persona(s)
-          {descuento > 0 && ` − cupón ${cuponElegido.codigo} ${formatoMoneda(descuento)}`}
+          Valor sugerido: {formatoMoneda(valorPersona, moneda)} × {personas} persona(s)
+          {descuento > 0 && ` − cupón ${cuponElegido.codigo} ${formatoMoneda(descuento, moneda)}`}
         </Alert>
       )}
 
