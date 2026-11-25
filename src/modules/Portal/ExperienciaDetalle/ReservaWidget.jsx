@@ -68,7 +68,7 @@ export const calcularTotal = (precio, personas, promocion) => {
 
 // Pantalla final de la reserva: el código es lo único que necesita el viajero para consultarla.
 // Si la experiencia es de pago en línea, lleva de una vez al checkout de la pasarela (con reintento manual).
-const ReservaConfirmada = ({ reserva, dias, fechaFin, porcentajeAbono, onCerrar }) => {
+const ReservaConfirmada = ({ reserva, dias, fechaFin, porcentajeAbono, moneda = 'COP', onCerrar }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const t = useTextos('reserva');
@@ -144,7 +144,7 @@ const ReservaConfirmada = ({ reserva, dias, fechaFin, porcentajeAbono, onCerrar 
         <Stack direction='row' spacing={1} justifyContent='center' flexWrap='wrap' useFlexGap sx={{ mt: 2 }}>
           <Chip icon={<CalendarMonthIcon />} label={`${rangoFechas(reserva.fecha, dias, fechaFin)} · ${aHoraCorta(reserva.hora_inicio)}`} />
           <Chip icon={<GroupsIcon />} label={t('resumenPersonas', { n: reserva.cantidad_personas })} />
-          <Chip color='primary' variant='outlined' label={formatoMoneda(reserva.valor_total)} />
+          <Chip color='primary' variant='outlined' label={formatoMoneda(reserva.valor_total, moneda)} />
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3, flexWrap: 'wrap', gap: 1 }}>
@@ -152,10 +152,10 @@ const ReservaConfirmada = ({ reserva, dias, fechaFin, porcentajeAbono, onCerrar 
         {pendientePago && abono ? (
           <>
             <Button variant='outlined' onClick={() => pagar('abono')} disabled={pagando}>
-              {t('pagarAbono', { valor: formatoMoneda(abono) })}
+              {t('pagarAbono', { valor: formatoMoneda(abono, moneda) })}
             </Button>
             <Button variant='contained' startIcon={<CreditCardIcon />} onClick={() => pagar('total')} disabled={pagando}>
-              {t('pagarTotal', { valor: formatoMoneda(reserva.valor_total) })}
+              {t('pagarTotal', { valor: formatoMoneda(reserva.valor_total, moneda) })}
             </Button>
           </>
         ) : pendientePago ? (
@@ -184,6 +184,7 @@ ReservaConfirmada.propTypes = {
   dias: PropTypes.number,
   fechaFin: PropTypes.string,
   porcentajeAbono: PropTypes.number,
+  moneda: PropTypes.string,
   onCerrar: PropTypes.func.isRequired,
 };
 
@@ -306,7 +307,7 @@ const ReservaWidget = ({ experiencia }) => {
     <Paper sx={{ p: 3, position: { md: 'sticky' }, top: { md: 100 } }}>
       <Typography variant='caption' color='text.secondary'>{t('desde')}</Typography>
       <Typography variant='h2' color='primary.main'>
-        <span className='notranslate' translate='no'>{formatoMoneda(experiencia.precio_desde)}</span>
+        <span className='notranslate' translate='no'>{formatoMoneda(experiencia.precio_desde, experiencia.moneda)}</span>
         <Typography component='span' color='text.secondary'> {t('porPersona')}</Typography>
       </Typography>
       {experiencia.promocion && (
@@ -347,25 +348,25 @@ const ReservaWidget = ({ experiencia }) => {
 
       <Box sx={{ mt: 2.5 }}>
         <Stack direction='row' justifyContent='space-between'>
-          <Typography color='text.secondary'>{formatoMoneda(valorPersona)} × {personas}</Typography>
-          <Typography>{formatoMoneda(subtotal)}</Typography>
+          <Typography color='text.secondary'>{formatoMoneda(valorPersona, experiencia.moneda)} × {personas}</Typography>
+          <Typography>{formatoMoneda(subtotal, experiencia.moneda)}</Typography>
         </Stack>
         {descuento > 0 && (
           <Stack direction='row' justifyContent='space-between' sx={{ color: 'success.main' }}>
             <Typography>{t('descuento')}</Typography>
-            <Typography>- {formatoMoneda(descuento)}</Typography>
+            <Typography>- {formatoMoneda(descuento, experiencia.moneda)}</Typography>
           </Stack>
         )}
         {descuentoDelCupon > 0 && (
           <Stack direction='row' justifyContent='space-between' sx={{ color: 'success.main' }}>
             <Typography>{t('cuponResumen', { codigo: cupon.codigo })}</Typography>
-            <Typography>- {formatoMoneda(descuentoDelCupon)}</Typography>
+            <Typography>- {formatoMoneda(descuentoDelCupon, experiencia.moneda)}</Typography>
           </Stack>
         )}
         <Divider sx={{ my: 1 }} />
         <Stack direction='row' justifyContent='space-between'>
           <Typography fontWeight={700}>{t('totalEstimado')}</Typography>
-          <Typography fontWeight={700}>{formatoMoneda(total)}</Typography>
+          <Typography fontWeight={700}>{formatoMoneda(total, experiencia.moneda)}</Typography>
         </Stack>
       </Box>
 
@@ -412,7 +413,7 @@ const ReservaWidget = ({ experiencia }) => {
       </Button>
       <Typography variant='caption' color='text.secondary' component='p' sx={{ mt: 1, textAlign: 'center' }}>
         {pagoEnLinea && t('notaPagoEnLinea')}
-        {porcentajeAbono && ` ${t('notaAbono', { porcentaje: porcentajeAbono, valor: formatoMoneda(Math.round((total * porcentajeAbono) / 100)) })}`}
+        {porcentajeAbono && ` ${t('notaAbono', { porcentaje: porcentajeAbono, valor: formatoMoneda(Math.round((total * porcentajeAbono) / 100), experiencia.moneda) })}`}
         {!pagoEnLinea && isAuthenticated && t('notaConCuenta')}
         {!pagoEnLinea && !isAuthenticated && t('notaSinCuenta')}
       </Typography>
@@ -420,7 +421,7 @@ const ReservaWidget = ({ experiencia }) => {
 
       <Dialog open={confirmando} onClose={cerrar} maxWidth='xs' fullWidth fullScreen={pantallaChica}>
         {reservaConfirmada ? (
-          <ReservaConfirmada reserva={reservaConfirmada} dias={dias} fechaFin={disponibilidad?.fecha_fin ?? undefined} porcentajeAbono={porcentajeAbono} onCerrar={cerrar} />
+          <ReservaConfirmada reserva={reservaConfirmada} dias={dias} fechaFin={disponibilidad?.fecha_fin ?? undefined} porcentajeAbono={porcentajeAbono} moneda={experiencia.moneda} onCerrar={cerrar} />
         ) : (
           <Formik
             initialValues={{
@@ -441,7 +442,7 @@ const ReservaWidget = ({ experiencia }) => {
                     <Typography variant='body2' color='text.secondary'>
                       {rangoFechas(disponibilidad?.fecha, dias, disponibilidad?.fecha_fin)} · {aHoraCorta(disponibilidad?.hora_inicio)} · {t('resumenPersonas', { n: personas })}
                     </Typography>
-                    <Typography variant='body2' fontWeight={700}>{formatoMoneda(total)}</Typography>
+                    <Typography variant='body2' fontWeight={700}>{formatoMoneda(total, experiencia.moneda)}</Typography>
                   </Stack>
                 </Box>
                 <Stack spacing={2}>

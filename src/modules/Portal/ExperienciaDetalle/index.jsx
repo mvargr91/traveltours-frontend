@@ -34,6 +34,7 @@ import TranslateIcon from '@mui/icons-material/Translate';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import { onShow, resetActual } from '@crema/redux/features/portalExperiencias/portalExperienciasSlice';
 import { onCreate as onCrearFavorito } from '@crema/redux/features/favoritos/favoritosSlice';
@@ -101,6 +102,8 @@ const ExperienciaDetalle = () => {
 
   const fotos = exp.multimedia.filter((m) => m.tipo === 'foto');
   const videos = exp.multimedia.filter((m) => m.tipo === 'video');
+  // PDF (itinerario, políticas…): un botón por documento con su título como texto.
+  const documentos = exp.multimedia.filter((m) => m.tipo === 'documento');
   const incluye = [...lineasDe(exp.incluye), ...exp.caracteristicas.filter((c) => c.incluida).map((c) => c.nombre)];
   const noIncluye = [...lineasDe(exp.no_incluye), ...exp.caracteristicas.filter((c) => !c.incluida).map((c) => c.nombre)];
   const verificada = exp.verificada || exp.proveedor_verificacion === 'aprobado';
@@ -190,6 +193,23 @@ const ExperienciaDetalle = () => {
             <Typography sx={{ whiteSpace: 'pre-line', mb: 3 }}>{exp.descripcion}</Typography>
           )}
 
+          {documentos.length > 0 && (
+            <Stack direction='row' sx={{ flexWrap: 'wrap', gap: 1.5, mb: 3 }}>
+              {documentos.map((d) => (
+                <Button
+                  key={d.id}
+                  variant='outlined'
+                  startIcon={<PictureAsPdfIcon />}
+                  href={urlArchivo(d.ruta_archivo)}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  {d.titulo}
+                </Button>
+              ))}
+            </Stack>
+          )}
+
           <Grid container spacing={3} sx={{ mb: 3 }}>
             <Grid item xs={12} sm={6}><ListaIncluye titulo={t('incluye')} lineas={incluye} incluida /></Grid>
             <Grid item xs={12} sm={6}><ListaIncluye titulo={t('noIncluye')} lineas={noIncluye} incluida={false} /></Grid>
@@ -212,7 +232,7 @@ const ExperienciaDetalle = () => {
                           )}
                         </TableCell>
                         <TableCell>{textoCantidad(c.cantidad)}</TableCell>
-                        <TableCell align='right'><strong>{formatoMoneda(c.valor)}</strong> <Typography component='span' variant='body2' color='text.secondary'>{t('cadaUno')}</Typography></TableCell>
+                        <TableCell align='right'><strong className='notranslate' translate='no'>{formatoMoneda(c.valor, exp.moneda)}</strong> <Typography component='span' variant='body2' color='text.secondary'>{t('cadaUno')}</Typography></TableCell>
                       </TableRow>
                     )),
                   )}

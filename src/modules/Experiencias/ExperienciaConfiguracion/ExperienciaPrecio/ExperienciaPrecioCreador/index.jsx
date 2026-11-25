@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import * as yup from 'yup';
 import { Box, Typography } from '@mui/material';
@@ -30,6 +31,7 @@ const transformarAntesDeEnviar = ({ estado, ...valores }) => precioAParams({ ...
 const ExperienciaPrecioCreador = (props) => {
   const { precio, experienciaId, accion, handleOnClose, updateColeccion, titulo } = props;
   const disabled = accion === 'ver';
+  const moneda = useSelector((state) => state.experiencias.actual?.moneda) ?? 'COP';
 
   const initialValues = (registro) => ({
     ...precioInicial(registro ?? { cantidades: [{ cantidad: 1, valor: null }] }),
@@ -59,7 +61,7 @@ const ExperienciaPrecioCreador = (props) => {
           <MyRadioField label='Estado' name='estado' disabled={disabled} options={OPCIONES_ESTADO} />
           <Box className='campo-completo'>
             <Typography sx={{ fontWeight: 600, mb: 2 }}>Cantidades</Typography>
-            <CantidadesPrecio name='cantidades' disabled={disabled} />
+            <CantidadesPrecio name='cantidades' disabled={disabled} moneda={moneda} />
           </Box>
         </AppCrudForm>
       )}

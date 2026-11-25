@@ -39,7 +39,7 @@ const cells = [
     mostrarInicio: true,
     ordenable: false,
   },
-  { id: 'valor_total', typeHead: 'numeric', label: 'Valor Total', value: formatoMoneda, align: 'right', mostrarInicio: true },
+  { id: 'valor_total', typeHead: 'numeric', label: 'Valor Total', value: (v, row) => formatoMoneda(v, row.moneda), align: 'right', mostrarInicio: true },
   {
     id: 'estado',
     typeHead: 'string',

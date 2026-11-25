@@ -79,9 +79,11 @@ const ErrorArreglo = ({ name }) => {
 };
 ErrorArreglo.propTypes = { name: PropTypes.string.isRequired };
 
-export const CantidadesPrecio = ({ name, disabled }) => {
+// La moneda llega por prop (pestaña Precios) o del campo "moneda" del formulario de la experiencia.
+export const CantidadesPrecio = ({ name, disabled, moneda }) => {
   const { values } = useFormikContext();
   const cantidades = getIn(values, name) ?? [];
+  const monedaPrecio = moneda ?? values.moneda ?? 'COP';
 
   return (
     <FieldArray name={name}>
@@ -97,7 +99,13 @@ export const CantidadesPrecio = ({ name, disabled }) => {
                 inputProps={{ min: 1, step: 1 }}
                 disabled={disabled}
               />
-              <MyCurrencyField fullWidth label='Valor por persona' name={`${name}.${i}.valor`} disabled={disabled} />
+              <MyCurrencyField
+                fullWidth
+                label={`Valor por persona (${monedaPrecio})`}
+                name={`${name}.${i}.valor`}
+                decimales={monedaPrecio === 'USD' ? 2 : 0}
+                disabled={disabled}
+              />
               {!disabled && (
                 <Tooltip title='Quitar cantidad'>
                   <span>
@@ -120,7 +128,7 @@ export const CantidadesPrecio = ({ name, disabled }) => {
     </FieldArray>
   );
 };
-CantidadesPrecio.propTypes = { name: PropTypes.string.isRequired, disabled: PropTypes.bool };
+CantidadesPrecio.propTypes = { name: PropTypes.string.isRequired, disabled: PropTypes.bool, moneda: PropTypes.string };
 
 const PreciosExperiencia = ({ name = 'precios', disabled }) => {
   const { values, setFieldValue } = useFormikContext();
@@ -146,7 +154,7 @@ const PreciosExperiencia = ({ name = 'precios', disabled }) => {
                 <Typography sx={{ fontWeight: 600, flex: 1 }}>Precio {i + 1}</Typography>
                 {precio.cantidades?.length > 0 && precio.cantidades.every((c) => c.valor !== '') && (
                   <Typography variant='body2' sx={{ color: 'text.secondary' }}>
-                    Desde {formatoMoneda(Math.min(...precio.cantidades.map((c) => Number(c.valor))))}
+                    Desde {formatoMoneda(Math.min(...precio.cantidades.map((c) => Number(c.valor))), values.moneda)}
                   </Typography>
                 )}
                 {!disabled && (

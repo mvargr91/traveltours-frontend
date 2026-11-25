@@ -88,7 +88,7 @@ const ResultadoPago = () => {
                 <Stack direction='row' spacing={1} justifyContent='center' flexWrap='wrap' useFlexGap sx={{ mt: 1.5 }}>
                   <Chip size='small' icon={<CalendarMonthIcon />} label={`${reserva.fecha} · ${aHoraCorta(reserva.hora_inicio)}`} />
                   <Chip size='small' icon={<GroupsIcon />} label={t('personas', { n: reserva.cantidad_personas })} />
-                  <Chip size='small' color='primary' variant='outlined' label={formatoMoneda(reserva.valor_total)} />
+                  <Chip size='small' color='primary' variant='outlined' label={formatoMoneda(reserva.valor_total, reserva.moneda)} />
                 </Stack>
               </Box>
             )}

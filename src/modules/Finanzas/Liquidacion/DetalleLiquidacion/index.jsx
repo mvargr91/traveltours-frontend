@@ -336,7 +336,14 @@ const DetalleLiquidacion = () => {
                       <TableCell>{c.experiencia_nombre ?? '—'}</TableCell>
                       <TableCell>{c.fecha ?? c.periodo}</TableCell>
                       <TableCell>{c.reserva_estado ? nombreDe(ESTADOS_RESERVA, c.reserva_estado) : 'Eliminada'}</TableCell>
-                      <TableCell align='right'>{formatoMoneda(c.base)}</TableCell>
+                      <TableCell align='right'>
+                        {formatoMoneda(c.base)}
+                        {c.moneda_reserva === 'USD' && c.trm && (
+                          <Typography variant='caption' display='block' color='text.secondary'>
+                            Venta en USD · TRM {formatoMoneda(c.trm)}
+                          </Typography>
+                        )}
+                      </TableCell>
                       <TableCell align='right'>{porcentaje(c.porcentaje)}</TableCell>
                       <TableCell align='right' sx={{ color: Number(c.valor) < 0 ? 'success.main' : undefined }}>
                         {formatoMoneda(c.valor)}

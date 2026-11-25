@@ -29,7 +29,15 @@ const validationSchema = yup.object({
   precios: esquemaPrecios,
   capacidad_maxima: enteroOpcional().min(1, 'Mínimo 1'),
   duracion_dias: enteroOpcional().min(1, 'Mínimo 1').max(60, 'Máximo 60'),
-  modalidad_pago: yup.string().required('Requerido').oneOf(['reserva', 'pago_en_linea']),
+  moneda: yup.string().required('Requerido').oneOf(['COP', 'USD']),
+  // Las pasarelas cobran solo en pesos: en dólares la experiencia se reserva.
+  modalidad_pago: yup
+    .string()
+    .required('Requerido')
+    .oneOf(['reserva', 'pago_en_linea'])
+    .test('usd-sin-pago-en-linea', 'Las experiencias en dólares no admiten pago en línea', function (modalidad) {
+      return !(modalidad === 'pago_en_linea' && this.parent.moneda === 'USD');
+    }),
   porcentaje_abono: enteroOpcional().min(1, 'Mínimo 1').max(99, 'Máximo 99'),
   latitud: numeroOpcional().min(-90, 'Mínimo -90').max(90, 'Máximo 90'),
   longitud: numeroOpcional().min(-180, 'Mínimo -180').max(180, 'Máximo 180'),
@@ -45,6 +53,7 @@ const initialValues = (registro) => ({
   tipo: registro?.tipo ?? '',
   duracion: registro?.duracion ?? '',
   duracion_dias: registro?.duracion_dias ?? '',
+  moneda: registro?.moneda ?? 'COP',
   precios: preciosIniciales(registro?.precios),
   capacidad_maxima: registro?.capacidad_maxima ?? '',
   modalidad_pago: registro?.modalidad_pago ?? 'reserva',

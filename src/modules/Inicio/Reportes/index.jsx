@@ -112,7 +112,7 @@ const TablaDatos = ({ columnas, filas, primera, archivo, vacio = 'Sin datos en e
                     const v = valorDe(f, c);
                     return (
                       <TableCell key={c.id} align={c.numero || c.moneda ? 'right' : 'left'} sx={{ whiteSpace: 'nowrap' }}>
-                        {c.render ? c.render(f) : c.moneda ? formatoMoneda(v) : v ?? '—'}
+                        {c.render ? c.render(f) : c.moneda ? formatoMoneda(v, f.moneda) : v ?? '—'}
                       </TableCell>
                     );
                   })}
