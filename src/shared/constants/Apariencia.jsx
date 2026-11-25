@@ -77,7 +77,7 @@ export const APARIENCIA_BASE = {
     propuestas: [
       { icono: 'verified_user', titulo: 'Proveedores verificados', texto: 'Revisamos documentos y registro de turismo de cada proveedor antes de publicar.' },
       { icono: 'reviews', titulo: 'Reseñas de la comunidad', texto: 'Opiniones reales de viajeros, moderadas por nuestro equipo.' },
-      { icono: 'event_available', titulo: 'Reserva con confianza', texto: 'Cupos y horarios actualizados por el proveedor, confirmación en tu cuenta.' },
+      { icono: 'event_available', titulo: 'Reserva con confianza', texto: 'Disponibilidad y horarios actualizados por el proveedor, confirmación en tu cuenta.' },
     ],
   },
   // Textos del portal por página (catálogo en TextosPortal).

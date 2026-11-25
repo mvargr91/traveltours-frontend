@@ -115,7 +115,7 @@ const ConsultarReserva = () => {
         <Paper sx={{ p: 3, mt: 3 }}>
           <Stack direction='row' alignItems='center' spacing={1.5} sx={{ flexWrap: 'wrap', gap: 1 }}>
             <ConfirmationNumberIcon color='primary' />
-            <Typography variant='h4' sx={{ fontFamily: 'monospace' }}>{reserva.codigo_reserva}</Typography>
+            <Typography variant='h4' className='notranslate' translate='no' sx={{ fontFamily: 'monospace' }}>{reserva.codigo_reserva}</Typography>
             <Chip
               label={nombreDe(ESTADOS_RESERVA, reserva.estado)}
               sx={{ ml: 'auto !important', color: '#fff', bgcolor: colorDe(ESTADOS_RESERVA, reserva.estado) }}

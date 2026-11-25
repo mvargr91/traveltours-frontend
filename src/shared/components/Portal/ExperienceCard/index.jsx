@@ -75,7 +75,7 @@ const ExperienceCard = ({ experiencia }) => {
             </Stack>
             <Box textAlign='right'>
               <Typography variant='caption' color='text.secondary'>{t('desde')}</Typography>
-              <Typography variant='h4' color='primary.main' lineHeight={1}>
+              <Typography variant='h4' color='primary.main' lineHeight={1} className='notranslate' translate='no'>
                 {formatoMoneda(experiencia.precio_desde)}
               </Typography>
             </Box>

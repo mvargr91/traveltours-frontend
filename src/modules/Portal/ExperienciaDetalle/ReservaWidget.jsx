@@ -129,7 +129,7 @@ const ReservaConfirmada = ({ reserva, dias, fechaFin, porcentajeAbono, onCerrar 
         >
           <Typography variant='caption' color='text.secondary'>{t('tuCodigo')}</Typography>
           <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
-            <Typography variant='h2' sx={{ letterSpacing: 1, fontFamily: 'monospace' }}>
+            <Typography variant='h2' className='notranslate' translate='no' sx={{ letterSpacing: 1, fontFamily: 'monospace' }}>
               {reserva.codigo_reserva}
             </Typography>
             <Tooltip title={t(copiado ? 'copiado' : 'copiar')}>
@@ -306,7 +306,7 @@ const ReservaWidget = ({ experiencia }) => {
     <Paper sx={{ p: 3, position: { md: 'sticky' }, top: { md: 100 } }}>
       <Typography variant='caption' color='text.secondary'>{t('desde')}</Typography>
       <Typography variant='h2' color='primary.main'>
-        {formatoMoneda(experiencia.precio_desde)}
+        <span className='notranslate' translate='no'>{formatoMoneda(experiencia.precio_desde)}</span>
         <Typography component='span' color='text.secondary'> {t('porPersona')}</Typography>
       </Typography>
       {experiencia.promocion && (
